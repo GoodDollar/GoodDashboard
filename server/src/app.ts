@@ -2,6 +2,7 @@ import express from 'express'
 import path from 'path'
 import routes from './routes'
 import bodyParser from 'body-parser'
+import Blockchain from './providers/blockchain'
 
 // Create Express server
 const app = express()
@@ -20,5 +21,9 @@ app.set('port', process.env.PORT || 3000)
 
 // Routes configuration
 app.use('/api', routes)
+
+if (Blockchain.ready) {
+  Blockchain.updateListWallets()
+}
 
 export default app
