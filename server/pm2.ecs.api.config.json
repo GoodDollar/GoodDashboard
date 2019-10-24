@@ -1,0 +1,6 @@
+{
+  "apps" : [{
+    "name"        : "ist-web",
+    "script"      : "./dist/index.js"
+  }]
+}

@@ -1,0 +1,13 @@
+{
+  "development": {
+    "use_env_variable": "DB_URI",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  },
+  "test": {
+    "use_env_variable": "DB_URI"
+  },
+  "production":{
+    "use_env_variable": "DB_URI"
+  }
+}
