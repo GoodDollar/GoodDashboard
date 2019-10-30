@@ -27,6 +27,7 @@
   },
   "scripts": {
     "start": "npm run watch",
+    "start-server": "node dist/index.js",
     "start:node": "npm run build && npm run serve",
     "build": "npm run build:ts",
     "test": "jest --forceExit --coverage --verbose",
