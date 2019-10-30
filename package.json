@@ -8,7 +8,7 @@
     "npm": "6.x"
   },
   "scripts": {
-    "postinstall": "npm i react-scripts -g && cd client && npm run build && cd ../server && npm run build",
+    "postinstall": "npm i react-scripts -g && cd client && npm i && npm run build && cd ../server && npm i && npm run build",
     "start": "cd server && npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
