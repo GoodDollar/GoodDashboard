@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": "12.x",
+    "npm": "6.x"
+  },
   "scripts": {
     "postinstall": "npm i react-scripts -g && cd client && npm run build && cd ../server && npm run build",
     "start": "cd server && npm start",
