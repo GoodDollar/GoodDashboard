@@ -8,9 +8,9 @@
     "npm": "6.x"
   },
   "scripts": {
-    "postinstall": "npm i react-scripts tsc -g && npm run install:server && npm run install:client",
-    "install:server": "cd server && npm i && npm run build",
-    "install:client": "cd client && npm i && npm run build",
+    "postinstall": "npm run install:server && npm run install:client",
+    "install:server": "npm i tsc -g && cd server && npm i && npm run build",
+    "install:client": "npm i react-scripts -g && cd client && npm i && npm run build",
     "start": "cd server && npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
