@@ -8,9 +8,7 @@
     "npm": "6.x"
   },
   "scripts": {
-    "postinstall": "npm run install:server && npm run install:client",
-    "install:server": "cd server && npm i && npm run build",
-    "install:client": "cd client && npm i && npm run build",
+    "postinstall": "./server.sh",
     "start": "cd server && npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
