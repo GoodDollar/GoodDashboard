@@ -9,7 +9,7 @@
   },
   "scripts": {
     "postinstall": "./server.sh",
-    "start": "cd server && npm start",
+    "start": "cd server && npm run serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
