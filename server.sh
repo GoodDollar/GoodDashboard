@@ -1,9 +1,9 @@
-echo 'Install server'
+echo 'Install typecript'
+npm i typecript -g
 cd server
-echo 'Install prod'
+echo 'Install server'
 npm i
-echo 'Install dev'
-npm i -D
+echo 'Build server'
 npm run build
 echo 'Install client'
 cd ../client
