@@ -1,5 +1,5 @@
-echo 'Install typecript'
-npm i typecript -g
+echo 'Install typescript'
+npm i typescript -g
 cd server
 echo 'Install server'
 npm i
