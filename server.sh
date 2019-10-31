@@ -8,5 +8,6 @@ npm run build
 echo 'Install client'
 cd ../client
 npm i
-npm i -D
+echo 'Build client'
 npm run build
+echo 'Start server app'
