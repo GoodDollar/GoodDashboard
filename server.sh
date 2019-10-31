@@ -1,7 +1,5 @@
-echo 'Install typescript'
-npm i typescript -g
-cd server
 echo 'Install server'
+cd server
 npm i
 echo 'Build server'
 npm run build
