@@ -1,0 +1,25 @@
+{
+  "name": "heroku-deploy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "engines": {
+    "node": "12.x",
+    "npm": "6.x"
+  },
+  "scripts": {
+    "postinstall": "./server.sh",
+    "start": "cd server && npm run start:server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoodDollar/GoodDashboard.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GoodDollar/GoodDashboard/issues"
+  },
+  "homepage": "https://github.com/GoodDollar/GoodDashboard#readme"
+}

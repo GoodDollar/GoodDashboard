@@ -1,7 +1,6 @@
 {
-  "name": "ist-node",
+  "name": "gooddashboard-server",
   "version": "0.1.0",
-  "private": true,
   "dependencies": {
     "@gooddollar/goodcontracts": "0.0.19",
     "@types/hdkey": "^0.7.1",
@@ -39,6 +38,7 @@
   },
   "scripts": {
     "start": "npm run watch",
+    "start:server": "node dist/index.js",
     "start:node": "npm run build && npm run serve",
     "build": "npm run build:ts",
     "test": "jest --forceExit --coverage --verbose",
