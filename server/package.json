@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "dependencies": {
     "@gooddollar/goodcontracts": "0.0.19",
+    "@types/cors": "^2.8.6",
     "@types/hdkey": "^0.7.1",
     "@types/lodash": "^4.14.144",
     "@types/mongoose": "^5.5.23",
@@ -10,13 +11,15 @@
     "bip39-light": "^1.0.7",
     "body-parser": "^1.19.0",
     "convict": "^5.2.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "http-status": "^1.4.0",
     "lodash": "^4.17.15",
     "mongoose": "^5.7.6",
     "pino": "^5.13.5",
     "web3": "^2.0.0-alpha.1",
-    "web3-providers": "^2.0.0-alpha.1"
+    "web3-providers": "^2.0.0-alpha.1",
+    "websocket": "^1.0.30"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.1",

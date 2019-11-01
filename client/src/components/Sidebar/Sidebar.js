@@ -16,6 +16,7 @@ import AdminNavbarLinks from "components/Navbars/AdminNavbarLinks.js";
 import RTLNavbarLinks from "components/Navbars/RTLNavbarLinks.js";
 
 import styles from "assets/jss/material-dashboard-react/components/sidebarStyle.js";
+import config from "config";
 
 const useStyles = makeStyles(styles);
 
@@ -26,7 +27,7 @@ export default function Sidebar(props) {
     return window.location.href.indexOf(routeName) > -1 ? true : false;
   }
   const { color, logo, image, logoText, routes } = props;
-  var links = (
+  const links = (
     <List className={classes.list}>
       {routes.map((prop, key) => {
         var activePro = " ";
@@ -80,10 +81,10 @@ export default function Sidebar(props) {
       })}
     </List>
   );
-  var brand = (
+  const brand = (
     <div className={classes.logo}>
       <a
-        href="https://www.creative-tim.com?ref=mdr-sidebar"
+        href={config.walletUrl}
         className={classNames(classes.logoLink, {
           [classes.logoLinkRTL]: props.rtlActive
         })}
