@@ -6,9 +6,9 @@ export const walletsSchema = new mongoose.Schema({
     type: String,
     index: { unique: true }
   },
-  balance: String,
-  from: String,
-  to: String,
+  balance: Number,
+  from: Number,
+  to: Number,
 })
 
 export default mongoose.model(MODEL_WALLETS, walletsSchema)

@@ -6,7 +6,7 @@ import logger from '../helpers/pino-logger'
 import get from 'lodash/get'
 import propertyProvider from './property'
 import walletsProvider from './wallets'
-
+import * as web3Utils from 'web3-utils'
 const log = logger.child({ from: 'Blockchain' })
 
 /**
@@ -69,7 +69,7 @@ export class blockchain {
       GoodDollarABI.abi,
       address,
     )
-
+    await this.subscription()
     try {
       log.debug('blockchain Ready:', {
         network: this.networkId,
@@ -80,9 +80,25 @@ export class blockchain {
     return true
   }
 
-  async updateListWallets() {
+  async subscription() {
+    await this.tokenContract.events.Transfer(function(error: any, transaction: any) {
+      if (error) {
+        console.log('------------------')
+        console.log(error)
+        console.log('------------------')
+      } else {
+        console.log('------------------')
+        console.log(transaction);
+      }
+    })
+  }
+
+  /**
+   *
+   */
+  async updateListWallets() {/*
     let wallets:any = {}
-    let lastBlock = await propertyProvider.get('lastBlock')
+    let lastBlock = 0 //await propertyProvider.get('lastBlock')
     log.info('last Block', lastBlock)
     const allEvents = await this.tokenContract.getPastEvents('Transfer',
       {
@@ -103,7 +119,8 @@ export class blockchain {
           ...wallets, [fromAddr]: {
             address: fromAddr,
             from: 0,
-            to: 1
+            to: 1,
+            balance: await this.getAddressBalance(fromAddr)
           }
         }
       }
@@ -114,7 +131,8 @@ export class blockchain {
           ...wallets, [toAddr]: {
             address: toAddr,
             from: 1,
-            to: 0
+            to: 0,
+            balance: await this.getAddressBalance(toAddr)
           }
         }
 
@@ -126,7 +144,17 @@ export class blockchain {
       await walletsProvider.set(wallets[index])
     }
     await propertyProvider.set('lastBlock', lastBlock)
+*/
+  }
 
+  /**
+   *  Get GD balance by address
+   * @param address
+   */
+  async getAddressBalance(address: string): Promise<number> {
+    const gdbalance = await this.tokenContract.methods.balanceOf(address).call()
+
+    return gdbalance ? web3Utils.hexToNumber(gdbalance) : 0
   }
 
 }

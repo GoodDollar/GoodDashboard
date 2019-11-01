@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 
 
 // Express configuration
-app.set('port', process.env.PORT || 3000)
+app.set('port', process.env.PORT || 3022)
 
 // Routes configuration
 app.use('/api', routes)

@@ -19,7 +19,7 @@ class Property {
    *
    * @returns {Promise<void>}
    */
-  async set(property: string, value: string): Promise<boolean> {
+  async set(property: string, value: number): Promise<boolean> {
     try {
       await this.model.updateOne({ property }, { $set: {property, value} }, { upsert: true })
       return true
