@@ -1,13 +1,14 @@
 import React from "react"
 import { makeStyles } from "@material-ui/core/styles"
 import CircularProgress from '@material-ui/core/CircularProgress'
-import GridItem from "components/Grid/GridItem.js"
-import GridContainer from "components/Grid/GridContainer.js"
-import Table from "components/Table/Table.js"
-import Card from "components/Card/Card.js"
-import CardHeader from "components/Card/CardHeader.js"
-import CardBody from "components/Card/CardBody.js"
-import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js"
+import GridItem from "components/Grid/GridItem"
+import GridContainer from "components/Grid/GridContainer"
+import Table from "components/Table/Table"
+import Card from "components/Card/Card"
+import CardHeader from "components/Card/CardHeader"
+import CardBody from "components/Card/CardBody"
+import Balance from "components/Balance"
+import styles from "assets/jss/material-dashboard-react/views/dashboardStyle"
 import { useTopAccounts, useTopLowMediumBalance } from 'hooks/api'
 
 const useStyles = makeStyles(styles)
@@ -20,9 +21,9 @@ export default function Dashboard() {
   if (topLowMediumBalance && topLowMediumBalance.top) {
     topLowMediumBalanceTableData = [
       [
-        String(topLowMediumBalance.top),
-        String(topLowMediumBalance.median),
-        String(topLowMediumBalance.low)
+        <Balance amount={topLowMediumBalance.top} fromCents/>,
+        <Balance amount={topLowMediumBalance.median} fromCents/>,
+        <Balance amount={topLowMediumBalance.low} fromCents/>
       ]]
   }
   const classes = useStyles()
@@ -65,7 +66,8 @@ export default function Dashboard() {
                 <Table
                   tableHeaderColor="warning"
                   tableHead={["#", "Address", "Balance"]}
-                  tableData={topAccounts.map((d, index) => [String(index + 1), d.address, String(d.balance)])}
+                  tableData={topAccounts.map(
+                    (d, index) => [String(index + 1), d.address, <Balance amount={d.balance} fromCents/>])}
                 />
               )}
             </CardBody>
