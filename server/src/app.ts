@@ -4,7 +4,7 @@ import cors from 'cors'
 import routes from './routes'
 import bodyParser from 'body-parser'
 import Blockchain from './providers/blockchain'
-
+import conf from './config'
 // Create Express server
 const app = express()
 app.use(cors())
@@ -22,7 +22,11 @@ app.set('port', process.env.PORT || 3022)
 
 
 if (Blockchain.ready) {
-  Blockchain.updateListWallets()
+  setInterval(() => {
+    console.log('********Start update data**************')
+    Blockchain.updateListWallets()
+  },  conf.timeUpdate);
+
 }
 
 export default app

@@ -30,6 +30,12 @@ const conf = convict({
     default: 'debug',
     env: 'LOG_LEVEL'
   },
+  timeUpdate: {
+    doc: 'data refresh interval',
+    format: Number,
+    default: 1800000,
+    env: 'DATA_REFRESH_INTERVAL'
+  },
   ethereum: {
     network_id: 42,
     httpWeb3Provider: 'https://kovan.infura.io/v3/',

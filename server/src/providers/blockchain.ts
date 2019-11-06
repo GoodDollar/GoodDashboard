@@ -85,10 +85,8 @@ export class blockchain {
    *
    */
   async updateListWallets() {
-    return
-    /*
     let wallets:any = {}
-    let lastBlock = 0 //await propertyProvider.get('lastBlock')
+    let lastBlock = await propertyProvider.get('lastBlock')
     log.info('last Block', lastBlock)
     const allEvents = await this.tokenContract.getPastEvents('Transfer',
       {
@@ -148,7 +146,7 @@ export class blockchain {
       await walletsProvider.set(wallets[index])
     }
 
-    await propertyProvider.set('lastBlock', lastBlock)*/
+    await propertyProvider.set('lastBlock', +lastBlock)
   }
 
   /**
