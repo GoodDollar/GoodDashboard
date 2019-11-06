@@ -6,6 +6,7 @@ import logger from '../helpers/pino-logger'
 import get from 'lodash/get'
 import propertyProvider from './property'
 import walletsProvider from './wallets'
+import transactionsProvider from './transactions'
 import * as web3Utils from 'web3-utils'
 const log = logger.child({ from: 'Blockchain' })
 
@@ -69,7 +70,7 @@ export class blockchain {
       GoodDollarABI.abi,
       address,
     )
-    await this.subscription()
+
     try {
       log.debug('blockchain Ready:', {
         network: this.networkId,
@@ -80,23 +81,12 @@ export class blockchain {
     return true
   }
 
-  async subscription() {
-    await this.tokenContract.events.Transfer(function(error: any, transaction: any) {
-      if (error) {
-        console.log('------------------')
-        console.log(error)
-        console.log('------------------')
-      } else {
-        console.log('------------------')
-        console.log(transaction);
-      }
-    })
-  }
-
   /**
    *
    */
-  async updateListWallets() {/*
+  async updateListWallets() {
+    return
+    /*
     let wallets:any = {}
     let lastBlock = 0 //await propertyProvider.get('lastBlock')
     log.info('last Block', lastBlock)
@@ -109,8 +99,18 @@ export class blockchain {
 
     for (let index in allEvents) {
       let event = allEvents[index]
+
       let fromAddr = event.returnValues.from;
       let toAddr = event.returnValues.to;
+
+      await transactionsProvider.set({
+        hash: event.blockHash,
+        value: web3Utils.hexToNumber(event.returnValues.value),
+        blockNumber: event.blockNumber,
+        from: fromAddr,
+        to: toAddr,
+      })
+
 
       if (wallets.hasOwnProperty(fromAddr)) {
         wallets[fromAddr].to = wallets[fromAddr].to + 1
@@ -120,7 +120,8 @@ export class blockchain {
             address: fromAddr,
             from: 0,
             to: 1,
-            balance: await this.getAddressBalance(fromAddr)
+            balance: await this.getAddressBalance(fromAddr),
+            countTx: 0
           }
         }
       }
@@ -132,7 +133,8 @@ export class blockchain {
             address: toAddr,
             from: 1,
             to: 0,
-            balance: await this.getAddressBalance(toAddr)
+            balance: await this.getAddressBalance(toAddr),
+            countTx: 0
           }
         }
 
@@ -141,10 +143,12 @@ export class blockchain {
     }
 
     for (let index in wallets) {
+      wallets[index].countTx = await transactionsProvider.getCountByWallet(wallets[index].address)
+
       await walletsProvider.set(wallets[index])
     }
-    await propertyProvider.set('lastBlock', lastBlock)
-*/
+
+    await propertyProvider.set('lastBlock', lastBlock)*/
   }
 
   /**

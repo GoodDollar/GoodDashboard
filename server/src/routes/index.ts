@@ -1,14 +1,13 @@
 import { Router } from 'express'
 import { badRequest, clientErrorHandler, healthCheck, logErrors } from './common.js'
-import  balance  from './balance'
-import app from "../app";
+import  wallets  from './wallets'
 
 const router = Router()
 
 /* common */
 router.get('/health-check', healthCheck)
 
-router.use('/balance', balance)
+router.use('/wallets', wallets)
 
 router.use(logErrors)
 router.use(clientErrorHandler)

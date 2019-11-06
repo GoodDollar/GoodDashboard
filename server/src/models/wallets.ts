@@ -9,6 +9,7 @@ export const walletsSchema = new mongoose.Schema({
   balance: Number,
   from: Number,
   to: Number,
+  countTx: Number,
 })
 
 export default mongoose.model(MODEL_WALLETS, walletsSchema)
