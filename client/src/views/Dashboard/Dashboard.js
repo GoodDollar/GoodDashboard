@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles"
 import CircularProgress from '@material-ui/core/CircularProgress'
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
 // import Warning from "@material-ui/icons/Warning"
-import ReceiptIcon from '@material-ui/icons/Receipt';
+import ReceiptIcon from '@material-ui/icons/Receipt'
 import Warning from "components/Typography/Warning"
 import Success from "components/Typography/Success"
 import GridItem from "components/Grid/GridItem"
@@ -14,24 +14,37 @@ import CardHeader from "components/Card/CardHeader"
 import CardBody from "components/Card/CardBody"
 import CardIcon from "components/Card/CardIcon.js"
 import CardFooter from "components/Card/CardFooter.js"
+import Pie from "components/Charts/Pie"
 
 import Balance from "components/Balance"
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle"
-import { useWalletTopAccounts,
-  useWalletTopMedianLow,
+import {
+  useTransactionDistributionHistogram,
   useTransactionTopAccounts,
-  useTransactionTopMedianLow } from 'hooks/api'
+  useTransactionTopMedianLow,
+  useWalletDistributionHistogram,
+  useWalletTopAccounts,
+  useWalletTopMedianLow
+} from 'hooks/api'
 
 const useStyles = makeStyles(styles)
 
 export default function Dashboard() {
 
   const [walletTopAccounts = [], walletTopAccountsLoading] = useWalletTopAccounts()
-  const [walletTopMedianLow= {}, walletTopMedianLowLoading] = useWalletTopMedianLow()
+  const [walletTopMedianLow = {}, walletTopMedianLowLoading] = useWalletTopMedianLow()
+  const [walletDistributionHistogram = {}, walletDistributionHistogramLoading] = useWalletDistributionHistogram()
 
   const [transactionTopAccounts = [], transactionTopAccountsLoading] = useTransactionTopAccounts()
   const [transactionTopMedianLow = {}, transactionTopMedianLowLoading] = useTransactionTopMedianLow()
-
+  const [transactionDistributionHistogram = {}, transactionDistributionHistogramLoading] = useTransactionDistributionHistogram()
+  /*
+   color: "hsl(151, 70%, 50%)"
+   id: "haskell"
+   label: "haskell"
+   value: 64
+   */
+  console.log({ walletDistributionHistogram, transactionDistributionHistogram })
   const classes = useStyles()
   return (
     <div>
@@ -97,6 +110,54 @@ export default function Dashboard() {
         <GridItem xs={12} sm={12} md={6}>
           <Card>
             <CardHeader color="success">
+              <h4 className={classes.cardTitleWhite}>Distributions (Balances)</h4>
+            </CardHeader>
+            <CardBody>
+              <GridItem container xs={12} justify="center">
+                {walletDistributionHistogramLoading && (
+                  <CircularProgress/>
+                )}
+                {!walletDistributionHistogramLoading && (
+                  <Pie
+                    data={Object.keys(walletDistributionHistogram).map((key) => ({
+                      id: key,
+                      label: key,
+                      value: walletDistributionHistogram[key]
+                    }))}
+                  />
+                )}
+              </GridItem>
+            </CardBody>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} sm={12} md={6}>
+          <Card>
+            <CardHeader color="warning">
+              <h4 className={classes.cardTitleWhite}>Distributions (Transactions)</h4>
+            </CardHeader>
+            <CardBody>
+              <GridItem container xs={12} justify="center">
+                {transactionDistributionHistogramLoading && (
+                  <CircularProgress/>
+                )}
+                {!transactionDistributionHistogramLoading && (
+                  <Pie
+                    data={Object.keys(transactionDistributionHistogram).map((key) => ({
+                      id: key,
+                      label: key,
+                      value: transactionDistributionHistogram[key]
+                    }))}
+                  />
+                )}
+              </GridItem>
+            </CardBody>
+          </Card>
+        </GridItem>
+      </GridContainer>
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={6}>
+          <Card>
+            <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Balances)</h4>
             </CardHeader>
             <CardBody>
@@ -132,7 +193,7 @@ export default function Dashboard() {
                   tableHeaderColor="warning"
                   tableHead={["#", "Address", "Count"]}
                   tableData={transactionTopAccounts.map(
-                    (d, index) => [String(index + 1), d.address, String(d.balance)])}
+                    (d, index) => [String(index + 1), d.address, String(d.countTx)])}
                 />
               )}
             </CardBody>

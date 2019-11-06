@@ -41,7 +41,7 @@ const getTopAccounts = async (req: Request, res: Response, next: NextFunction) =
 
 const getDistributionHistogram  = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await walletsProvider.getDistributionHistogramByField('countTx',25)
+    const data = await walletsProvider.getDistributionHistogramByField('countTx',5)
 
     return res.status(200).json({
       responseCode: 200,
