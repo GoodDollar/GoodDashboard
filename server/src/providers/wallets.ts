@@ -81,7 +81,6 @@ class Wallets {
         }
       }
     )
-
     return {
       top: (topLow) ? topLow[0].top : 0,
       low:  (topLow) ? topLow[0].low : 0,

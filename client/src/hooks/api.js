@@ -22,6 +22,8 @@ export const useApi = (apiFunc, deps, params = []) => {
 }
 
 export const useApiHealthCheck = (deps = []) => useApi(api.getHealthCheck, deps)
-export const useTopAccounts = (deps = []) => useApi(api.getTopAccounts, deps)
-export const useTopLowMediumBalance = (deps = []) => useApi(api.getTopLowMediumBalance, deps)
+export const useWalletTopAccounts = (deps = []) => useApi(api.getWalletTopAccounts, deps)
+export const useWalletTopMedianLow = (deps = []) => useApi(api.getWalletTopMedianLow, deps)
 
+export const useTransactionTopAccounts = (deps = []) => useApi(api.getTransactionTopAccounts, deps)
+export const useTransactionTopMedianLow = (deps = []) => useApi(api.getTransactionTopMedianLow, deps)

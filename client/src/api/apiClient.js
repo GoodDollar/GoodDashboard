@@ -8,7 +8,9 @@ export default class ApiClient {
   }
 
   getHealthCheck = () => this.http.get('/health-check')
-  getTopLowMediumBalance = () => this.http.get('/balance/get-top-low-medium-balance')
-  getTopAccounts = () => this.http.get('/balance/get-top-accounts')
+  getWalletTopMedianLow = () => this.http.get('/balance/get-top-low-medium-balance')
+  getWalletTopAccounts = () => this.http.get('/balance/get-top-accounts')
+  getTransactionTopMedianLow = () => this.http.get('/balance/get-top-low-medium-balance')
+  getTransactionTopAccounts = () => this.http.get('/balance/get-top-accounts')
 
 }
