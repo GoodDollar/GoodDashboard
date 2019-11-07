@@ -38,13 +38,7 @@ export default function Dashboard() {
   const [transactionTopAccounts = [], transactionTopAccountsLoading] = useTransactionTopAccounts()
   const [transactionTopMedianLow = {}, transactionTopMedianLowLoading] = useTransactionTopMedianLow()
   const [transactionDistributionHistogram = {}, transactionDistributionHistogramLoading] = useTransactionDistributionHistogram()
-  /*
-   color: "hsl(151, 70%, 50%)"
-   id: "haskell"
-   label: "haskell"
-   value: 64
-   */
-  console.log({ walletDistributionHistogram, transactionDistributionHistogram })
+
   const classes = useStyles()
   return (
     <div>

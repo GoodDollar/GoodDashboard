@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import networks from './networks'
 require('dotenv').config()
 const convict = require('convict')
@@ -84,8 +85,8 @@ const conf = convict({
 // Load environment dependent configuration
 const env = conf.get('env')
 const network = conf.get('network')
-const networkId = ContractsAddress[network].networkId
-conf.set('ethereum', networks[networkId])
+
+conf.set('ethereum', _.get(networks,`[${_.get(ContractsAddress,`[${network}].networkId`)}]`))
 
 
 export default conf.getProperties()
