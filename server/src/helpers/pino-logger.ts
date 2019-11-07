@@ -4,7 +4,7 @@ import conf from '../config'
 
 const LOG_LEVEL = conf.logLevel || 'debug'
 
-console.log('Starting logger', { LOG_LEVEL, env: conf.env })
+console.log('Starting logger', {LOG_LEVEL, env: conf.env})
 
 const logger = pino({
   name: 'GoodDollar - Dashboard',
@@ -17,8 +17,8 @@ const logger = pino({
 
 let error = logger.error
 
-logger.error = function() {
-  return error.apply(logger, arguments)
+logger.error = function (...props: any) {
+  return error.apply(logger, props)
 }
 
 export default logger
