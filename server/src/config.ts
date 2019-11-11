@@ -37,6 +37,12 @@ const conf = convict({
     default: 1800000,
     env: 'DATA_REFRESH_INTERVAL'
   },
+  startTimeTransaction: {
+    doc: 'start time transaction',
+    format: Number,
+    default: 1573470000,
+    env: 'START_TIME_TRANSACTION'
+  },
   ethereum: {
     network_id: 42,
     httpWeb3Provider: 'https://kovan.infura.io/v3/',

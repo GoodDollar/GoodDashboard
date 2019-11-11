@@ -7,6 +7,7 @@ type transaction = {
   hash: string,
   value: number,
   blockNumber: string,
+  time: number,
   from: string,
   to: string,
 }

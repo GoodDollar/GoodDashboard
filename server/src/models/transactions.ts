@@ -7,6 +7,7 @@ export const transactionsSchema = new mongoose.Schema({
     index: { unique: true }
   },
   value: Number,
+  time: Number,
   blockNumber: String,
   from: String,
   to: String,

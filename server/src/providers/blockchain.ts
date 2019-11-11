@@ -88,6 +88,7 @@ export class blockchain {
     let wallets:any = {}
     let lastBlock = await propertyProvider.get('lastBlock')
     log.info('last Block', lastBlock)
+
     const allEvents = await this.tokenContract.getPastEvents('Transfer',
       {
         fromBlock: (+lastBlock > 0) ? +lastBlock: 0,
@@ -97,18 +98,23 @@ export class blockchain {
 
     for (let index in allEvents) {
       let event = allEvents[index]
-
       let fromAddr = event.returnValues.from;
       let toAddr = event.returnValues.to;
+      const blockNumber = event.blockNumber
+      const txTime = (await this.web3.eth.getBlock(blockNumber)).timestamp
+
+      if (+txTime < +conf.startTimeTransaction) {
+        continue
+      }
 
       await transactionsProvider.set({
         hash: event.blockHash,
         value: web3Utils.hexToNumber(event.returnValues.value),
-        blockNumber: event.blockNumber,
+        blockNumber,
+        time:txTime,
         from: fromAddr,
         to: toAddr,
       })
-
 
       if (wallets.hasOwnProperty(fromAddr)) {
         wallets[fromAddr].to = wallets[fromAddr].to + 1
@@ -137,16 +143,16 @@ export class blockchain {
         }
 
       }
-      lastBlock = event.blockNumber
+      await propertyProvider.set('lastBlock', +blockNumber)
     }
 
-    for (let index in wallets) {
-      wallets[index].countTx = await transactionsProvider.getCountByWallet(wallets[index].address)
+    if (wallets) {
+      for (let index in wallets) {
+        wallets[index].countTx = await transactionsProvider.getCountByWallet(wallets[index].address)
 
-      await walletsProvider.set(wallets[index])
+        await walletsProvider.set(wallets[index])
+      }
     }
-
-    await propertyProvider.set('lastBlock', +lastBlock)
   }
 
   /**
