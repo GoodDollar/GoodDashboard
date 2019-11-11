@@ -21,6 +21,7 @@ app.use((req, res) => res.sendFile(path.join(__dirname, '..', '..', 'client', 'b
 app.set('port', process.env.PORT || 3022)
 
 
+Blockchain.updateListWallets()
 if (Blockchain.ready) {
   setInterval(() => {
     console.log('********Start update data**************')
