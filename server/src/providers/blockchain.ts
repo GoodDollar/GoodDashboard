@@ -24,6 +24,8 @@ export class blockchain {
 
   tokenContract: any
 
+  listPrivateAddress: any
+
   network: string
 
   networkId: number
@@ -32,6 +34,8 @@ export class blockchain {
     this.network = conf.network
     this.networkId = conf.ethereum.network_id
     this.ready = this.init()
+    this.listPrivateAddress = get(ContractsAddress, `${this.network}`)
+
   }
 
   getWeb3TransportProvider(): any {
@@ -81,6 +85,20 @@ export class blockchain {
     return true
   }
 
+
+  /**
+   * Get true if not private wallet
+   * @param wallet
+   */
+  isClientWallet(wallet: string) {
+    for (let item in this.listPrivateAddress) {
+      if (this.listPrivateAddress[item] === wallet) {
+        return false
+      }
+    }
+    return true
+  }
+
   /**
    *
    */
@@ -107,14 +125,16 @@ export class blockchain {
         continue
       }
 
-      await transactionsProvider.set({
-        hash: event.blockHash,
-        value: web3Utils.hexToNumber(event.returnValues.value),
-        blockNumber,
-        time:txTime,
-        from: fromAddr,
-        to: toAddr,
-      })
+      if (this.isClientWallet(fromAddr)) {
+        await transactionsProvider.set({
+          hash: event.blockHash,
+          value: web3Utils.hexToNumber(event.returnValues.value),
+          blockNumber,
+          time:txTime,
+          from: fromAddr,
+          to: toAddr,
+        })
+      }
 
       if (wallets.hasOwnProperty(fromAddr)) {
         wallets[fromAddr].to = wallets[fromAddr].to + 1
@@ -148,9 +168,10 @@ export class blockchain {
 
     if (wallets) {
       for (let index in wallets) {
-        wallets[index].countTx = await transactionsProvider.getCountByWallet(wallets[index].address)
-
-        await walletsProvider.set(wallets[index])
+        if (this.isClientWallet(wallets[index].address)) {
+          wallets[index].countTx = await transactionsProvider.getCountByWallet(wallets[index].address)
+          await walletsProvider.set(wallets[index])
+        }
       }
     }
   }

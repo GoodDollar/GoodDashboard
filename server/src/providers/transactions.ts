@@ -53,6 +53,28 @@ class Transactions {
 
     return count
   }
+
+  async getTotal() {
+    const count = await this.model.find().count()
+
+    return count
+  }
+
+  async getTotalAmount() {
+    const count = await this.model.aggregate([
+      {$group :{ _id : "transactions", totalAmount: { $sum : "$value" }}}
+    ]);
+    return count
+  }
+
+  async getAvgAmount() {
+    const count = await this.model.aggregate([
+      {$group :{ _id : "transactions", avgAmount: { $avg : "$value" }}}
+    ]);
+    return count[0].avgAmount
+  }
+
+
 }
 
 export default new Transactions()

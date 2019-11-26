@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import config from '../config'
-import walletsProvider from "../providers/wallets";
+import transactionsProvider from "../providers/transactions";
 
 
-const getTopLowMediumBalance = async (req: Request, res: Response, next: NextFunction) => {
+const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await walletsProvider.getTopLowMediumBalanceByField('countTx')
+    const total = await transactionsProvider.getTotal()
 
     return res.status(200).json({
       responseCode: 200,
-      data,
+      total,
       success: true
     })
   }
@@ -21,13 +20,15 @@ const getTopLowMediumBalance = async (req: Request, res: Response, next: NextFun
   }
 }
 
-const getTopAccounts = async (req: Request, res: Response, next: NextFunction) => {
+
+
+const getTotalAmount = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await walletsProvider.getTopAccountsByField('countTx', 10)
+    const total = await transactionsProvider.getTotalAmount()
 
     return res.status(200).json({
       responseCode: 200,
-      data,
+      total,
       success: true
     })
   }
@@ -39,13 +40,14 @@ const getTopAccounts = async (req: Request, res: Response, next: NextFunction) =
   }
 }
 
-const getDistributionHistogram  = async (req: Request, res: Response, next: NextFunction) => {
+
+const getAvgAmount = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await walletsProvider.getDistributionHistogramByField('countTx',config.stepDistributionHistogramWalletTransaction)
+    const avg = await transactionsProvider.getAvgAmount()
 
     return res.status(200).json({
       responseCode: 200,
-      data,
+      avg,
       success: true
     })
   }
@@ -56,9 +58,10 @@ const getDistributionHistogram  = async (req: Request, res: Response, next: Next
     })
   }
 }
+
 
 export default {
-  getTopLowMediumBalance,
-  getTopAccounts,
-  getDistributionHistogram
+  getTotal,
+  getTotalAmount,
+  getAvgAmount
 };

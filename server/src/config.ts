@@ -43,6 +43,18 @@ const conf = convict({
     default: 1573470000,
     env: 'START_TIME_TRANSACTION'
   },
+  stepDistributionHistogramWalletBalance: {
+    doc: 'step distribution histogram wallet balance',
+    format: Number,
+    default: 30,
+    env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_BALANCE'
+  },
+  stepDistributionHistogramWalletTransaction: {
+    doc: 'step distribution histogram wallet transaction',
+    format: Number,
+    default: 30,
+    env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_TRANSACTION'
+  },
   ethereum: {
     network_id: 42,
     httpWeb3Provider: 'https://kovan.infura.io/v3/',

@@ -84,8 +84,16 @@ class Wallets {
     return {
       top: (topLow) ? topLow[0].top : 0,
       low:  (topLow) ? topLow[0].low : 0,
-      median: (medium) ? medium[0][field] : 0
+      median: (medium) ? medium[0][field] : 0,
+      avg: await this.getAvgAmount(field)
     }
+  }
+
+  async getAvgAmount(field: string) {
+    const count = await this.model.aggregate([
+      {$group :{ _id : "wallet", avgAmount: { $avg : `$${field}` }}}
+    ]);
+    return count[0].avgAmount
   }
 
   async getTopAccountsByField(filed: string, count: number) {
