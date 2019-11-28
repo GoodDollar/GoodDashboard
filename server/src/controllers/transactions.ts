@@ -8,7 +8,7 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
 
     return res.status(200).json({
       responseCode: 200,
-      total,
+      data: total,
       success: true
     })
   }
@@ -24,11 +24,11 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
 
 const getTotalAmount = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const total = await transactionsProvider.getTotalAmount()
+    const data = await transactionsProvider.getTotalAmount()
 
     return res.status(200).json({
       responseCode: 200,
-      total,
+      data,
       success: true
     })
   }
@@ -43,11 +43,11 @@ const getTotalAmount = async (req: Request, res: Response, next: NextFunction) =
 
 const getAvgAmount = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const avg = await transactionsProvider.getAvgAmount()
+    const data = await transactionsProvider.getAvgAmount()
 
     return res.status(200).json({
       responseCode: 200,
-      avg,
+      data,
       success: true
     })
   }

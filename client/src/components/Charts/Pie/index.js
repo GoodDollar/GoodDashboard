@@ -7,7 +7,7 @@ const commonProperties = {
   margin: { top: 30, right: 30, bottom: 30, left: 30 },
   animate: true
 }
-console.log(commonProperties)
+
 export default (props) => {
   return (
     <Pie {...commonProperties} {...props} />

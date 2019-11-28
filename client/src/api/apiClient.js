@@ -14,4 +14,7 @@ export default class ApiClient {
   getTransactionTopMedianLow = () => this.http.get('/wallets/transactions/top-low-medium-avr-balance')
   getTransactionTopAccounts = () => this.http.get('/wallets/transactions/top-accounts')
   getTransactionDistributionHistogram = () => this.http.get('/wallets/transactions/distribution-histogram')
+  getTransactionTotal = () => this.http.get('/transactions/total')
+  getTransactionTotalAmount = () => this.http.get('/transactions/total-amount')
+  getTransactionDailyAverage = () => this.http.get('/transactions/avg-amount')
 }

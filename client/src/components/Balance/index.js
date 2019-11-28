@@ -3,7 +3,7 @@ import { CURRENCY_GD } from '../../constants'
 import priceFormat from '../../utils/priceFormat'
 
 const CURRENCIES = {
-  [CURRENCY_GD]: 'GD'
+  [CURRENCY_GD]: 'G$'
 }
 
 export default (

@@ -44,34 +44,30 @@ class Transactions {
    * @returns {Promise<*>}
    */
   async getAll(): Promise<object> {
-    return await this.model.find().lean()
+    return this.model.find().lean()
   }
 
 
   async getCountByWallet(wallet: string) {
-    const count = await this.model.find({from: wallet}).count()
-
-    return count
+    return this.model.find({from: wallet}).count()
   }
 
   async getTotal() {
-    const count = await this.model.find().count()
-
-    return count
+    return this.model.find().count()
   }
 
   async getTotalAmount() {
-    const count = await this.model.aggregate([
+    const result = await this.model.aggregate([
       {$group :{ _id : "transactions", totalAmount: { $sum : "$value" }}}
     ]);
-    return count
+    return result[0].totalAmount
   }
 
   async getAvgAmount() {
-    const count = await this.model.aggregate([
+    const result = await this.model.aggregate([
       {$group :{ _id : "transactions", avgAmount: { $avg : "$value" }}}
     ]);
-    return count[0].avgAmount
+    return result[0].avgAmount
   }
 
 
