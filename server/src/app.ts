@@ -21,11 +21,11 @@ app.use((req, res) => res.sendFile(path.join(__dirname, '..', '..', 'client', 'b
 app.set('port', process.env.PORT || 3000)
 
 
-Blockchain.updateListWallets()
+Blockchain.updateData()
 if (Blockchain.ready) {
   setInterval(() => {
     console.log('********Start update data**************')
-    Blockchain.updateListWallets()
+    Blockchain.updateData()
   },  conf.timeUpdate);
 
 }

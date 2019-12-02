@@ -89,6 +89,13 @@ export class blockchain {
     return this.listPrivateAddress[wallet] === undefined;
   }
 
+  async updateData () {
+
+    await this.updateListWallets()
+    const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`);
+    const inEscorw = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call();
+    await propertyProvider.set("inEscorw", +inEscorw);
+  }
   /**
    *
    */
@@ -102,8 +109,6 @@ export class blockchain {
       toBlock: "latest"
     });
 
-    const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`);
-    const inEscorw = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call();
 
     for (let index in allEvents) {
       let event = allEvents[index];
@@ -164,8 +169,6 @@ export class blockchain {
         }
       }
     }
-
-    await propertyProvider.set("inEscorw", +inEscorw);
   }
 
   /**
