@@ -131,30 +131,26 @@ export class blockchain {
 
       if (wallets.hasOwnProperty(fromAddr)) {
         wallets[fromAddr].to = wallets[fromAddr].to + 1;
+        wallets[fromAddr].countTx = wallets[fromAddr].countTx + 1;
       } else {
-        wallets = {
-          ...wallets,
-          [fromAddr]: {
+        wallets[fromAddr] = {
             address: fromAddr,
             from: 0,
             to: 1,
             balance: await this.getAddressBalance(fromAddr),
-            countTx: 0
-          }
+            countTx: 1
         };
       }
       if (wallets.hasOwnProperty(toAddr)) {
         wallets[toAddr].from = wallets[toAddr].from + 1;
+        wallets[toAddr].countTx = wallets[toAddr].countTx + 1;
       } else {
-        wallets = {
-          ...wallets,
-          [toAddr]: {
+        wallets[toAddr] = {
             address: toAddr,
             from: 1,
             to: 0,
             balance: await this.getAddressBalance(toAddr),
-            countTx: 0
-          }
+            countTx: 1
         };
       }
       await propertyProvider.set("lastBlock", +blockNumber);
