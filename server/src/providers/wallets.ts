@@ -96,6 +96,13 @@ class Wallets {
     return count[0].avgAmount
   }
 
+  async getTotal() {
+    const count = await this.model.aggregate([
+      {$group :{ _id : "wallet", total: { $sum : `$balance` }}}
+    ]);
+    return count[0].total
+  }
+
   async getTopAccountsByField(filed: string, count: number) {
 
     const topAccounts = await this.model.find({}, [],

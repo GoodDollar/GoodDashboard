@@ -1,4 +1,5 @@
 import Web3 from "web3"
+import moment from "moment"
 import GoodDollarABI from '@gooddollar/goodcontracts/build/contracts/GoodDollar.json'
 import ContractsAddress from '@gooddollar/goodcontracts/releases/deployment.json'
 import conf from '../config'
@@ -114,6 +115,9 @@ export class blockchain {
       }
     )
 
+    const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`)
+    const inEscorw = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call()
+
     for (let index in allEvents) {
       let event = allEvents[index]
       let fromAddr = event.returnValues.from;
@@ -126,11 +130,13 @@ export class blockchain {
       }
 
       if (this.isClientWallet(fromAddr)) {
+        let timestamp = moment.unix(txTime);
         await transactionsProvider.set({
           hash: event.blockHash,
           value: web3Utils.hexToNumber(event.returnValues.value),
           blockNumber,
-          time:txTime,
+          time: txTime,
+          date: timestamp.format("YYYY-MM-DD"),
           from: fromAddr,
           to: toAddr,
         })
@@ -174,6 +180,8 @@ export class blockchain {
         }
       }
     }
+
+    await propertyProvider.set('inEscorw', +inEscorw)
   }
 
   /**

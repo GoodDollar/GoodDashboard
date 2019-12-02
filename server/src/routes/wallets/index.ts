@@ -6,5 +6,4 @@ const router = Router()
 router.use('/balance', balance)
 router.use('/transactions', transactions)
 
-
 export default router

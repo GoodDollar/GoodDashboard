@@ -8,6 +8,7 @@ export const transactionsSchema = new mongoose.Schema({
   },
   value: Number,
   time: Number,
+  date: String,
   blockNumber: String,
   from: String,
   to: String,

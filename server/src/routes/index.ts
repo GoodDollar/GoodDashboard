@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { badRequest, clientErrorHandler, healthCheck, logErrors } from './common.js'
 import  wallets  from './wallets'
 import  transactions  from './transactions/index'
+import  gd  from './gd/index'
 // import transactions from '../controllers/transactions'
 const router = Router()
 
@@ -11,6 +12,7 @@ router.get('/health-check', healthCheck)
 
 router.use('/wallets', wallets)
 router.use('/transactions', transactions)
+router.use('/gd', gd)
 
 router.use(logErrors)
 router.use(clientErrorHandler)

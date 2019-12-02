@@ -16,6 +16,7 @@
     "express": "^4.17.1",
     "http-status": "^1.4.0",
     "lodash": "^4.17.15",
+    "moment": "^2.24.0",
     "mongoose": "^5.7.6",
     "pino": "^5.13.5",
     "web3": "^2.0.0-alpha.1",

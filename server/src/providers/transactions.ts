@@ -9,6 +9,7 @@ type transaction = {
   blockNumber: string,
   time: number,
   from: string,
+  date: string,
   to: string,
 }
 
@@ -63,14 +64,37 @@ class Transactions {
     return result[0].totalAmount
   }
 
-  async getAvgAmount() {
+  async getAvgDailyCountOfTransactions() {
     const result = await this.model.aggregate([
-      {$group :{ _id : "transactions", avgAmount: { $avg : "$value" }}}
+      {$group :{ _id : {date:"$date"}, avgAmount: { $avg : "$value" }}},
+      {$group :{ _id : 'transactions', avgDyaAmount: { $avg : "$avgAmount" }}}
     ]);
-    return result[0].avgAmount
+    return result[0].avgDyaAmount
   }
 
+  async getCountPerDay() {
+    const result = await this.model.aggregate([
+      {$group :{ _id : {date:"$date"}, count: { $sum: 1 } }, },
+    ]);
 
+    return result
+  }
+
+  async getAmountPerDay() {
+    const result = await this.model.aggregate([
+      {$group :{ _id : {date:"$date"}, avgAmount: { $avg : "$value" }}},
+    ]);
+
+    return result
+  }
+
+  async getSumAmountPerDay() {
+    const result = await this.model.aggregate([
+      {$group :{ _id : {date:"$date"}, sumAmount: { $sum : "$value" }}},
+    ]);
+
+    return result
+  }
 }
 
 export default new Transactions()
