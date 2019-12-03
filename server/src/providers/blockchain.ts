@@ -8,7 +8,7 @@ import get from "lodash/get";
 import _invert from "lodash/invert";
 import propertyProvider from "./property";
 import walletsProvider from "./wallets";
-import transactionsProvider from "./transactions";
+import AboutTransactionsProvider from "./about-transactions";
 import * as web3Utils from "web3-utils";
 const log = logger.child({ from: "Blockchain" });
 
@@ -101,6 +101,7 @@ export class blockchain {
    */
   async updateListWallets() {
     let wallets: any = {};
+    let aboutTXs: any = {};
     let lastBlock = await propertyProvider.get("lastBlock");
     log.info("last Block", lastBlock);
 
@@ -123,29 +124,34 @@ export class blockchain {
 
       if (this.isClientWallet(fromAddr)) {
         let timestamp = moment.unix(txTime);
-        await transactionsProvider.set({
-          hash: event.blockHash,
-          value: web3Utils.hexToNumber(event.returnValues.value),
-          blockNumber,
-          time: txTime,
-          date: timestamp.format("YYYY-MM-DD"),
-          from: fromAddr,
-          to: toAddr
-        });
-      }
+        let date = timestamp.format("YYYY-MM-DD")
+        console.log('set - at ' + date);
+        const amountTX = web3Utils.hexToNumber(event.returnValues.value)
 
-      if (wallets.hasOwnProperty(fromAddr)) {
-        wallets[fromAddr].to = wallets[fromAddr].to + 1;
-        wallets[fromAddr].countTx = wallets[fromAddr].countTx + 1;
-      } else {
-        wallets[fromAddr] = {
+        if (aboutTXs.hasOwnProperty(date)) {
+          aboutTXs[date].amount_txs = aboutTXs[date].amount_txs + amountTX;
+          aboutTXs[date].count_txs = aboutTXs[date].count_txs + 1;
+        } else {
+          aboutTXs[date] = {
+            date,
+            amount_txs: amountTX,
+            count_txs: 1
+          }
+        }
+        if (wallets.hasOwnProperty(fromAddr)) {
+          wallets[fromAddr].to = wallets[fromAddr].to + 1;
+          wallets[fromAddr].countTx = wallets[fromAddr].countTx + 1;
+        } else {
+          wallets[fromAddr] = {
             address: fromAddr,
             from: 0,
             to: 1,
-            balance: await this.getAddressBalance(fromAddr),
+            balance: 0,
             countTx: 1
-        };
+          };
+        }
       }
+
       if (wallets.hasOwnProperty(toAddr)) {
         wallets[toAddr].from = wallets[toAddr].from + 1;
         wallets[toAddr].countTx = wallets[toAddr].countTx + 1;
@@ -154,7 +160,7 @@ export class blockchain {
             address: toAddr,
             from: 1,
             to: 0,
-            balance: await this.getAddressBalance(toAddr),
+            balance: 0,
             countTx: 1
         };
       }
@@ -163,10 +169,14 @@ export class blockchain {
 
     if (wallets) {
       for (let index in wallets) {
-        if (this.isClientWallet(wallets[index].address)) {
-          wallets[index].countTx = await transactionsProvider.getCountByWallet(wallets[index].address);
-          await walletsProvider.set(wallets[index]);
-        }
+        wallets[index].balance = await this.getAddressBalance(wallets[index].address);
+        await walletsProvider.set(wallets[index]);
+      }
+    }
+
+    if (aboutTXs) {
+      for (let index in aboutTXs) {
+        await AboutTransactionsProvider.updateOrSet(aboutTXs[index]);
       }
     }
   }

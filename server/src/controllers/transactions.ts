@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import transactionsProvider from "../providers/transactions";
+import AboutTransactionsProvider from "../providers/about-transactions";
 
 
 const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const total = await transactionsProvider.getTotal()
+    const total = await AboutTransactionsProvider.getTotalTX()
 
     return res.status(200).json({
       responseCode: 200,
@@ -24,7 +24,7 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
 
 const getTotalAmount = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await transactionsProvider.getTotalAmount()
+    const data = await AboutTransactionsProvider.getTotalAmount()
 
     return res.status(200).json({
       responseCode: 200,
@@ -43,7 +43,7 @@ const getTotalAmount = async (req: Request, res: Response, next: NextFunction) =
 
 const getAvgAmount = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await transactionsProvider.getAvgDailyCountOfTransactions()
+    const data = await AboutTransactionsProvider.getAvgDailyCountOfTransactions()
 
     return res.status(200).json({
       responseCode: 200,
@@ -61,7 +61,7 @@ const getAvgAmount = async (req: Request, res: Response, next: NextFunction) => 
 
 const getCountPerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await transactionsProvider.getCountPerDay()
+    let data = await AboutTransactionsProvider.getCountPerDay()
     data = prepareDataForGraph(data, 'count')
     return res.status(200).json({
       responseCode: 200,
@@ -79,7 +79,7 @@ const getCountPerDay = async (req: Request, res: Response, next: NextFunction) =
 
 const getAmountPerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await transactionsProvider.getAmountPerDay()
+    let data = await AboutTransactionsProvider.getAmountPerDay()
     data = prepareDataForGraph(data, 'avgAmount')
     return res.status(200).json({
       responseCode: 200,
@@ -110,7 +110,7 @@ const prepareDataForGraph = (data:any, yField: string) => {
 
 const getSumAmountPerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await transactionsProvider.getSumAmountPerDay()
+    let data = await AboutTransactionsProvider.getSumAmountPerDay()
     data = prepareDataForGraph(data, 'sumAmount')
     return res.status(200).json({
       responseCode: 200,
