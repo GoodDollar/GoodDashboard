@@ -20,13 +20,13 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-const getInEscorw = async (req: Request, res: Response, next: NextFunction) => {
+const getInEscrow = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const inEscorw = await propertyProvider.get('inEscorw')
+    const inEscrow = await propertyProvider.get('inEscrow')
 
     return res.status(200).json({
       responseCode: 200,
-      data: inEscorw,
+      data: inEscrow,
       success: true
     })
   }
@@ -41,5 +41,5 @@ const getInEscorw = async (req: Request, res: Response, next: NextFunction) => {
 
 export default {
   getTotal,
-  getInEscorw,
+  getInEscrow,
 };

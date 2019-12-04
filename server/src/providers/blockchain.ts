@@ -8,7 +8,7 @@ import get from "lodash/get";
 import _invert from "lodash/invert";
 import propertyProvider from "./property";
 import walletsProvider from "./wallets";
-import AboutTransactionsProvider from "./about-transactions";
+import AboutTransactionProvider from "./about-transaction";
 import * as web3Utils from "web3-utils";
 const log = logger.child({ from: "Blockchain" });
 
@@ -93,8 +93,8 @@ export class blockchain {
 
     await this.updateListWallets()
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`);
-    const inEscorw = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call();
-    await propertyProvider.set("inEscorw", +inEscorw);
+    const inEscrow = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call();
+    await propertyProvider.set("inEscrow", +inEscrow);
   }
   /**
    *
@@ -176,7 +176,7 @@ export class blockchain {
 
     if (aboutTXs) {
       for (let index in aboutTXs) {
-        await AboutTransactionsProvider.updateOrSet(aboutTXs[index]);
+        await AboutTransactionProvider.updateOrSet(aboutTXs[index]);
       }
     }
   }

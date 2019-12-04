@@ -1,14 +1,14 @@
 import { Router } from 'express'
-import transactions from '../../controllers/transactions'
+import transaction from '../../controllers/transaction'
 const router = Router()
 
-router.get('/total', transactions.getTotal)
-router.get('/total-amount', transactions.getTotalAmount)
-router.get('/avg-amount', transactions.getAvgAmount)
+router.get('/total', transaction.getTotal)
+router.get('/total-amount', transaction.getTotalAmount)
+router.get('/avg-count', transaction.getAvgCount)
 
-router.get('/count-per-day', transactions.getCountPerDay)
-router.get('/amount-per-day', transactions.getAmountPerDay)
-router.get('/sum-amount-per-day', transactions.getSumAmountPerDay)
+router.get('/count-per-day', transaction.getCountPerDay)
+router.get('/total-amount-per-day', transaction.getAmountPerDay)
+router.get('/avg-amount-per-day', transaction.getAvgAmountPerDay)
 
 
 export default router

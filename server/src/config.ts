@@ -46,7 +46,7 @@ const conf = convict({
   stepDistributionHistogramWalletBalance: {
     doc: 'step distribution histogram wallet balance',
     format: Number,
-    default: 30,
+    default: 5,
     env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_BALANCE'
   },
   stepDistributionHistogramWalletTransaction: {

@@ -60,16 +60,28 @@ class Wallets {
     return await this.model.find().lean()
   }
 
-  async getTopLowMediumBalanceByField(field: string) {
+  /**
+   * Return min max field
+   *
+   * @param {string} field
+   */
+  async getMinMaxField(field: string) {
 
-    const topLow =  await this.model.aggregate([
+    const minMax =  await this.model.aggregate([
       { $group: {
           _id: null,
-          top: { $max: '$'+field },
-          low: { $min: '$'+field }
+          max: { $max: '$'+field },
+          min: { $min: '$'+field }
         }
       },
     ])
+
+    return { max: minMax[0].max, min: minMax[0].min }
+  }
+
+
+  async getTopLowMediumBalanceByField(field: string) {
+    const minMax = await this.getMinMaxField(field)
     const count = await this.model.count()
     const skip =  count / 2
     const medium = await this.model.find({}, [field],
@@ -82,8 +94,8 @@ class Wallets {
       }
     )
     return {
-      top: (topLow) ? topLow[0].top : 0,
-      low:  (topLow) ? topLow[0].low : 0,
+      top: (minMax) ? minMax.max : 0,
+      low:  (minMax) ? minMax.min : 0,
       median: (medium) ? medium[0][field] : 0,
       avg: await this.getAvgAmount(field)
     }
@@ -118,32 +130,16 @@ class Wallets {
     return topAccounts
   }
 
-  async getDistributionHistogramByField(field: string, step: number = 25, countIteration: number = 5 ) {
+  async getDistributionHistogramByField(field: string, step: number = 5) {
     let result: any = {}
-    const allWallets = await this.model.find()
+    const minMax = await this.getMinMaxField(field)
+    const stepAmount = Math.ceil((minMax.max - minMax.min) / step);
 
-    if (allWallets) {
-
-      for (let i in allWallets) {
-        let items = allWallets[i]
-
-        for (let j = 0; j <= countIteration; j++) {
-          let minStep = step * j
-          let maxStep = step * j + step
-          let key = `${minStep}-${ (j === countIteration) ? '~': maxStep}`
-
-          if (!result.hasOwnProperty(key)) {
-            result = {[key]: 0, ...result}
-          }
-
-          if (items[field] > minStep && items[field] < maxStep) {
-            result[key] +=1
-          } else if (j === countIteration && items[field] > minStep) {
-            result[key] +=1
-          }
-
-        }
-      }
+    for (let j = 0; j <= step; j++) {
+      let minStep:number = stepAmount * j + minMax.min
+      let maxStep:number = stepAmount * j + stepAmount + minMax.min
+      let key = `${minStep}-${maxStep}`
+      result[key] = await this.model.count({ balance: { $gt: minStep, $lt: maxStep } })
     }
 
     return result
