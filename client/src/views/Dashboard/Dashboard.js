@@ -105,11 +105,11 @@ export default function Dashboard() {
       setTransactionAmountPerDayData([
         {
           id: "Average amount",
-          data: transactionAmountPerDay,
+          data: transactionAmountPerDay.map(t=>({...t,y:t.y/100})),
         },
         {
           id: "Total amount",
-          data: transactionSumAmountPerDay,
+          data: transactionSumAmountPerDay.map(t=>({...t,y:t.y/100})),
         },
       ])
     }
