@@ -13,6 +13,13 @@ import * as web3Utils from "web3-utils";
 const log = logger.child({ from: "Blockchain" });
 
 /**
+ * This varb save unique address per day
+ */
+let uniqueTxs = {
+  now: '',
+  uniqueAddress: [],
+}
+/**
  * Exported as blockchain
  * Interface with blockchain contracts via web3 using HDWalletProvider
  */
@@ -38,6 +45,9 @@ export class blockchain {
     this.listPrivateAddress = _invert(get(ContractsAddress, `${this.network}`));
   }
 
+  /**
+   * Return transport provider for web3 connection
+   */
   getWeb3TransportProvider(): any {
     let provider: string;
     let web3Provider: any;
@@ -64,6 +74,9 @@ export class blockchain {
     return web3Provider;
   }
 
+  /**
+   * Main process, it run all update
+   */
   async init() {
     log.debug("Initializing blockchain:", { conf: conf.ethereum });
 
@@ -89,20 +102,46 @@ export class blockchain {
     return this.listPrivateAddress[wallet] === undefined;
   }
 
+  /**
+   * Update all date BChain
+   */
   async updateData () {
-
-    await this.updateListWallets()
+    await this.updateListWalletsAndTransactions()
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`);
     const inEscrow = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call();
     await propertyProvider.set("inEscrow", +inEscrow);
   }
+
   /**
-   *
+   * Check address for unique
+   * @param {string} address
+   * @param {string} date
    */
-  async updateListWallets() {
+  isUniqueAddress(address: string, date: string) {
+
+    if (uniqueTxs.now !== date) {
+      uniqueTxs.uniqueAddress = []
+      uniqueTxs.now = date
+    }
+
+    // @ts-ignore
+    if (uniqueTxs.uniqueAddress.indexOf(address) >= 0) {
+      return false
+    }
+    // @ts-ignore
+    uniqueTxs.uniqueAddress.push(address)
+
+    return true
+  }
+
+  /**
+   * Update list wallets and transactions info
+   */
+  async updateListWalletsAndTransactions() {
     let wallets: any = {};
     let aboutTXs: any = {};
     let lastBlock = await propertyProvider.get("lastBlock");
+    let blockNumber: number = 0
     log.info("last Block", lastBlock);
 
     const allEvents = await this.tokenContract.getPastEvents("Transfer", {
@@ -115,8 +154,9 @@ export class blockchain {
       let event = allEvents[index];
       let fromAddr = event.returnValues.from;
       let toAddr = event.returnValues.to;
-      const blockNumber = event.blockNumber;
       const txTime = (await this.web3.eth.getBlock(blockNumber)).timestamp;
+
+      blockNumber = event.blockNumber;
 
       if (+txTime < +conf.startTimeTransaction) {
         continue;
@@ -131,59 +171,53 @@ export class blockchain {
         if (aboutTXs.hasOwnProperty(date)) {
           aboutTXs[date].amount_txs = aboutTXs[date].amount_txs + amountTX;
           aboutTXs[date].count_txs = aboutTXs[date].count_txs + 1;
+          aboutTXs[date].unique_txs = aboutTXs[date].unique_txs + Number(this.isUniqueAddress(fromAddr, date))
         } else {
           aboutTXs[date] = {
             date,
             amount_txs: amountTX,
-            count_txs: 1
+            count_txs: 1,
+            unique_txs: Number(this.isUniqueAddress(fromAddr, date))
           }
         }
+
         if (wallets.hasOwnProperty(fromAddr)) {
-          wallets[fromAddr].to = wallets[fromAddr].to + 1;
+          wallets[fromAddr].inTXs = wallets[fromAddr].inTXs + 1;
           wallets[fromAddr].countTx = wallets[fromAddr].countTx + 1;
         } else {
           wallets[fromAddr] = {
             address: fromAddr,
-            from: 0,
-            to: 1,
-            balance: 0,
+            outTXs: 0,
+            inTXs: 1,
+            balance: await this.getAddressBalance(toAddr),
             countTx: 1
           };
         }
       }
 
       if (wallets.hasOwnProperty(toAddr)) {
-        wallets[toAddr].from = wallets[toAddr].from + 1;
+        wallets[toAddr].outTXs = wallets[toAddr].outTXs + 1;
         wallets[toAddr].countTx = wallets[toAddr].countTx + 1;
       } else {
         wallets[toAddr] = {
             address: toAddr,
-            from: 1,
-            to: 0,
-            balance: 0,
-            countTx: 1
+            outTXs: 1,
+            inTXs: 0,
+            countTx: 1,
+            balance: await this.getAddressBalance(toAddr),
         };
       }
-      await propertyProvider.set("lastBlock", +blockNumber);
     }
 
-    if (wallets) {
-      for (let index in wallets) {
-        wallets[index].balance = await this.getAddressBalance(wallets[index].address);
-        await walletsProvider.set(wallets[index]);
-      }
-    }
+    await propertyProvider.set("lastBlock", +blockNumber);
+    await walletsProvider.updateOrSet(wallets);
+    await AboutTransactionProvider.updateOrSet(aboutTXs);
 
-    if (aboutTXs) {
-      for (let index in aboutTXs) {
-        await AboutTransactionProvider.updateOrSet(aboutTXs[index]);
-      }
-    }
   }
 
   /**
    *  Get GD balance by address
-   * @param address
+   * @param {string} address
    */
   async getAddressBalance(address: string): Promise<number> {
     const gdbalance = await this.tokenContract.methods.balanceOf(address).call();

@@ -6,6 +6,7 @@ const log = logger.child({ from: 'Transaction' })
 type aboutTransaction = {
   count_txs: number,
   amount_txs: number,
+  unique_txs: number,
   date: string,
 }
 
@@ -37,19 +38,33 @@ class AboutTransaction {
     return false
   }
 
-  async updateOrSet(aboutTransaction: aboutTransaction): Promise<boolean> {
-    try {
-      const aboutTXs:any = await this.getByDate(aboutTransaction.date)
-      if (aboutTXs) {
-        aboutTXs.count_txs = aboutTXs.count_txs+aboutTransaction.count_txs
-        aboutTXs.amount_txs = aboutTXs.amount_txs+aboutTransaction.amount_txs
-        await aboutTXs.save()
-      } else {
-        await this.set(aboutTransaction)
+  async updateOrSet(aboutTransactions: object): Promise<boolean> {
+      const params = [];
+      if (aboutTransactions) {
+        for(const i in aboutTransactions) {
+          // @ts-ignore
+          let aboutTransaction: aboutTransaction = aboutTransactions[i]
+          let inc = {}
+          for (let f in aboutTransaction) {
+            // @ts-ignore
+            if (typeof aboutTransaction[f] === 'number' && aboutTransaction[f] > 0) {
+              // @ts-ignore
+              inc[f] = aboutTransaction[f]
+            }
+          }
+          params.push({
+            updateOne: {
+              filter: {date: aboutTransaction.date},
+              update: {
+                date: aboutTransaction.date,
+                $inc: inc,
+              },
+              upsert: true, new: true
+            }
+          })
+        }
+        await this.model.bulkWrite(params)
       }
-    } catch (ex) {
-      log.error('Update aboutTransaction failed [mongo actions]:', { message: ex.message, aboutTransaction})
-    }
 
     return true
   }

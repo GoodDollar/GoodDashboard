@@ -7,8 +7,8 @@ export const walletsSchema = new mongoose.Schema({
     index: { unique: true }
   },
   balance: Number,
-  from: Number,
-  to: Number,
+  outTXs: Number,
+  inTXs: Number,
   countTx: Number,
 })
 

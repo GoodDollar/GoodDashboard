@@ -40,6 +40,25 @@ const getTotalAmount = async (req: Request, res: Response, next: NextFunction) =
   }
 }
 
+const getUniquePerDay = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    let data = await AboutTransactionProvider.getAll()
+    data = prepareDataForGraph(data, 'unique_txs')
+
+    return res.status(200).json({
+      responseCode: 200,
+      data,
+      success: true
+    })
+  }
+
+  catch (error) {
+    return res.status(500).json({
+      message: error.message ? error.message : 'Unexpected error occure.'
+    })
+  }
+}
+
 
 const getAvgCount = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -137,6 +156,7 @@ const getAvgAmountPerDay = async (req: Request, res: Response, next: NextFunctio
 export default {
   getTotal,
   getTotalAmount,
+  getUniquePerDay,
   getAvgCount,
   getCountPerDay,
   getAmountPerDay,

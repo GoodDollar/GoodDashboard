@@ -6,8 +6,8 @@ const log = logger.child({ from: 'WalletsModelModel' })
 type wallet = {
   address: string
   balance: number,
-  from: number,
-  to: number,
+  outTXs: number,
+  inTXs: number,
   countTx: string,
 }
 
@@ -28,19 +28,8 @@ class Wallets {
    */
   async set(wallet: wallet): Promise<boolean> {
     try {
-      const walletDb: any = await this.getByAddress(wallet.address)
-      if (walletDb) {
-        walletDb.from = wallet.from + walletDb.from
-        walletDb.to = wallet.to + walletDb.to
-        walletDb.balance = wallet.balance
-        walletDb.countTx = wallet.countTx
-        walletDb.save()
-      } else {
-        await this.model.create(wallet)
-      }
-
+      await this.model.create(wallet)
       return true
-
     } catch (ex) {
       log.error('Update user failed [mongo actions]:', { message: ex.message, wallet})
     }
@@ -48,6 +37,39 @@ class Wallets {
     return false
   }
 
+  async updateOrSet(wallets: object) {
+    const params = [];
+    if (wallets) {
+      for(const i in wallets) {
+        // @ts-ignore
+        let wallet: wallet = wallets[i]
+        let inc = {}
+        for (let f in wallet) {
+          // @ts-ignore
+          if (typeof wallet[f] === 'number' && wallet[f] > 0) {
+            // @ts-ignore
+            inc[f] = wallet[f]
+          }
+        }
+        params.push({
+          updateOne: {
+            filter: {address: wallet.address},
+            update: {
+              address: wallet.address,
+              $inc: inc,
+            },
+            upsert: true, new: true
+          }
+        })
+      }
+      await this.model.bulkWrite(params)
+    }
+  }
+
+  /**
+   * Get wallet by address
+   * @param address
+   */
   async getByAddress(address:string): Promise<boolean> {
     return await this.model.findOne({ address })
   }
@@ -80,6 +102,10 @@ class Wallets {
   }
 
 
+  /**
+   *  get Top Low Medium By Field
+   * @param field
+   */
   async getTopLowMediumBalanceByField(field: string) {
     const minMax = await this.getMinMaxField(field)
     const count = await this.model.count()
@@ -108,6 +134,9 @@ class Wallets {
     return count[0].avgAmount
   }
 
+  /**
+   * get total
+   */
   async getTotal() {
     const count = await this.model.aggregate([
       {$group :{ _id : "wallet", total: { $sum : `$balance` }}}
@@ -115,6 +144,11 @@ class Wallets {
     return count[0].total
   }
 
+  /**
+   * get top wallet by field
+   * @param filed
+   * @param count
+   */
   async getTopAccountsByField(filed: string, count: number) {
 
     const topAccounts = await this.model.find({}, [],
