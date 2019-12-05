@@ -52,7 +52,7 @@ const conf = convict({
   stepDistributionHistogramWalletTransaction: {
     doc: 'step distribution histogram wallet transaction',
     format: Number,
-    default: 30,
+    default: 5,
     env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_TRANSACTION'
   },
   ethereum: {

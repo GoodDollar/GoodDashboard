@@ -37,6 +37,7 @@ export const useGetTransactionDailyAverage = (deps = []) => useApi(api.getTransa
 
 // per day
 export const useGetTransactionCountPerDay = (deps=[]) => useApi(api.getTransactionCountPerDay, deps)
+export const useGetTransactionUniquePerDay = (deps=[]) => useApi(api.getTransactionUniquePerDay, deps)
 export const useGetTransactionAmountPerDay = (deps=[]) => useApi(api.getTransactionAmountPerDay, deps)
 export const useGetTransactionSumAmountPerDay = (deps=[]) => useApi(api.getTransactionSumAmountPerDay, deps)
 

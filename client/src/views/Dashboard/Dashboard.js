@@ -33,7 +33,8 @@ import {
   useGetTransactionAmountPerDay,
   useGetTransactionSumAmountPerDay,
   useGetGDTotal,
-  useGetGDInEscrow
+  useGetGDInEscrow,
+  useGetTransactionUniquePerDay
 } from 'hooks/api'
 import priceFormat from '../../utils/priceFormat'
 
@@ -79,14 +80,17 @@ export default function Dashboard() {
   const [transactionDailyAverage, transactionDailyAverageLoading] = useGetTransactionDailyAverage()
 
   // per day
-  const [transactionCountPerDay = [], getTransactionCountPerDayLoading] = useGetTransactionCountPerDay()
-  const [transactionAmountPerDay = [], getTransactionAmountPerDayLoading] = useGetTransactionAmountPerDay()
-  const [transactionSumAmountPerDay = [], getTransactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay()
+  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay()
+  const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay()
+  console.log({transactionCountPerDay,
+    transactionUniquePerDay})
+  const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay()
+  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay()
+
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
-
   useEffect(() => {
-    if(transactionAmountPerDay.length>0 && transactionSumAmountPerDay>0){
+    if(transactionAmountPerDay.length>0 && transactionSumAmountPerDay.length>0){
       setTransactionAmountPerDayData([
         {
           id: "Average amount",
@@ -101,16 +105,21 @@ export default function Dashboard() {
   },[transactionAmountPerDay, transactionSumAmountPerDay])
 
   useEffect(() => {
-    if(transactionCountPerDay.length>0){
+    if(transactionCountPerDay.length>0 && transactionUniquePerDay.length>0){
       setTransactionCountPerDayData([
         {
-          id: "Count of transaction",
+          id: "Unique users",
+          data: transactionUniquePerDay
+        },
+        {
+          id: "Transactions",
           data: transactionCountPerDay
         },
+
       ])
     }
-  },[transactionCountPerDay])
-
+  },[transactionCountPerDay, transactionUniquePerDay])
+  console.log('aaa',transactionAmountPerDayData)
   // gd
   const [GDTotal] = useGetGDTotal()
   const [GDInEscrow] = useGetGDInEscrow()
@@ -127,17 +136,17 @@ export default function Dashboard() {
               </CardIcon>
               <p className={classes.cardCategory}>General</p>
               <Success>
-                Total G$ distributed:
+                Total G$:
                 <Balance amount={GDTotal} fromCents/>
               </Success>
               <Success>
-                Balance G$ in one time payment links:
+                G$ in OTPL:
                 <Balance amount={GDInEscrow} fromCents/>
               </Success>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
-                Balances of GD (top, median, average, low)
+                OTPL - One time payment link
               </div>
             </CardFooter>
           </Card>
@@ -239,10 +248,10 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
             </CardHeader>
             <CardBody>
-              {(getTransactionAmountPerDayLoading || getTransactionSumAmountPerDayLoading) && (
+              {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
                 <CircularProgress/>
               )}
-              {!(getTransactionAmountPerDayLoading || getTransactionSumAmountPerDayLoading) && (
+              {!(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
                 <Line data={transactionAmountPerDayData} height={400} legendY={'G$'} colors={['#fb8c00','#43a047']}/>
               )}
             </CardBody>
@@ -254,11 +263,11 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>Daily count of transactions</h4>
             </CardHeader>
             <CardBody>
-              {getTransactionCountPerDayLoading && (
+              {(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
                 <CircularProgress/>
               )}
-              {!getTransactionCountPerDayLoading && (
-                <Line data={transactionCountPerDayData} height={400} legendY={'Tx count'} colors={['#fb8c00']}/>
+              {!(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
+                <Line data={transactionCountPerDayData} height={400} legendY={'Count'} colors={['#fb8c00','#43a047']}/>
               )}
             </CardBody>
           </Card>

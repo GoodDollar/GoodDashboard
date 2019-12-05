@@ -140,7 +140,7 @@ const getAvgAmountPerDay = async (req: Request, res: Response, next: NextFunctio
     }
     return res.status(200).json({
       responseCode: 200,
-      result,
+      data: result,
       success: true
     })
   }
