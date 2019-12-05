@@ -165,18 +165,15 @@ class Wallets {
   }
 
   async getDistributionHistogramByField(field: string, step: number = 5) {
-    console.log(field,step)
-    step--;
     let result: any = {}
     const minMax = await this.getMinMaxField(field)
-    console.log(minMax)
     const stepAmount = Math.ceil((minMax.max - minMax.min) / step);
 
-    for (let j = 0; j <= step; j++) {
+    for (let j = 0; j < step; j++) {
       let minStep:number = stepAmount * j + minMax.min
       let maxStep:number = stepAmount * j + stepAmount + minMax.min
       let key = `${minStep}-${maxStep}`
-      result[key] = await this.model.count({ balance: { $gte: minStep, $lt: maxStep } })
+      result[key] = await this.model.count({ [field]: { $gt: minStep, $lte: maxStep } })
     }
 
     return result

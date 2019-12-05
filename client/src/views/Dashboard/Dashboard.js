@@ -65,6 +65,18 @@ import priceFormat from '../../utils/priceFormat'
 // ]
 const useStyles = makeStyles(styles)
 
+const prepareHistogramData = (walletDistributionHistogram) => {
+  const notNullKeys = Object.keys(walletDistributionHistogram).filter(key=>walletDistributionHistogram[key]>0)
+  return notNullKeys.map((key) => {
+    const label = `${key.split('-').map(v=>priceFormat(v)).join('-')} G$`
+    return ({
+      id: label,
+      label,
+      value: walletDistributionHistogram[key],
+    })
+  })
+}
+
 export default function Dashboard() {
   // wallet
   const [walletTopAccounts = [], walletTopAccountsLoading] = useWalletTopAccounts()
@@ -82,8 +94,7 @@ export default function Dashboard() {
   // per day
   const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay()
   const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay()
-  console.log({transactionCountPerDay,
-    transactionUniquePerDay})
+
   const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay()
   const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay()
 
@@ -119,7 +130,6 @@ export default function Dashboard() {
       ])
     }
   },[transactionCountPerDay, transactionUniquePerDay])
-  console.log('aaa',transactionAmountPerDayData)
   // gd
   const [GDTotal] = useGetGDTotal()
   const [GDInEscrow] = useGetGDInEscrow()
@@ -224,10 +234,10 @@ export default function Dashboard() {
                 Total: {!transactionTotalLoading && transactionTotal}
               </Warning>
               <Warning>
-                Total Amount: {!transactionTotalAmountLoading && transactionTotalAmount}
+                Total Amount: {!transactionTotalAmountLoading && transactionTotalAmount && <Balance amount={transactionTotalAmount}/>}
               </Warning>
               <Warning>
-                Average Amount: {!transactionDailyAverageLoading && priceFormat(transactionDailyAverage)}
+                Average Count: {!transactionDailyAverageLoading && transactionDailyAverage}
               </Warning>
               <Warning>
                 &nbsp;
@@ -249,7 +259,9 @@ export default function Dashboard() {
             </CardHeader>
             <CardBody>
               {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
-                <CircularProgress/>
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
               )}
               {!(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
                 <Line data={transactionAmountPerDayData} height={400} legendY={'G$'} colors={['#fb8c00','#43a047']}/>
@@ -264,7 +276,9 @@ export default function Dashboard() {
             </CardHeader>
             <CardBody>
               {(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
-                <CircularProgress/>
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
               )}
               {!(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
                 <Line data={transactionCountPerDayData} height={400} legendY={'Count'} colors={['#fb8c00','#43a047']}/>
@@ -286,11 +300,7 @@ export default function Dashboard() {
                 )}
                 {!walletDistributionHistogramLoading && (
                   <Pie
-                    data={Object.keys(walletDistributionHistogram).map((key) => ({
-                      id: key,
-                      label: key,
-                      value: walletDistributionHistogram[key],
-                    }))}
+                    data={prepareHistogramData(walletDistributionHistogram)}
                   />
                 )}
               </GridItem>
