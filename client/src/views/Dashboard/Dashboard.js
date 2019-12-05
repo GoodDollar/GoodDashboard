@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useState, useEffect} from "react"
 import { makeStyles } from "@material-ui/core/styles"
 import CircularProgress from '@material-ui/core/CircularProgress'
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
@@ -29,51 +29,91 @@ import {
   useWalletDistributionHistogram,
   useWalletTopAccounts,
   useWalletTopMedianLow,
+  useGetTransactionCountPerDay,
+  useGetTransactionAmountPerDay,
+  useGetTransactionSumAmountPerDay,
+  useGetGDTotal,
+  useGetGDInEscrow
 } from 'hooks/api'
 import priceFormat from '../../utils/priceFormat'
 
-const dataTxLine = [
-  {
-    color: 'hsl(122,100%,55%)',
-    id: "Count of transaction",
-    data: [...Array(10)].map((v, index) => ({
-      x: `2019-11-${index + 1}`,
-      y: (Math.random() + 1) * 100,
-    })),
-  },
-]
-const dataLine = [
-  {
-    color: 'hsl(242,100%,55%)',
-    id: "Average amount",
-    data: [...Array(10)].map((v, index) => ({
-      x: `2019-11-${index + 1}`,
-      y: (Math.random() + 1) * 100,
-    })),
-  },
-  {
-    color: 'hsl(1,100%,59%)',
-    id: "Total amount",
-    data: [...Array(10)].map((v, index) => ({
-      x: `2019-11-${index + 1}`,
-      y: (Math.random() + 1) * 100,
-    })),
-  },
-]
+// const dataTxLine = [
+//   {
+//     id: "Count of transaction",
+//     data: [...Array(10)].map((v, index) => ({
+//       x: `2019-11-${index + 1}`,
+//       y: (Math.random() + 1) * 100,
+//     })),
+//   },
+// ]
+// const dataLine = [
+//   {
+//     id: "Average amount",
+//     data: [...Array(10)].map((v, index) => ({
+//       x: `2019-11-${index + 1}`,
+//       y: (Math.random() + 1) * 100,
+//     })),
+//   },
+//   {
+//     id: "Total amount",
+//     data: [...Array(10)].map((v, index) => ({
+//       x: `2019-11-${index + 1}`,
+//       y: (Math.random() + 1) * 100,
+//     })),
+//   },
+// ]
 const useStyles = makeStyles(styles)
 
 export default function Dashboard() {
-
+  // wallet
   const [walletTopAccounts = [], walletTopAccountsLoading] = useWalletTopAccounts()
   const [walletTopMedianLow = {}, walletTopMedianLowLoading] = useWalletTopMedianLow()
   const [walletDistributionHistogram = {}, walletDistributionHistogramLoading] = useWalletDistributionHistogram()
 
+  // transactions
   const [transactionTopAccounts = [], transactionTopAccountsLoading] = useTransactionTopAccounts()
   const [transactionTopMedianLow = {}, transactionTopMedianLowLoading] = useTransactionTopMedianLow()
   const [transactionDistributionHistogram = {}, transactionDistributionHistogramLoading] = useTransactionDistributionHistogram()
   const [transactionTotal, transactionTotalLoading] = useGetTransactionTotal()
   const [transactionTotalAmount, transactionTotalAmountLoading] = useGetTransactionTotalAmount()
   const [transactionDailyAverage, transactionDailyAverageLoading] = useGetTransactionDailyAverage()
+
+  // per day
+  const [transactionCountPerDay = [], getTransactionCountPerDayLoading] = useGetTransactionCountPerDay()
+  const [transactionAmountPerDay = [], getTransactionAmountPerDayLoading] = useGetTransactionAmountPerDay()
+  const [transactionSumAmountPerDay = [], getTransactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay()
+  const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
+  const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
+
+  useEffect(() => {
+    if(transactionAmountPerDay.length>0 && transactionSumAmountPerDay>0){
+      setTransactionAmountPerDayData([
+        {
+          id: "Average amount",
+          data: transactionAmountPerDay,
+        },
+        {
+          id: "Total amount",
+          data: transactionSumAmountPerDay,
+        },
+      ])
+    }
+  },[transactionAmountPerDay, transactionSumAmountPerDay])
+
+  useEffect(() => {
+    if(transactionCountPerDay.length>0){
+      setTransactionCountPerDayData([
+        {
+          id: "Count of transaction",
+          data: transactionCountPerDay
+        },
+      ])
+    }
+  },[transactionCountPerDay])
+
+  // gd
+  const [GDTotal] = useGetGDTotal()
+  const [GDInEscrow] = useGetGDInEscrow()
 
   const classes = useStyles()
   return (
@@ -85,14 +125,14 @@ export default function Dashboard() {
               <CardIcon color="success">
                 <AccountBalanceWalletIcon/>
               </CardIcon>
-              <p className={classes.cardCategory}>General (example data)</p>
+              <p className={classes.cardCategory}>General</p>
               <Success>
                 Total G$ distributed:
-                <Balance amount={123422345} fromCents/>
+                <Balance amount={GDTotal} fromCents/>
               </Success>
               <Success>
                 Balance G$ in one time payment links:
-                <Balance amount={423545} fromCents/>
+                <Balance amount={GDInEscrow} fromCents/>
               </Success>
             </CardHeader>
             <CardFooter stats>
@@ -196,20 +236,30 @@ export default function Dashboard() {
         <GridItem xs={12} sm={12} md={6}>
           <Card>
             <CardHeader color="success">
-              <h4 className={classes.cardTitleWhite}>Daily G$ usage (example data)</h4>
+              <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
             </CardHeader>
             <CardBody>
-              <Line data={dataLine} height={400} legendY={'G$'} colors={['#fb8c00','#43a047']}/>
+              {(getTransactionAmountPerDayLoading || getTransactionSumAmountPerDayLoading) && (
+                <CircularProgress/>
+              )}
+              {!(getTransactionAmountPerDayLoading || getTransactionSumAmountPerDayLoading) && (
+                <Line data={transactionAmountPerDayData} height={400} legendY={'G$'} colors={['#fb8c00','#43a047']}/>
+              )}
             </CardBody>
           </Card>
         </GridItem>
         <GridItem xs={12} sm={12} md={6}>
           <Card>
             <CardHeader color="warning">
-              <h4 className={classes.cardTitleWhite}>Daily count of transactions (example data)</h4>
+              <h4 className={classes.cardTitleWhite}>Daily count of transactions</h4>
             </CardHeader>
             <CardBody>
-                <Line data={dataTxLine} height={400} legendY={'Tx count'} colors={['#fb8c00']}/>
+              {getTransactionCountPerDayLoading && (
+                <CircularProgress/>
+              )}
+              {!getTransactionCountPerDayLoading && (
+                <Line data={transactionCountPerDayData} height={400} legendY={'Tx count'} colors={['#fb8c00']}/>
+              )}
             </CardBody>
           </Card>
         </GridItem>
