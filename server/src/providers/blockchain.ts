@@ -18,9 +18,9 @@ const log = logger.child({ from: "Blockchain" });
  * This varb save unique address per day
  */
 let uniqueTxs = {
-  now: '',
-  uniqueAddress: [],
-}
+  now: "",
+  uniqueAddress: []
+};
 /**
  * Exported as blockchain
  * Interface with blockchain contracts via web3 using HDWalletProvider
@@ -45,6 +45,11 @@ export class blockchain {
     this.networkId = conf.ethereum.network_id;
     this.ready = this.init();
     this.listPrivateAddress = _invert(get(ContractsAddress, `${this.network}`));
+    log.info("Starting blockchain reader:", {
+      network: this.network,
+      networkdId: this.networkId,
+      systemContracts: this.listPrivateAddress
+    });
   }
 
   /**
@@ -101,7 +106,7 @@ export class blockchain {
    * @param wallet
    */
   isClientWallet(wallet: string) {
-    return this.listPrivateAddress[wallet] === undefined;
+    return this.listPrivateAddress[this.web3.utils.toChecksumAddress(wallet)] === undefined;
   }
 
   /**
@@ -115,28 +120,6 @@ export class blockchain {
   }
 
   /**
-   * Check address for unique
-   * @param {string} address
-   * @param {string} date
-   */
-  isUniqueAddress(address: string, date: string) {
-
-    if (uniqueTxs.now !== date) {
-      uniqueTxs.uniqueAddress = []
-      uniqueTxs.now = date
-    }
-
-    // @ts-ignore
-    if (uniqueTxs.uniqueAddress.indexOf(address) >= 0) {
-      return false
-    }
-    // @ts-ignore
-    uniqueTxs.uniqueAddress.push(address)
-
-    return true
-  }
-
-  /**
    * Update list wallets and transactions info
    */
   async updateDataToDB() {
@@ -144,7 +127,7 @@ export class blockchain {
     let surveys: any = {};
     let aboutTXs: any = {};
     let lastBlock = await propertyProvider.get("lastBlock");
-    let blockNumber: number = 0
+    let blockNumber: number = 0;
     log.info("last Block", lastBlock);
 
     const allEvents = await this.tokenContract.getPastEvents("Transfer", {
@@ -165,13 +148,13 @@ export class blockchain {
         continue;
       }
 
+      // log.debug("Event:", { fromAddr, toAddr, event });
       if (this.isClientWallet(fromAddr)) {
         let timestamp = moment.unix(txTime);
-        let date = timestamp.format("YYYY-MM-DD")
+        let date = timestamp.format("YYYY-MM-DD");
+        log.debug("Client Event:", { date, fromAddr, toAddr });
+        const amountTX = web3Utils.hexToNumber(event.returnValues.value);
         let dateForSurveyNow = timestamp.format("DDMMYY")
-
-        console.log('set - at ' + date);
-        const amountTX = web3Utils.hexToNumber(event.returnValues.value)
 
         if (lastDateForSurveyNow !== dateForSurveyNow) {
           console.log(dateForSurveyNow)
@@ -184,43 +167,47 @@ export class blockchain {
         }
 
         if (aboutTXs.hasOwnProperty(date)) {
-          aboutTXs[date].amount_txs = aboutTXs[date].amount_txs + amountTX;
-          aboutTXs[date].count_txs = aboutTXs[date].count_txs + 1;
-          aboutTXs[date].unique_txs = aboutTXs[date].unique_txs + Number(this.isUniqueAddress(fromAddr, date))
+          aboutTXs[date].amount_txs += amountTX;
+          aboutTXs[date].count_txs += 1;
+          aboutTXs[date].unique_txs[fromAddr] = true;
         } else {
           aboutTXs[date] = {
             date,
             amount_txs: amountTX,
             count_txs: 1,
-            unique_txs: Number(this.isUniqueAddress(fromAddr, date))
-          }
+            unique_txs: { [fromAddr]: true }
+          };
         }
 
         if (wallets.hasOwnProperty(fromAddr)) {
-          wallets[fromAddr].inTXs = wallets[fromAddr].inTXs + 1;
-          wallets[fromAddr].countTx = wallets[fromAddr].countTx + 1;
+          wallets[fromAddr].outTXs += 1;
+          wallets[fromAddr].countTx += 1;
         } else {
           wallets[fromAddr] = {
             address: fromAddr,
-            outTXs: 0,
-            inTXs: 1,
+            outTXs: 1,
+            inTXs: 0,
             balance: await this.getAddressBalance(toAddr),
             countTx: 1
           };
         }
+      } else {
+        log.trace("Skipping system contracts event", { fromAddr });
       }
 
-      if (wallets.hasOwnProperty(toAddr)) {
-        wallets[toAddr].outTXs = wallets[toAddr].outTXs + 1;
-        wallets[toAddr].countTx = wallets[toAddr].countTx + 1;
-      } else {
-        wallets[toAddr] = {
+      if (this.isClientWallet(toAddr)) {
+        if (wallets.hasOwnProperty(toAddr)) {
+          wallets[toAddr].inTXs += 1;
+          wallets[toAddr].countTx += 1;
+        } else {
+          wallets[toAddr] = {
             address: toAddr,
-            outTXs: 1,
-            inTXs: 0,
+            outTXs: 0,
+            inTXs: 1,
             countTx: 1,
-            balance: await this.getAddressBalance(toAddr),
-        };
+            balance: await this.getAddressBalance(toAddr)
+          };
+        }
       }
     }
 
