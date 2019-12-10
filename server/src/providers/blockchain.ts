@@ -8,6 +8,8 @@ import get from "lodash/get";
 import _invert from "lodash/invert";
 import propertyProvider from "./property";
 import walletsProvider from "./wallets";
+import surveyProvider from "./survey";
+import surveyDB from "../gun/models/survey";
 import AboutTransactionProvider from "./about-transaction";
 import * as web3Utils from "web3-utils";
 const log = logger.child({ from: "Blockchain" });
@@ -106,7 +108,7 @@ export class blockchain {
    * Update all date BChain
    */
   async updateData () {
-    await this.updateListWalletsAndTransactions()
+    await this.updateDataToDB()
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`);
     const inEscrow = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call();
     await propertyProvider.set("inEscrow", +inEscrow);
@@ -137,8 +139,9 @@ export class blockchain {
   /**
    * Update list wallets and transactions info
    */
-  async updateListWalletsAndTransactions() {
+  async updateDataToDB() {
     let wallets: any = {};
+    let surveys: any = {};
     let aboutTXs: any = {};
     let lastBlock = await propertyProvider.get("lastBlock");
     let blockNumber: number = 0
@@ -149,7 +152,7 @@ export class blockchain {
       toBlock: "latest"
     });
 
-
+    let lastDateForSurveyNow : string = ''
     for (let index in allEvents) {
       let event = allEvents[index];
       let fromAddr = event.returnValues.from;
@@ -165,8 +168,20 @@ export class blockchain {
       if (this.isClientWallet(fromAddr)) {
         let timestamp = moment.unix(txTime);
         let date = timestamp.format("YYYY-MM-DD")
+        let dateForSurveyNow = timestamp.format("DDMMYY")
+
         console.log('set - at ' + date);
         const amountTX = web3Utils.hexToNumber(event.returnValues.value)
+
+        if (lastDateForSurveyNow !== dateForSurveyNow) {
+          console.log(dateForSurveyNow)
+          const surveyGroupDate = await surveyDB.getGroupDataByDate(dateForSurveyNow)
+          lastDateForSurveyNow = dateForSurveyNow
+          surveys[dateForSurveyNow] = {
+            date,
+            ...surveyGroupDate
+          }
+        }
 
         if (aboutTXs.hasOwnProperty(date)) {
           aboutTXs[date].amount_txs = aboutTXs[date].amount_txs + amountTX;
@@ -212,7 +227,7 @@ export class blockchain {
     await propertyProvider.set("lastBlock", +blockNumber);
     await walletsProvider.updateOrSet(wallets);
     await AboutTransactionProvider.updateOrSet(aboutTXs);
-
+    await surveyProvider.updateOrSet(surveys)
   }
 
   /**
