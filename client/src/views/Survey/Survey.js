@@ -5,9 +5,14 @@ import { makeStyles } from "@material-ui/core/styles";
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import Table from "components/Table/Table.js";
+import TablePagination from "components/Table/TablePagination.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
+import {
+  useGetSurveyTable,
+} from 'hooks/api'
+import CircularProgress from "@material-ui/core/CircularProgress/CircularProgress";
 
 const styles = {
   cardCategoryWhite: {
@@ -41,8 +46,32 @@ const styles = {
 
 const useStyles = makeStyles(styles);
 
+const DEFAULT_PER_PAGE = 15;
+
 export default function TableList() {
   const classes = useStyles();
+  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
+  const [page, setPage] = useState(0);
+  const skip = page * perPage;
+
+  const [
+    tableData = {
+      list: [],
+      count: 0,
+    },
+    rowsLoading
+  ] = useGetSurveyTable(
+    [
+      page,
+      perPage,
+    ],
+    [{
+      limit: perPage,
+      skip,
+    }],
+  );
+  const rows = tableData.list;
+  const totalCount = tableData.count;
 
   return (
       <GridContainer>
@@ -52,17 +81,25 @@ export default function TableList() {
       <h4 className={classes.cardTitleWhite}>Survey Table</h4>
   </CardHeader>
   <CardBody>
+    {rowsLoading && (
+      <GridItem container xs={12} justify="center">
+        <CircularProgress/>
+      </GridItem>
+    )}
     <Table
-          tableHeaderColor="primary"
-          tableHead={["Name", "Country", "City", "Salary"]}
-          tableData={[
-                ["Dakota Rice", "Niger", "Oud-Turnhout", "$36,738"],
-            ["Minerva Hooper", "Curaçao", "Sinaai-Waas", "$23,789"],
-          ["Sage Rodriguez", "Netherlands", "Baileux", "$56,142"],
-              ["Philip Chaney", "Korea, South", "Overland Park", "$38,735"],
-              ["Doris Greene", "Malawi", "Feldkirchen in Kärnten", "$63,542"],
-              ["Mason Porter", "Chile", "Gloucester", "$78,615"]
+        tableHeaderColor="primary"
+        tableHead={["Date", "Product", "Service", "Other"]}
+        tableData={[
+          ...rows.map(i => [i.date, `${i.product || 0}`, `${i.service || 0}`, `${i.other || 0}`])
         ]}
+    />
+    <TablePagination
+      count={totalCount}
+      page={page}
+      perPage={perPage}
+      onChangePage={setPage}
+      onChangeRowsPerPage={setPerPage}
+      rowsPerPageOptions={[10, 15, 20, 25]}
     />
   </CardBody>
   </Card>
