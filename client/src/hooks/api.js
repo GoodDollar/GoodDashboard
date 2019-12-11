@@ -44,3 +44,6 @@ export const useGetTransactionSumAmountPerDay = (deps=[]) => useApi(api.getTrans
 // gd
 export const useGetGDTotal = (deps=[]) => useApi(api.getGDTotal, deps)
 export const useGetGDInEscrow = (deps=[]) => useApi(api.getGDInEscrow, deps)
+
+// survey
+export const useGetSurveyTable = (deps=[], params) => useApi(api.getSurveyTable, deps, params)
