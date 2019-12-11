@@ -1,10 +1,11 @@
 import SurveyModel from '../models/survey'
 
 type survey = {
-  service: number,
-  product: number,
-  other: number,
+  hash: string,
   date: string,
+  reason: string,
+  amount: number,
+  survey: string,
 }
 
 class SurveyTransaction {
@@ -21,26 +22,18 @@ class SurveyTransaction {
         for(const i in surveys) {
           // @ts-ignore
           let survey: survey = surveys[i]
-          let inc = {}
-          for (let f in survey) {
-            // @ts-ignore
-            if (typeof survey[f] === 'number' && survey[f] > 0) {
-              // @ts-ignore
-              inc[f] = survey[f]
-            }
-          }
+
           params.push({
             updateOne: {
-              filter: {date: survey.date},
-              update: {
-                date: survey.date,
-                $inc: inc,
-              },
+              filter: {hash: survey.hash},
+              update: survey,
               upsert: true, new: true
             }
           })
         }
-        await this.model.bulkWrite(params)
+        if (params.length > 0) {
+          await this.model.bulkWrite(params)
+        }
       }
 
     return true

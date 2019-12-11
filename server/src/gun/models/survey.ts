@@ -1,32 +1,30 @@
 import gunDB from '../gundb'
-
+import moment from 'moment'
 class SurveyProperties {
   gun: any
   constructor() {
     this.gun = gunDB
   }
 
-  async getGroupDataByDate(date: string) {
-    const result = {
-      service: 0,
-      product: 0,
-      other: 0
-    }
-    await this.gun
-      .get('survey').get(date).map().on(function(data:any){
-          switch(data.survey) {
-            case 'A service':
-              result.service += 1
-              break
-            case 'A product':
-              result.product += 1
-              break
-            default:
-              result.other += 1
-          }
-      })
+  async getByDate(date:any) {
+    const result:any = {}
+    const gunDate = moment(date).format('DDMMYY')
 
-    return result
+    await this.gun.get('survey').get(gunDate).on(async (data:any) => {
+        if (data) {
+          await this.gun.get('survey').get(gunDate).map().on((dataTx:any, hash:any) => {
+            result[hash] = {
+              date: moment(date).format('YYYY-MM-DD'),
+              hash,
+              amount: dataTx.amount,
+              reason: dataTx.reason,
+              survey: dataTx.survey,
+            }
+          })
+        }
+    })
+
+    return Promise.resolve(result)
   }
 
 }
