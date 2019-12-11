@@ -15,14 +15,15 @@ export default function CustomTable(props) {
 
   const _onChangePage = (event, page) => {
     if (page <= totalPages && page >= 0) {
-      onChangePage(page)
+      onChangePage(page);
     }
   };
 
   const _onChangeRowsPerPage = (event) => {
     const newPerPage = event && event.target && event.target.value;
 
-    onChangeRowsPerPage(newPerPage || perPage)
+    onChangeRowsPerPage(newPerPage || perPage);
+    onChangePage(0);
   };
 
   return (
@@ -38,21 +39,3 @@ export default function CustomTable(props) {
     </div>
   );
 }
-
-CustomTable.defaultProps = {
-  tableHeaderColor: "gray"
-};
-
-CustomTable.propTypes = {
-  tableHeaderColor: PropTypes.oneOf([
-    "warning",
-    "primary",
-    "danger",
-    "success",
-    "info",
-    "rose",
-    "gray"
-  ]),
-  tableHead: PropTypes.arrayOf(PropTypes.string),
-  tableData: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string))
-};
