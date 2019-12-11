@@ -47,12 +47,16 @@ class SurveyTransaction {
   }
 
   /**
-   * Get all wallets
+   * Get all survey
    *
    * @returns {Promise<*>}
    */
   async getAll(skip: number = 1, limit: number = 20) {
     return this.model.find({}).sort({ date: 1 }).skip(skip).limit(limit);
+  }
+
+  async getCount() {
+    return this.model.find().count()
   }
 
 }
