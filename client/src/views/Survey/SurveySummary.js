@@ -15,6 +15,7 @@ import {
   useGetSurveySummaryTable,
 } from 'hooks/api'
 import CircularProgress from "@material-ui/core/CircularProgress/CircularProgress";
+import Config from '../../config';
 
 const styles = {
   cardCategoryWhite: {
@@ -81,13 +82,19 @@ export default function TableList() {
   const rows = tableData.list;
   const totalCount = tableData.count;
 
+  const downloadCSV = () => {
+    const downloadUrl = `${Config.apiUrl}/survey/export-csv`;
+
+    window.open(downloadUrl);
+  };
+
   return (
     <GridContainer>
       <GridItem xs={12} sm={12} md={12}>
         <Card>
           <CardHeader color="primary" className={classes.header}>
             <h4 className={classes.cardTitleWhite}>Survey Summary Table</h4>
-            <IconButton className={classes.exportButton}>
+            <IconButton className={classes.exportButton} onClick={downloadCSV}>
               <BackupIcon />
             </IconButton>
           </CardHeader>
