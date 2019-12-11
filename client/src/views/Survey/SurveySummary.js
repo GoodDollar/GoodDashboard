@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, {useEffect, useState} from 'react'
 // @material-ui/core components
-import { makeStyles } from "@material-ui/core/styles";
+import {makeStyles} from "@material-ui/core/styles";
+import IconButton from "@material-ui/core/IconButton";
+import BackupIcon from "@material-ui/icons/Backup";
 // core components
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
@@ -29,11 +31,9 @@ const styles = {
   },
   cardTitleWhite: {
     color: "#FFFFFF",
-    marginTop: "0px",
-    minHeight: "auto",
+    margin: 'auto 0',
     fontWeight: "300",
     fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-    marginBottom: "3px",
     textDecoration: "none",
     "& small": {
       color: "#777",
@@ -41,7 +41,15 @@ const styles = {
       fontWeight: "400",
       lineHeight: "1"
     }
-  }
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  exportButton: {
+    padding: 8,
+    color: 'white',
+  },
 };
 
 const useStyles = makeStyles(styles);
@@ -74,36 +82,39 @@ export default function TableList() {
   const totalCount = tableData.count;
 
   return (
-      <GridContainer>
+    <GridContainer>
       <GridItem xs={12} sm={12} md={12}>
-      <Card>
-      <CardHeader color="primary">
-      <h4 className={classes.cardTitleWhite}>Survey Summary Table</h4>
-  </CardHeader>
-  <CardBody>
-    {rowsLoading && (
-      <GridItem container xs={12} justify="center">
-        <CircularProgress/>
+        <Card>
+          <CardHeader color="primary" className={classes.header}>
+            <h4 className={classes.cardTitleWhite}>Survey Summary Table</h4>
+            <IconButton className={classes.exportButton}>
+              <BackupIcon />
+            </IconButton>
+          </CardHeader>
+          <CardBody>
+            {rowsLoading && (
+              <GridItem container xs={12} justify="center">
+                <CircularProgress/>
+              </GridItem>
+            )}
+            <Table
+              tableHeaderColor="primary"
+              tableHead={["Date", "Amount", "Survey", "Reason", "Hash"]}
+              tableData={[
+                ...rows.map(i => [i.date, `${i.amount || 0}`, i.survey, i.reason, i.hash])
+              ]}
+            />
+            <TablePagination
+              count={totalCount}
+              page={page}
+              perPage={perPage}
+              onChangePage={setPage}
+              onChangeRowsPerPage={setPerPage}
+              rowsPerPageOptions={[10, 15, 20, 25]}
+            />
+          </CardBody>
+        </Card>
       </GridItem>
-    )}
-    <Table
-        tableHeaderColor="primary"
-        tableHead={["Date", "Amount", "Survey", "Reason", "Hash"]}
-        tableData={[
-          ...rows.map(i => [i.date, `${i.amount || 0}`, i.survey, i.reason, i.hash])
-        ]}
-    />
-    <TablePagination
-      count={totalCount}
-      page={page}
-      perPage={perPage}
-      onChangePage={setPage}
-      onChangeRowsPerPage={setPerPage}
-      rowsPerPageOptions={[10, 15, 20, 25]}
-    />
-  </CardBody>
-  </Card>
-  </GridItem>
-  </GridContainer>
-);
+    </GridContainer>
+  );
 }
