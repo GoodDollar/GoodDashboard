@@ -1,6 +1,8 @@
 import IPFS from 'ipfs'
 import Log from 'ipfs-log'
 import IdentityProvider from 'orbit-db-identity-provider'
+import Identity from 'orbit-db-identity-provider/src/identity'
+
 import conf from '../config'
 import logger from '../helpers/pino-logger'
 import propertyProvider from './property'
@@ -16,7 +18,21 @@ export default class IPFSLog {
   }
 
   async init(): Promise<boolean> {
-    const identity = await IdentityProvider.createIdentity({ id: 'gooddashboard' })
+    const id = await propertyProvider.get('ipfsID').then(_ => _ && JSON.parse(_))
+    let identity
+    if (id) {
+      identity = new Identity(
+        id.id,
+        id.publicKey,
+        id.signatures.id,
+        id.signatures.publicKey,
+        id.type,
+        IdentityProvider.IdentityProvider
+      )
+    } else {
+      identity = await IdentityProvider.createIdentity({ id: 'gooddashboard' })
+      await propertyProvider.set('ipfsID', JSON.stringify(identity.toJSON()))
+    }
     log.debug({ identity })
     const ipfs = new IPFS()
     await ipfs.ready
