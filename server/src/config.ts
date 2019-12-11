@@ -11,55 +11,55 @@ const conf = convict({
     format: ['production', 'development', 'staging', 'test'],
     default: 'development',
     arg: 'nodeEnv',
-    env: 'NODE_ENV'
+    env: 'NODE_ENV',
   },
   ip: {
     doc: 'The IP address to bind.',
     format: 'ipaddress',
     default: '127.0.0.1',
-    env: 'IP_ADDRESS'
+    env: 'IP_ADDRESS',
   },
   port: {
     doc: 'The port to bind.',
     format: 'port',
     default: 3003,
-    env: 'PORT'
+    env: 'PORT',
   },
   logLevel: {
     doc: 'Log level',
     format: ['debug', 'error', 'warn', 'info', 'off', 'trace'],
     default: 'debug',
-    env: 'LOG_LEVEL'
+    env: 'LOG_LEVEL',
   },
   timeUpdate: {
     doc: 'data refresh interval',
     format: Number,
     default: 1800000,
-    env: 'DATA_REFRESH_INTERVAL'
+    env: 'DATA_REFRESH_INTERVAL',
   },
   startTimeTransaction: {
     doc: 'start time transaction',
     format: Number,
     default: 1573470000,
-    env: 'START_TIME_TRANSACTION'
+    env: 'START_TIME_TRANSACTION',
   },
   stepDistributionHistogramWalletBalance: {
     doc: 'step distribution histogram wallet balance',
     format: Number,
     default: 5,
-    env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_BALANCE'
+    env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_BALANCE',
   },
   stepDistributionHistogramWalletTransaction: {
     doc: 'step distribution histogram wallet transaction',
     format: Number,
     default: 5,
-    env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_TRANSACTION'
+    env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_TRANSACTION',
   },
   ethereum: {
     network_id: 42,
     httpWeb3Provider: 'https://kovan.infura.io/v3/',
     websocketWeb3Provider: 'wss://kovan.infura.io/ws',
-    web3Transport: 'HttpProvider'
+    web3Transport: 'HttpProvider',
   },
   network: {
     doc: 'The blockchain network to connect to',
@@ -73,30 +73,29 @@ const conf = convict({
       'fuse',
       'production',
       'develop',
-      'staging'
+      'staging',
     ],
     default: 'develop',
-    env: 'NETWORK'
+    env: 'NETWORK',
   },
   mongodb: {
     uri: {
       doc: 'Mongo DB URI',
       format: '*',
       env: 'MONGO_DB_URI',
-      default: ''
-    }
+      default: '',
+    },
   },
-  secure_key: {
-    doc: 'Secure key word used to create secure hash by which server can communicate with web3',
-    format: '*',
-    env: 'SECURE_KEY',
-    default: undefined
+  amplitudeKey: {
+    format: String,
+    env: 'AMPLITUDE_KEY',
+    default: null,
   },
   fuse: {
     doc: 'Main url for fuse api',
     format: String,
     env: 'FUSE_API',
-    default: null
+    default: null,
   },
 })
 
@@ -104,7 +103,6 @@ const conf = convict({
 const env = conf.get('env')
 const network = conf.get('network')
 
-conf.set('ethereum', _.get(networks,`[${_.get(ContractsAddress,`[${network}].networkId`)}]`))
-
+conf.set('ethereum', _.get(networks, `[${_.get(ContractsAddress, `[${network}].networkId`)}]`))
 
 export default conf.getProperties()
