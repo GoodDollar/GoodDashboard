@@ -11,6 +11,8 @@ import get from 'lodash/get'
 import _invert from 'lodash/invert'
 import propertyProvider from './property'
 import walletsProvider from './wallets'
+import surveyProvider from './survey'
+import surveyDB from '../gun/models/survey'
 import AboutTransactionProvider from './about-transaction'
 import Amplitude from './amplitude'
 import IPFSLog from './ipfs'
@@ -290,6 +292,22 @@ export class blockchain {
     }
   }
 
+  async updateSurvey() {
+    let lastDateForSurveyNow: string = await propertyProvider.get('lastSurveyDate')
+    let dateForSurveyNow = timestamp.format('DDMMYY')
+
+    if (lastDateForSurveyNow !== dateForSurveyNow) {
+      console.log(dateForSurveyNow)
+      const surveyGroupDate = await surveyDB.getGroupDataByDate(dateForSurveyNow)
+      lastDateForSurveyNow = dateForSurveyNow
+      surveys[dateForSurveyNow] = {
+        date,
+        ...surveyGroupDate,
+      }
+    }
+    await propertyProvider.set('lastSurveyDate', dateForSurveyNow)
+    await surveyProvider.updateOrSet(surveys)
+  }
   /**
    * Update list wallets and transactions info
    */

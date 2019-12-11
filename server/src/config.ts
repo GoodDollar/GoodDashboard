@@ -49,6 +49,12 @@ const conf = convict({
     default: 5,
     env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_BALANCE',
   },
+  gunPublicUrl: {
+    doc: 'step distribution histogram wallet balance',
+    format: Number,
+    default: 'http://localhost:8765/gun',
+    env: 'GUN_PUBLIC_URL'
+  },
   stepDistributionHistogramWalletTransaction: {
     doc: 'step distribution histogram wallet transaction',
     format: Number,

@@ -78,10 +78,10 @@ class AboutTransaction {
    *
    * @returns {Promise<*>}
    */
-  async getAll(start: number = 1, limit: number = 20) {
+  async getAll(start: number = 1, limit: number = 50) {
     return this.model
       .find({})
-      .sort({ date: 1 })
+      .sort({ date: -1 })
       .skip(start)
       .limit(limit);
   }

@@ -17,6 +17,7 @@
 */
 // @material-ui/icons
 import Dashboard from "@material-ui/icons/Dashboard";
+import ViewList from "@material-ui/icons/ViewList";
 // import Person from "@material-ui/icons/Person";
 // import LibraryBooks from "@material-ui/icons/LibraryBooks";
 // import BubbleChart from "@material-ui/icons/BubbleChart";
@@ -26,6 +27,7 @@ import Dashboard from "@material-ui/icons/Dashboard";
 // import Language from "@material-ui/icons/Language";
 // core components/views for Admin layout
 import DashboardPage from "views/Dashboard/Dashboard.js";
+import SurveyPage from "views/Survey/Survey.js";
 // import UserProfile from "views/UserProfile/UserProfile.js";
 // import TableList from "views/TableList/TableList.js";
 // import Typography from "views/Typography/Typography.js";
@@ -43,6 +45,14 @@ const dashboardRoutes = [
     rtlName: "لوحة القيادة",
     icon: Dashboard,
     component: DashboardPage,
+    layout: "/admin"
+  },
+  {
+    path: "/survey",
+    name: "Survey",
+    rtlName: "لوحة القيادة",
+    icon: ViewList,
+    component: SurveyPage,
     layout: "/admin"
   },
   // {

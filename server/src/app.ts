@@ -18,7 +18,7 @@ app.use((req, res) => res.sendFile(path.join(__dirname, '..', '..', 'client', 'b
 
 
 // Express configuration
-app.set('port', process.env.PORT || 3000)
+app.set('port', process.env.PORT || 3055)
 
 
 Blockchain.updateData()
