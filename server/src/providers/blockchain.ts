@@ -95,7 +95,7 @@ export class blockchain {
         break
     }
 
-    log.debug({ conf, web3Provider, provider })
+    log.debug({ conf, provider })
 
     return web3Provider
   }
@@ -110,7 +110,6 @@ export class blockchain {
       .then(_ => +_)
       .catch(_ => 0)
     await this.ipfslog.ready
-    this.ipfslog.logEventAsCSV('TEST', { a: 1, b: Math.random() })
     this.web3 = new Web3(this.getWeb3TransportProvider())
     const address: any = get(ContractsAddress, `${this.network}.GoodDollar`)
     this.tokenContract = new this.web3.eth.Contract(GoodDollarABI.abi, address)
