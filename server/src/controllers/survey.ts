@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import surveyProvider from "../providers/survey";
 
-const getTotalPerDay = async (req: Request, res: Response, next: NextFunction) => {
+const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const skip = (req.query.skip) ? req.query.skip : 0
     const limit = (req.query.limit) ? req.query.limit : 20
@@ -27,5 +27,5 @@ const getTotalPerDay = async (req: Request, res: Response, next: NextFunction) =
 
 
 export default {
-  getTotalPerDay
+  getTotal
 };
