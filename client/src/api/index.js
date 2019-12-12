@@ -1,9 +1,10 @@
-import axios from 'axios'
-import ApiClient from './apiClient'
-import HttpAdapter from './httpAdapter'
+import axios from 'axios';
+import ApiClient from './apiClient';
+import HttpAdapter from './httpAdapter';
+import Config from '../config';
 
 const api = new ApiClient(new HttpAdapter(axios.create({
-  baseURL: process.env.REACT_APP_API_URL
-})))
+  baseURL: Config.apiUrl,
+})));
 
-export default api
+export default api;
