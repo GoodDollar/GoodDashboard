@@ -21,13 +21,6 @@ import * as web3Utils from 'web3-utils'
 const log = logger.child({ from: 'Blockchain' })
 
 /**
- * This varb save unique address per day
- */
-let uniqueTxs = {
-  now: '',
-  uniqueAddress: [],
-}
-/**
  * Exported as blockchain
  * Interface with blockchain contracts via web3 using HDWalletProvider
  */

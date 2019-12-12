@@ -85,6 +85,7 @@ export default function Sidebar(props) {
     <div className={classes.logo}>
       <a
         href={config.walletUrl}
+        rel="noopener noreferrer"
         className={classNames(classes.logoLink, {
           [classes.logoLinkRTL]: props.rtlActive
         })}

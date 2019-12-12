@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, { useState} from 'react'
 // @material-ui/core components
 import {makeStyles} from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
@@ -9,6 +9,7 @@ import GridContainer from "components/Grid/GridContainer.js";
 import Table from "components/Table/Table.js";
 import TablePagination from "components/Table/TablePagination.js";
 import Card from "components/Card/Card.js";
+import Balance from "components/Balance"
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import {
@@ -83,7 +84,7 @@ export default function TableList() {
   const totalCount = tableData.count;
 
   const downloadCSV = () => {
-    const downloadUrl = `${Config.apiUrl}/survey/export-csv`;
+    const downloadUrl = `${Config.apiUrl}/survey/csv`;
 
     window.open(downloadUrl);
   };
@@ -108,7 +109,7 @@ export default function TableList() {
               tableHeaderColor="primary"
               tableHead={["Date", "Amount", "Survey", "Reason", "Hash"]}
               tableData={[
-                ...rows.map(i => [i.date, `${i.amount || 0}`, i.survey, i.reason, i.hash])
+                ...rows.map(i => [i.date, <Balance amount={i.amount} />, i.survey, i.reason, i.hash])
               ]}
             />
             <TablePagination

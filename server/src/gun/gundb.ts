@@ -1,6 +1,5 @@
 const Gun = require('@gooddollar/gun-appendonly');
 import 'gun/lib/rindexed'
-import config from '../config'
 
 let gunDb:any
 
