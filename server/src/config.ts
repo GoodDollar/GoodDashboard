@@ -106,7 +106,6 @@ const conf = convict({
 })
 
 // Load environment dependent configuration
-const env = conf.get('env')
 const network = conf.get('network')
 
 conf.set('ethereum', _.get(networks, `[${_.get(ContractsAddress, `[${network}].networkId`)}]`))

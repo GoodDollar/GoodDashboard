@@ -37,8 +37,8 @@ const useStyles = makeStyles(styles)
 
 export default function Dashboard() {
 
-  const [topAccounts = [], topAccountsLoading, topAccountsError] = useTopAccounts()
-  const [topLowMediumBalance, topLowMediumBalanceLoading, topLowMediumBalanceError] = useTopLowMediumBalance()
+  const [topAccounts = [], topAccountsLoading] = useTopAccounts()
+  const [topLowMediumBalance, topLowMediumBalanceLoading] = useTopLowMediumBalance()
   let topLowMediumBalanceArray = [[]]
   if (topLowMediumBalance && topLowMediumBalance.top) {
     topLowMediumBalanceArray = [
