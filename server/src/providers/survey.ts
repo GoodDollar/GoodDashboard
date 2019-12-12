@@ -45,7 +45,11 @@ class SurveyTransaction {
    * @returns {Promise<*>}
    */
   async getAll(skip: number = 1, limit: number = 20) {
-    return this.model.find({}).sort({ date: 1 }).skip(skip).limit(limit);
+    if (skip === -1){
+      return this.model.find({}).sort({ date: 1 })
+    } else {
+      return this.model.find({}).sort({ date: 1 }).skip(skip).limit(limit);
+    }
   }
 
   async getCount() {

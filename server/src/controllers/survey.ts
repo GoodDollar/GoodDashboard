@@ -25,7 +25,31 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
+const getCSV = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const filename = "survey.csv";
+    let bodyFile = 'date,hash,amount,reason,survey\n\r'
+    const data = await surveyProvider.getAll(-1)
+    if (data) {
+      for(let i in data) {
+        bodyFile += `${data[i].date},${data[i].hash},${data[i].amount},${data[i].reason},${data[i].survey}\n`
+      }
+    }
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader("Content-Disposition", 'attachment; filename='+filename);
+    res.end(bodyFile);
+  }
+
+  catch (error) {
+    return res.status(500).json({
+      message: error.message ? error.message : 'Unexpected error occure.'
+    })
+  }
+}
+
 
 export default {
-  getTotal
+  getTotal,
+  getCSV
 };
