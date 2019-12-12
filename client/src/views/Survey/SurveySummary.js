@@ -84,7 +84,7 @@ export default function TableList() {
   const totalCount = tableData.count;
 
   const downloadCSV = () => {
-    const downloadUrl = `${Config.apiUrl}/survey/export-csv`;
+    const downloadUrl = `${Config.apiUrl}/survey/csv`;
 
     window.open(downloadUrl);
   };
