@@ -28,11 +28,12 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
 const getCSV = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const filename = "survey.csv";
-    let bodyFile = 'date,hash,amount,reason,survey\n\r'
+    let bodyFile = 'date,amount,survey,reason,hash\n'
+
     const data = await surveyProvider.getAll(-1)
     if (data) {
       for(let i in data) {
-        bodyFile += `${data[i].date},${data[i].hash},${data[i].amount},${data[i].reason},${data[i].survey}\n`
+        bodyFile += `${data[i].date},${data[i].amount},${data[i].survey},${data[i].reason},${data[i].hash}\n`
       }
     }
     res.statusCode = 200;

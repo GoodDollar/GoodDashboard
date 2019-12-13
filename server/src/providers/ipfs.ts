@@ -1,8 +1,7 @@
 import IPFS from 'ipfs'
 import Log from 'ipfs-log'
 import IdentityProvider from 'orbit-db-identity-provider'
-import Identity from 'orbit-db-identity-provider/src/identity'
-
+const Identity = require('orbit-db-identity-provider/src/identity');
 import logger from '../helpers/pino-logger'
 import propertyProvider from './property'
 const log = logger.child({ from: 'IPFS' })
