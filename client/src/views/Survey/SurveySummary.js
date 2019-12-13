@@ -2,7 +2,7 @@ import React, { useState} from 'react'
 // @material-ui/core components
 import {makeStyles} from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
-import BackupIcon from "@material-ui/icons/Backup";
+import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 // core components
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
@@ -96,7 +96,7 @@ export default function TableList() {
           <CardHeader color="primary" className={classes.header}>
             <h4 className={classes.cardTitleWhite}>Survey Summary Table</h4>
             <IconButton className={classes.exportButton} onClick={downloadCSV}>
-              <BackupIcon />
+              <CloudDownloadIcon />
             </IconButton>
           </CardHeader>
           <CardBody>
