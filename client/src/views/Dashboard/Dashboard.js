@@ -264,7 +264,7 @@ export default function Dashboard() {
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                Chart shows summary amount and average amount of transactions per day
+                Chart shows total volume and average amount of transactions per day
               </div>
             </CardFooter>
           </Card>
@@ -301,7 +301,7 @@ export default function Dashboard() {
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                Chart shows count of transactions and count of unique users per day
+                Chart shows number of transactions and number of unique users per day
               </div>
             </CardFooter>
           </Card>
@@ -327,7 +327,7 @@ export default function Dashboard() {
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                The diagram shows how many users have a specific range of amount
+                The diagram shows how many users have a specific range of balance
               </div>
             </CardFooter>
           </Card>
@@ -351,7 +351,7 @@ export default function Dashboard() {
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                The diagram shows how many users have a specific range of transactions count
+                The diagram shows how many users did a specific range of transactions
               </div>
             </CardFooter>
           </Card>
@@ -409,7 +409,7 @@ export default function Dashboard() {
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                Top 10 User accounts by count of transactions
+                Top 10 User accounts by number of transactions
               </div>
             </CardFooter>
           </Card>
