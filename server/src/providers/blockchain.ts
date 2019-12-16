@@ -159,6 +159,20 @@ export class blockchain {
     await this.ipfslog.persist()
   }
 
+  async updateWalletsBalance() {
+    let newBalanceWallets: any = {}
+    const wallets = await walletsProvider.getAll()
+    for (let i in wallets) {
+      // @ts-ignore
+      const address =  wallets[i].address
+      newBalanceWallets[address] = {
+        address,
+        balance: await this.getAddressBalance(address),
+      }
+    }
+    await walletsProvider.updateOrSet(newBalanceWallets)
+    console.log('Finish update wallets balance')
+  }
   async updateBonusEvents(toBlock: number) {
     const allEvents = await this.bonusContract.getPastEvents('BonusClaimed', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
