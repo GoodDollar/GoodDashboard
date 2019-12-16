@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
-// import Warning from "@material-ui/icons/Warning"
+import DataUsageIcon from "@material-ui/icons/DataUsage"
 import ReceiptIcon from '@material-ui/icons/Receipt'
 import EqualizerIcon from '@material-ui/icons/Equalizer'
 import Warning from 'components/Typography/Warning'
@@ -116,34 +116,34 @@ export default function Dashboard() {
   return (
     <div>
       <GridContainer>
-        <GridItem xs={12} sm={6} md={3}>
+        <GridItem xs={12} md={6} lg={3}>
           <Card>
             <CardHeader color="success" stats icon>
               <CardIcon color="success">
-                <AccountBalanceWalletIcon/>
+                <DataUsageIcon/>
               </CardIcon>
               <p className={classes.cardCategory}>General</p>
               <Success>
-                Total: <Balance amount={GDTotal} fromCents/>
+                GD in circulation: <Balance amount={GDTotal} fromCents/>
               </Success>
               <Success>
-                OTPL: <Balance amount={GDInEscrow} fromCents/>
+                GD held in escrow: <Balance amount={GDInEscrow} fromCents/>
               </Success>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
-                OTPL - One time payment link
+                GD in circulation, GD held in escrow
               </div>
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} sm={6} md={3}>
+        <GridItem xs={12} md={6} lg={3}>
           <Card>
             <CardHeader color="success" stats icon>
               <CardIcon color="success">
                 <AccountBalanceWalletIcon/>
               </CardIcon>
-              <p className={classes.cardCategory}>Balances</p>
+              <p className={classes.cardCategory}>User Accounts Balance</p>
               <Success>
                 Top: {!walletTopMedianLowLoading && (
                 <Balance amount={walletTopMedianLow.top} fromCents/>
@@ -167,18 +167,18 @@ export default function Dashboard() {
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
-                Balances of GD (top, median, average, low)
+                User Accounts Balance (top, median, average, low)
               </div>
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} sm={6} md={3}>
+        <GridItem xs={12} md={6} lg={3}>
           <Card>
             <CardHeader color="warning" stats icon className={classes.cardHeader}>
               <CardIcon color="warning">
                 <ReceiptIcon/>
               </CardIcon>
-              <p className={classes.cardCategory}>Transactions count</p>
+              <p className={classes.cardCategory}>User Transactions</p>
               <Warning>
                 Top: {!transactionTopMedianLowLoading && transactionTopMedianLow.top}
               </Warning>
@@ -194,12 +194,12 @@ export default function Dashboard() {
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
-                Transactions (top, median, average, low)
+                User Transactions (top, median, average, low)
               </div>
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} sm={6} md={3}>
+        <GridItem xs={12} md={6} lg={3}>
           <Card>
             <CardHeader color="warning" stats icon>
               <CardIcon color="warning">
@@ -214,7 +214,7 @@ export default function Dashboard() {
               <Balance amount={transactionTotalAmount} fromCents/>}
               </Warning>
               <Warning>
-                Average Count: {!transactionDailyAverageLoading && transactionDailyAverage &&
+                Average Daily TXs: {!transactionDailyAverageLoading && transactionDailyAverage &&
               priceFormat(transactionDailyAverage)}
               </Warning>
               <Warning>
@@ -223,7 +223,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
-                Transactions (total, total amount, average amount)
+                Transactions (total, total amount, Average Daily TXs)
               </div>
             </CardFooter>
           </Card>
@@ -262,6 +262,11 @@ export default function Dashboard() {
                 />
               )}
             </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows summary amount and average amount of transactions per day
+              </div>
+            </CardFooter>
           </Card>
         </GridItem>
         <GridItem xs={12} lg={6}>
@@ -294,6 +299,11 @@ export default function Dashboard() {
                 />
               )}
             </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows count of transactions and count of unique users per day
+              </div>
+            </CardFooter>
           </Card>
         </GridItem>
       </GridContainer>
@@ -315,6 +325,11 @@ export default function Dashboard() {
                 )}
               </GridItem>
             </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                The diagram shows how many users have a specific range of amount
+              </div>
+            </CardFooter>
           </Card>
         </GridItem>
         <GridItem xs={12} lg={6}>
@@ -334,6 +349,11 @@ export default function Dashboard() {
                 )}
               </GridItem>
             </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                The diagram shows how many users have a specific range of transactions count
+              </div>
+            </CardFooter>
           </Card>
         </GridItem>
       </GridContainer>
@@ -359,6 +379,11 @@ export default function Dashboard() {
                 />
               )}
             </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Top 10 User accounts by balances
+              </div>
+            </CardFooter>
           </Card>
         </GridItem>
         <GridItem xs={12} lg={6}>
@@ -382,6 +407,11 @@ export default function Dashboard() {
                 />
               )}
             </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Top 10 User accounts by count of transactions
+              </div>
+            </CardFooter>
           </Card>
         </GridItem>
       </GridContainer>
