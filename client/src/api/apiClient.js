@@ -19,10 +19,10 @@ export default class ApiClient {
   getTransactionTotalAmount = () => this.http.get('/transactions/total-amount')
   getTransactionDailyAverage = () => this.http.get('/transactions/avg-count')
 
-  getTransactionCountPerDay = () => this.http.get('/transactions/count-per-day')
-  getTransactionUniquePerDay = () => this.http.get('/transactions/unique-per-day')
-  getTransactionAmountPerDay = () => this.http.get('/transactions/avg-amount-per-day')
-  getTransactionSumAmountPerDay = () => this.http.get('/transactions/total-amount-per-day')
+  getTransactionCountPerDay = (limit) => this.http.get('/transactions/count-per-day', {limit})
+  getTransactionUniquePerDay = (limit) => this.http.get('/transactions/unique-per-day', {limit})
+  getTransactionAmountPerDay = (limit) => this.http.get('/transactions/avg-amount-per-day', {limit})
+  getTransactionSumAmountPerDay = (limit) => this.http.get('/transactions/total-amount-per-day', {limit})
 
   getGDTotal = () => this.http.get('/gd/total')
   getGDInEscrow = () => this.http.get('/gd/in-escrow')
