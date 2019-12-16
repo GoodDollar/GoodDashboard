@@ -192,10 +192,10 @@ class Wallets {
         [field]:{ $gt: minStep, $lte: maxStep }
       }
       if(j===0){
-        filter[field] = { $lte: maxStep }
+        filter[field] = { $gt: 0, $lte: maxStep }
         key = `${minMax.min}-${maxStep}`
       }else if(j>=step-1){
-        filter[field] = { $gt: minStep }
+        filter[field] = { $gt: minStep, $lte: minMax.max }
         key = `${minStep}-${minMax.max}`
       }
 
