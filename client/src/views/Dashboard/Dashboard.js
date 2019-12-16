@@ -225,7 +225,7 @@ export default function Dashboard() {
         </GridItem>
       </GridContainer>
       <GridContainer>
-        <GridItem xs={12} sm={12} md={6}>
+        <GridItem xs={12} lg={6}>
           <Card>
             <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
@@ -249,8 +249,7 @@ export default function Dashboard() {
                   }}
                   axisBottom={{
                     format: '%b %d',
-                    tickValues: 'every 2 days',
-                    legend: 'time scale',
+                    tickValues: 'every 5 days',
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
@@ -260,7 +259,7 @@ export default function Dashboard() {
             </CardBody>
           </Card>
         </GridItem>
-        <GridItem xs={12} sm={12} md={6}>
+        <GridItem xs={12} lg={6}>
           <Card>
             <CardHeader color="warning">
               <h4 className={classes.cardTitleWhite}>Daily count of transactions</h4>
@@ -283,8 +282,7 @@ export default function Dashboard() {
                   }}
                   axisBottom={{
                     format: '%b %d',
-                    tickValues: 'every 2 days',
-                    legend: 'time scale',
+                    tickValues: 'every 5 days',
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
