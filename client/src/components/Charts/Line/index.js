@@ -1,10 +1,9 @@
 import React from 'react'
 import { ResponsiveLine } from '@nivo/line'
 
-export default ({ data, legendX='',legendY='', height = 300, colors }) => (
+export default ({ legendX='',legendY='', height = 300 ,...props}) => (
   <div style={{ height }}>
     <ResponsiveLine
-      data={data}
       margin={{ top: 50, right: 50, bottom: 50, left: 60 }}
       xScale={{ type: 'point' }}
       yScale={{ type: 'linear', stacked: true, min: 'auto', max: 'auto' }}
@@ -28,7 +27,6 @@ export default ({ data, legendX='',legendY='', height = 300, colors }) => (
         legendOffset: -40,
         legendPosition: 'middle',
       }}
-      colors={colors}
       pointSize={10}
       pointColor={{ theme: 'background' }}
       pointBorderWidth={2}
@@ -53,6 +51,7 @@ export default ({ data, legendX='',legendY='', height = 300, colors }) => (
           symbolBorderColor: 'rgba(0, 0, 0, .5)',
         },
       ]}
+      {...props}
     />
   </div>
 )

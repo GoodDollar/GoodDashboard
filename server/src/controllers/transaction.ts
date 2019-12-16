@@ -84,7 +84,7 @@ const getCountPerDay = async (req: Request, res: Response, next: NextFunction) =
 
 const getAmountPerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await AboutTransactionProvider.getAll();
+    let data = await AboutTransactionProvider.getAll(0,req.query.limit && parseInt(req.query.limit));
     data = prepareDataForGraph(data, "amount_txs");
     return res.status(200).json({
       responseCode: 200,
@@ -113,7 +113,7 @@ const prepareDataForGraph = (data: any, yField: string, transform: (value: any) 
 
 const getAvgAmountPerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await AboutTransactionProvider.getAll();
+    let data = await AboutTransactionProvider.getAll(0, req.query.limit && parseInt(req.query.limit));
     let result = [];
     for (let i in data) {
       let item = data[i];

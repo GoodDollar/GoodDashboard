@@ -38,31 +38,6 @@ import {
 } from 'hooks/api'
 import priceFormat from '../../utils/priceFormat'
 
-// const dataTxLine = [
-//   {
-//     id: "Count of transaction",
-//     data: [...Array(10)].map((v, index) => ({
-//       x: `2019-11-${index + 1}`,
-//       y: (Math.random() + 1) * 100,
-//     })),
-//   },
-// ]
-// const dataLine = [
-//   {
-//     id: "Average amount",
-//     data: [...Array(10)].map((v, index) => ({
-//       x: `2019-11-${index + 1}`,
-//       y: (Math.random() + 1) * 100,
-//     })),
-//   },
-//   {
-//     id: "Total amount",
-//     data: [...Array(10)].map((v, index) => ({
-//       x: `2019-11-${index + 1}`,
-//       y: (Math.random() + 1) * 100,
-//     })),
-//   },
-// ]
 const useStyles = makeStyles(styles)
 
 const prepareHistogramData = (walletDistributionHistogram) => {
@@ -92,11 +67,11 @@ export default function Dashboard() {
   const [transactionDailyAverage, transactionDailyAverageLoading] = useGetTransactionDailyAverage()
 
   // per day
-  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay()
-  const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay()
+  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([],20)
+  const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay([],20)
 
-  const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay()
-  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay()
+  const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([],20)
+  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([],20)
 
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
@@ -146,12 +121,10 @@ export default function Dashboard() {
               </CardIcon>
               <p className={classes.cardCategory}>General</p>
               <Success>
-                Total G$:
-                <Balance amount={GDTotal} fromCents/>
+                Total: <Balance amount={GDTotal} fromCents/>
               </Success>
               <Success>
-                G$ in OTPL:
-                <Balance amount={GDInEscrow} fromCents/>
+                OTPL: <Balance amount={GDInEscrow} fromCents/>
               </Success>
             </CardHeader>
             <CardFooter stats>
@@ -264,7 +237,25 @@ export default function Dashboard() {
                 </GridItem>
               )}
               {!(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
-                <Line data={transactionAmountPerDayData} height={400} legendY={'G$'} colors={['#fb8c00','#43a047']}/>
+                <Line
+                  data={transactionAmountPerDayData}
+                  height={400}
+                  legendY={'G$'}
+                  colors={['#fb8c00','#43a047']}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 2 days',
+                    legend: 'time scale',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  yFormat={v=>`G$ ${priceFormat(v)}`}
+                />
               )}
             </CardBody>
           </Card>
@@ -281,7 +272,23 @@ export default function Dashboard() {
                 </GridItem>
               )}
               {!(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
-                <Line data={transactionCountPerDayData} height={400} legendY={'Count'} colors={['#fb8c00','#43a047']}/>
+                <Line
+                  data={transactionCountPerDayData}
+                  height={400} legendY={'Count'}
+                  colors={['#fb8c00','#43a047']}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 2 days',
+                    legend: 'time scale',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                />
               )}
             </CardBody>
           </Card>
