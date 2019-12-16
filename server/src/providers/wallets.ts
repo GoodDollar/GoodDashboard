@@ -103,6 +103,29 @@ class Wallets {
   }
 
   /**
+   * Return min max field
+   *
+   * @param {string} field
+   * @param {number} percent
+   */
+  async getCustomMinMaxField(field: string, percent= 0.05) {
+    const total = await this.model.count()
+    const minMax = await this.model.aggregate([
+      {$sort: { [field]: 1 }},
+      {$skip: parseInt(String(total * percent))},
+      {$limit: parseInt(String(total * (1-percent * 2)))},
+      {
+        $group: {
+          _id: null,
+          max: { $max: '$' + field },
+          min: { $min: '$' + field },
+        },
+      },
+    ])
+    return { max: minMax[0].max, min: minMax[0].min }
+  }
+
+  /**
    *  get Top Low Medium By Field
    * @param field
    */
@@ -157,14 +180,26 @@ class Wallets {
 
   async getDistributionHistogramByField(field: string, step: number = 5) {
     let result: any = {}
+    const minMaxForStep = await this.getCustomMinMaxField(field,0.05)
     const minMax = await this.getMinMaxField(field)
-    const stepAmount = Math.ceil((minMax.max - minMax.min) / step)
+    const stepAmount = Math.ceil((minMaxForStep.max - minMaxForStep.min) / step)
 
     for (let j = 0; j < step; j++) {
-      let minStep: number = stepAmount * j + minMax.min
-      let maxStep: number = stepAmount * j + stepAmount + minMax.min
+      let minStep: number = stepAmount * j + minMaxForStep.min
+      let maxStep: number = stepAmount * j + stepAmount + minMaxForStep.min
       let key = `${minStep}-${maxStep}`
-      result[key] = await this.model.count({ [field]: { $gt: minStep, $lte: maxStep } })
+      const filter = {
+        [field]:{ $gt: minStep, $lte: maxStep }
+      }
+      if(j===0){
+        filter[field] = { $lte: maxStep }
+        key = `${minMax.min}-${maxStep}`
+      }else if(j>=step-1){
+        filter[field] = { $gt: minStep }
+        key = `${minStep}-${minMax.max}`
+      }
+
+      result[key] = await this.model.count(filter)
     }
 
     return result

@@ -2,7 +2,7 @@ import React from 'react'
 import { Pie } from '@nivo/pie'
 
 const commonProperties = {
-  width: 400,
+  width: 550,
   height: 400,
   animate: true,
   fit: true,
@@ -15,10 +15,10 @@ const commonProperties = {
   innerRadius:0.5,
   cornerRadius:2,
   margin: {
-    top: 30,
-    bottom: 30,
-    left: 30,
-    right: 30,
+    top: 60,
+    bottom: 60,
+    left: 150,
+    right: 150,
   },
 }
 
