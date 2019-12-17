@@ -155,6 +155,7 @@ export class blockchain {
       this.updateOTPLEvents(blockNumber).catch(e => log.error('otpl events failed', e.message, e)),
     ])
     await propertyProvider.set('lastBlock', +blockNumber)
+    this.lastBlock = +blockNumber
     await this.amplitude.sendBatch()
     await this.ipfslog.persist()
   }
