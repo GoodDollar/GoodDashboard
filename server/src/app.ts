@@ -20,14 +20,15 @@ app.use((req, res) => res.sendFile(path.join(__dirname, '..', '..', 'client', 'b
 // Express configuration
 app.set('port', process.env.PORT || 3055)
 
+if (conf.env === 'production') {
+  Blockchain.updateData()
+  if (Blockchain.ready) {
+    setInterval(() => {
+      console.log('********Start update data**************')
+      Blockchain.updateData()
+    },  conf.timeUpdate);
 
-Blockchain.updateData()
-if (Blockchain.ready) {
-  setInterval(() => {
-    console.log('********Start update data**************')
-    Blockchain.updateData()
-  },  conf.timeUpdate);
-
+  }
 }
 
 export default app
