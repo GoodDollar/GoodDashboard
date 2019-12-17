@@ -33,7 +33,7 @@ const getCSV = async (req: Request, res: Response, next: NextFunction) => {
     const data = await surveyProvider.getAll(-1)
     if (data) {
       for(let i in data) {
-        bodyFile += `${data[i].date},${data[i].amount},${data[i].survey},${data[i].reason},${data[i].hash}\n`
+        bodyFile += `${data[i].date},${data[i].amount/100},${data[i].survey},${data[i].reason},${data[i].hash}\n`
       }
     }
     res.statusCode = 200;
