@@ -109,7 +109,7 @@ export default function TableList() {
               tableHeaderColor="primary"
               tableHead={["Date", "Amount", "Survey", "Reason", "Hash"]}
               tableData={[
-                ...rows.map(i => [i.date, <Balance amount={i.amount} />, i.survey, i.reason, i.hash])
+                ...rows.map(i => [i.date, <Balance amount={i.amount} fromCents/>, i.survey, i.reason, i.hash])
               ]}
             />
             <TablePagination

@@ -2,14 +2,32 @@ import React from 'react'
 import { Pie } from '@nivo/pie'
 
 const commonProperties = {
-  width: 400,
+  width: 550,
   height: 400,
-  margin: { top: 30, right: 30, bottom: 30, left: 30 },
-  animate: true
+  animate: true,
+  fit: true,
+  enableRadialLabels: true,
+  enableSlicesLabels: true,
+  slicesLabelsSkipAngle: 8,
+  radialLabelsTextColor: 'inherit',
+  radialLabelsSkipAngle: 8,
+  padAngle:1,
+  innerRadius:0.5,
+  cornerRadius:2,
+  margin: {
+    top: 60,
+    bottom: 60,
+    left: 150,
+    right: 150,
+  },
 }
+
 
 export default (props) => {
   return (
-    <Pie {...commonProperties} {...props} />
+    <Pie
+      {...commonProperties}
+      {...props}
+    />
   )
 }

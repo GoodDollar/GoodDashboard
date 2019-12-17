@@ -12,6 +12,13 @@ import styles from "assets/jss/material-dashboard-react/components/tableStyle.js
 
 const useStyles = makeStyles(styles);
 
+const getAdditionalClasses = (props, prop, key,classes) => {
+  let lastColumnClass
+  if(key===(prop.length-1)) {
+    lastColumnClass = props.lastColumnClass
+  }
+  return classes[lastColumnClass]
+}
 export default function CustomTable(props) {
   const classes = useStyles();
   const { tableHead, tableData, tableHeaderColor } = props;
@@ -24,7 +31,7 @@ export default function CustomTable(props) {
               {tableHead.map((prop, key) => {
                 return (
                   <TableCell
-                    className={classes.tableCell + " " + classes.tableHeadCell}
+                    className={[classes.tableCell, classes.tableHeadCell, getAdditionalClasses(props,tableHead,key,classes)]}
                     key={key}
                   >
                     {prop}
@@ -38,10 +45,10 @@ export default function CustomTable(props) {
           {tableData.map((prop, key) => {
             return (
               <TableRow key={key} className={classes.tableBodyRow}>
-                {prop.map((prop, key) => {
+                {prop.map((propValue, key) => {
                   return (
-                    <TableCell className={classes.tableCell} key={key}>
-                      {prop}
+                    <TableCell className={[classes.tableCell,getAdditionalClasses(props,prop,key,classes)]} key={key}>
+                      {propValue}
                     </TableCell>
                   );
                 })}
