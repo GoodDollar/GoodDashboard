@@ -1,0 +1,1 @@
+export const CURRENCY_GD='CURRENCY_GD'

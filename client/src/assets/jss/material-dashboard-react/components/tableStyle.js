@@ -53,6 +53,9 @@ const tableStyle = theme => ({
     verticalAlign: "middle",
     fontSize: "0.8125rem"
   },
+  tableCellRight: {
+    textAlign: "right"
+  },
   tableResponsive: {
     width: "100%",
     marginTop: theme.spacing(3),

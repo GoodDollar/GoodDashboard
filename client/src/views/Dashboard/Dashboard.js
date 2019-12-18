@@ -1,265 +1,420 @@
-import React from "react";
-// react plugin for creating charts
-import ChartistGraph from "react-chartist";
-// @material-ui/core
-import { makeStyles } from "@material-ui/core/styles";
-import Icon from "@material-ui/core/Icon";
-// @material-ui/icons
-import Store from "@material-ui/icons/Store";
-import Warning from "@material-ui/icons/Warning";
-import DateRange from "@material-ui/icons/DateRange";
-import LocalOffer from "@material-ui/icons/LocalOffer";
-import Update from "@material-ui/icons/Update";
-import ArrowUpward from "@material-ui/icons/ArrowUpward";
-import AccessTime from "@material-ui/icons/AccessTime";
-import Accessibility from "@material-ui/icons/Accessibility";
-import BugReport from "@material-ui/icons/BugReport";
-import Code from "@material-ui/icons/Code";
-import Cloud from "@material-ui/icons/Cloud";
-// core components
-import GridItem from "components/Grid/GridItem.js";
-import GridContainer from "components/Grid/GridContainer.js";
-import Table from "components/Table/Table.js";
-import Tasks from "components/Tasks/Tasks.js";
-import CustomTabs from "components/CustomTabs/CustomTabs.js";
-import Danger from "components/Typography/Danger.js";
-import Card from "components/Card/Card.js";
-import CardHeader from "components/Card/CardHeader.js";
-import CardIcon from "components/Card/CardIcon.js";
-import CardBody from "components/Card/CardBody.js";
-import CardFooter from "components/Card/CardFooter.js";
-
-import { bugs, website, server } from "variables/general.js";
-
+import React, { useEffect, useState } from 'react'
+import { makeStyles } from '@material-ui/core/styles'
+import CircularProgress from '@material-ui/core/CircularProgress'
+import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
+import DataUsageIcon from "@material-ui/icons/DataUsage"
+import ReceiptIcon from '@material-ui/icons/Receipt'
+import EqualizerIcon from '@material-ui/icons/Equalizer'
+import Warning from 'components/Typography/Warning'
+import Success from 'components/Typography/Success'
+import GridItem from 'components/Grid/GridItem'
+import GridContainer from 'components/Grid/GridContainer'
+import Table from 'components/Table/Table'
+import Card from 'components/Card/Card'
+import CardHeader from 'components/Card/CardHeader'
+import CardBody from 'components/Card/CardBody'
+import CardIcon from 'components/Card/CardIcon.js'
+import CardFooter from 'components/Card/CardFooter.js'
+import Pie from 'components/Charts/Pie'
+import Line from 'components/Charts/Line'
+import Balance from 'components/Balance'
+import styles from 'assets/jss/material-dashboard-react/views/dashboardStyle'
 import {
-  dailySalesChart,
-  emailsSubscriptionChart,
-  completedTasksChart
-} from "variables/charts.js";
+  useGetGDInEscrow,
+  useGetGDTotal,
+  useGetTransactionAmountPerDay,
+  useGetTransactionCountPerDay,
+  useGetTransactionDailyAverage,
+  useGetTransactionSumAmountPerDay,
+  useGetTransactionTotal,
+  useGetTransactionTotalAmount,
+  useGetTransactionUniquePerDay,
+  useTransactionDistributionHistogram,
+  useTransactionTopAccounts,
+  useTransactionTopMedianLow,
+  useWalletDistributionHistogram,
+  useWalletTopAccounts,
+  useWalletTopMedianLow,
+} from 'hooks/api'
+import priceFormat from '../../utils/priceFormat'
 
-import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
+const useStyles = makeStyles(styles)
 
-const useStyles = makeStyles(styles);
+const prepareHistogramBalanceData = histogram => Object.keys(histogram).map((key) => {
+  const label = `${key.split('-').map(v => priceFormat(v / 100)).join('-')} G$`
+  return ({
+    id: label,
+    label,
+    value: histogram[key],
+  })
+})
+
+const prepareHistogramTransactionData = histogram => Object.keys(histogram).map((key) => ({
+  id: key,
+  label: key,
+  value: histogram[key],
+}))
 
 export default function Dashboard() {
-  const classes = useStyles();
+  // wallet
+  const [walletTopAccounts = [], walletTopAccountsLoading] = useWalletTopAccounts()
+  const [walletTopMedianLow = {}, walletTopMedianLowLoading] = useWalletTopMedianLow()
+  const [walletDistributionHistogram = {}, walletDistributionHistogramLoading] = useWalletDistributionHistogram()
+
+  // transactions
+  const [transactionTopAccounts = [], transactionTopAccountsLoading] = useTransactionTopAccounts()
+  const [transactionTopMedianLow = {}, transactionTopMedianLowLoading] = useTransactionTopMedianLow()
+  const [transactionDistributionHistogram = {}, transactionDistributionHistogramLoading] = useTransactionDistributionHistogram()
+  const [transactionTotal, transactionTotalLoading] = useGetTransactionTotal()
+  const [transactionTotalAmount, transactionTotalAmountLoading] = useGetTransactionTotalAmount()
+  const [transactionDailyAverage, transactionDailyAverageLoading] = useGetTransactionDailyAverage()
+
+  // per day
+  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([], 20)
+  const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay([], 20)
+
+  const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], 20)
+  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], 20)
+
+  const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
+  const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
+  useEffect(() => {
+    if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0) {
+      setTransactionAmountPerDayData([
+        {
+          id: 'Average amount',
+          data: transactionAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
+        },
+        {
+          id: 'Total amount',
+          data: transactionSumAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
+        },
+      ])
+    }
+  }, [transactionAmountPerDay, transactionSumAmountPerDay])
+
+  useEffect(() => {
+    if (transactionCountPerDay.length > 0 && transactionUniquePerDay.length > 0) {
+      setTransactionCountPerDayData([
+        {
+          id: 'Unique users',
+          data: transactionUniquePerDay,
+        },
+        {
+          id: 'Transactions',
+          data: transactionCountPerDay,
+        },
+
+      ])
+    }
+  }, [transactionCountPerDay, transactionUniquePerDay])
+  // gd
+  const [GDTotal] = useGetGDTotal()
+  const [GDInEscrow] = useGetGDInEscrow()
+
+  const classes = useStyles()
   return (
     <div>
       <GridContainer>
-        <GridItem xs={12} sm={6} md={3}>
-          <Card>
-            <CardHeader color="warning" stats icon>
-              <CardIcon color="warning">
-                <Icon>content_copy</Icon>
-              </CardIcon>
-              <p className={classes.cardCategory}>Used Space</p>
-              <h3 className={classes.cardTitle}>
-                49/50 <small>GB</small>
-              </h3>
-            </CardHeader>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                <Danger>
-                  <Warning />
-                </Danger>
-                <a href="#pablo" onClick={e => e.preventDefault()}>
-                  Get more space
-                </a>
-              </div>
-            </CardFooter>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} sm={6} md={3}>
+        <GridItem xs={12} md={6} lg={3}>
           <Card>
             <CardHeader color="success" stats icon>
               <CardIcon color="success">
-                <Store />
+                <DataUsageIcon/>
               </CardIcon>
-              <p className={classes.cardCategory}>Revenue</p>
-              <h3 className={classes.cardTitle}>$34,245</h3>
+              <p className={classes.cardCategory}>General</p>
+              <Success>
+                GD in circulation: <Balance amount={GDTotal} fromCents/>
+              </Success>
+              <Success>
+                GD held in escrow: <Balance amount={GDInEscrow} fromCents/>
+              </Success>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
-                <DateRange />
-                Last 24 Hours
+                GD in circulation, GD held in escrow
               </div>
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} sm={6} md={3}>
+        <GridItem xs={12} md={6} lg={3}>
           <Card>
-            <CardHeader color="danger" stats icon>
-              <CardIcon color="danger">
-                <Icon>info_outline</Icon>
+            <CardHeader color="success" stats icon>
+              <CardIcon color="success">
+                <AccountBalanceWalletIcon/>
               </CardIcon>
-              <p className={classes.cardCategory}>Fixed Issues</p>
-              <h3 className={classes.cardTitle}>75</h3>
+              <p className={classes.cardCategory}>User Accounts Balance</p>
+              <Success>
+                Top: {!walletTopMedianLowLoading && (
+                <Balance amount={walletTopMedianLow.top} fromCents/>
+              )}
+              </Success>
+              <Success>
+                Median: {!walletTopMedianLowLoading && (
+                <Balance amount={walletTopMedianLow.median} fromCents/>
+              )}
+              </Success>
+              <Success>
+                Average: {!walletTopMedianLowLoading && (
+                <Balance amount={walletTopMedianLow.avg} fromCents/>
+              )}
+              </Success>
+              <Success>
+                Low: {!walletTopMedianLowLoading && (
+                <Balance amount={walletTopMedianLow.low} fromCents/>
+              )}
+              </Success>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
-                <LocalOffer />
-                Tracked from Github
+                User Accounts Balance (top, median, average, low)
               </div>
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} sm={6} md={3}>
+        <GridItem xs={12} md={6} lg={3}>
           <Card>
-            <CardHeader color="info" stats icon>
-              <CardIcon color="info">
-                <Accessibility />
+            <CardHeader color="warning" stats icon className={classes.cardHeader}>
+              <CardIcon color="warning">
+                <ReceiptIcon/>
               </CardIcon>
-              <p className={classes.cardCategory}>Followers</p>
-              <h3 className={classes.cardTitle}>+245</h3>
+              <p className={classes.cardCategory}>User Transactions</p>
+              <Warning>
+                Top: {!transactionTopMedianLowLoading && transactionTopMedianLow.top}
+              </Warning>
+              <Warning>
+                Median: {!transactionTopMedianLowLoading && transactionTopMedianLow.median}
+              </Warning>
+              <Warning>
+                Average: {!transactionTopMedianLowLoading && priceFormat(transactionTopMedianLow.avg)}
+              </Warning>
+              <Warning>
+                Low: {!transactionTopMedianLowLoading && transactionTopMedianLow.low}
+              </Warning>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
-                <Update />
-                Just Updated
+                User Transactions (top, median, average, low)
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} md={6} lg={3}>
+          <Card>
+            <CardHeader color="warning" stats icon>
+              <CardIcon color="warning">
+                <EqualizerIcon/>
+              </CardIcon>
+              <p className={classes.cardCategory}>Transactions</p>
+              <Warning>
+                Total: {!transactionTotalLoading && transactionTotal}
+              </Warning>
+              <Warning>
+                Total Amount: {!transactionTotalAmountLoading && transactionTotalAmount &&
+              <Balance amount={transactionTotalAmount} fromCents/>}
+              </Warning>
+              <Warning>
+                Average Daily TXs: {!transactionDailyAverageLoading && transactionDailyAverage &&
+              priceFormat(transactionDailyAverage)}
+              </Warning>
+              <Warning>
+                &nbsp;
+              </Warning>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Transactions (total, total amount, Average Daily TXs)
               </div>
             </CardFooter>
           </Card>
         </GridItem>
       </GridContainer>
       <GridContainer>
-        <GridItem xs={12} sm={12} md={4}>
-          <Card chart>
+        <GridItem xs={12} lg={6}>
+          <Card>
             <CardHeader color="success">
-              <ChartistGraph
-                className="ct-chart"
-                data={dailySalesChart.data}
-                type="Line"
-                options={dailySalesChart.options}
-                listener={dailySalesChart.animation}
-              />
+              <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
             </CardHeader>
             <CardBody>
-              <h4 className={classes.cardTitle}>Daily Sales</h4>
-              <p className={classes.cardCategory}>
-                <span className={classes.successText}>
-                  <ArrowUpward className={classes.upArrowCardCategory} /> 55%
-                </span>{" "}
-                increase in today sales.
-              </p>
+              {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
+                <Line
+                  data={transactionAmountPerDayData}
+                  height={400}
+                  legendY={'G$'}
+                  colors={['#fb8c00', '#43a047']}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  yFormat={v => `G$ ${priceFormat(v)}`}
+                />
+              )}
             </CardBody>
-            <CardFooter chart>
+            <CardFooter stats>
               <div className={classes.stats}>
-                <AccessTime /> updated 4 minutes ago
+                Chart shows total volume and average amount of transactions per day
               </div>
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} sm={12} md={4}>
-          <Card chart>
+        <GridItem xs={12} lg={6}>
+          <Card>
             <CardHeader color="warning">
-              <ChartistGraph
-                className="ct-chart"
-                data={emailsSubscriptionChart.data}
-                type="Bar"
-                options={emailsSubscriptionChart.options}
-                responsiveOptions={emailsSubscriptionChart.responsiveOptions}
-                listener={emailsSubscriptionChart.animation}
-              />
+              <h4 className={classes.cardTitleWhite}>Daily count of transactions</h4>
             </CardHeader>
             <CardBody>
-              <h4 className={classes.cardTitle}>Email Subscriptions</h4>
-              <p className={classes.cardCategory}>Last Campaign Performance</p>
+              {(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
+                <Line
+                  data={transactionCountPerDayData}
+                  height={400} legendY={'Count'}
+                  colors={['#fb8c00', '#43a047']}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                />
+              )}
             </CardBody>
-            <CardFooter chart>
+            <CardFooter stats>
               <div className={classes.stats}>
-                <AccessTime /> campaign sent 2 days ago
-              </div>
-            </CardFooter>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} sm={12} md={4}>
-          <Card chart>
-            <CardHeader color="danger">
-              <ChartistGraph
-                className="ct-chart"
-                data={completedTasksChart.data}
-                type="Line"
-                options={completedTasksChart.options}
-                listener={completedTasksChart.animation}
-              />
-            </CardHeader>
-            <CardBody>
-              <h4 className={classes.cardTitle}>Completed Tasks</h4>
-              <p className={classes.cardCategory}>Last Campaign Performance</p>
-            </CardBody>
-            <CardFooter chart>
-              <div className={classes.stats}>
-                <AccessTime /> campaign sent 2 days ago
+                Chart shows number of transactions and number of unique users per day
               </div>
             </CardFooter>
           </Card>
         </GridItem>
       </GridContainer>
       <GridContainer>
-        <GridItem xs={12} sm={12} md={6}>
-          <CustomTabs
-            title="Tasks:"
-            headerColor="primary"
-            tabs={[
-              {
-                tabName: "Bugs",
-                tabIcon: BugReport,
-                tabContent: (
-                  <Tasks
-                    checkedIndexes={[0, 3]}
-                    tasksIndexes={[0, 1, 2, 3]}
-                    tasks={bugs}
-                  />
-                )
-              },
-              {
-                tabName: "Website",
-                tabIcon: Code,
-                tabContent: (
-                  <Tasks
-                    checkedIndexes={[0]}
-                    tasksIndexes={[0, 1]}
-                    tasks={website}
-                  />
-                )
-              },
-              {
-                tabName: "Server",
-                tabIcon: Cloud,
-                tabContent: (
-                  <Tasks
-                    checkedIndexes={[1]}
-                    tasksIndexes={[0, 1, 2]}
-                    tasks={server}
-                  />
-                )
-              }
-            ]}
-          />
-        </GridItem>
-        <GridItem xs={12} sm={12} md={6}>
+        <GridItem xs={12} lg={6}>
           <Card>
-            <CardHeader color="warning">
-              <h4 className={classes.cardTitleWhite}>Employees Stats</h4>
-              <p className={classes.cardCategoryWhite}>
-                New employees on 15th September, 2016
-              </p>
+            <CardHeader color="success">
+              <h4 className={classes.cardTitleWhite}>Distributions (Balances)</h4>
             </CardHeader>
             <CardBody>
-              <Table
-                tableHeaderColor="warning"
-                tableHead={["ID", "Name", "Salary", "Country"]}
-                tableData={[
-                  ["1", "Dakota Rice", "$36,738", "Niger"],
-                  ["2", "Minerva Hooper", "$23,789", "Curaçao"],
-                  ["3", "Sage Rodriguez", "$56,142", "Netherlands"],
-                  ["4", "Philip Chaney", "$38,735", "Korea, South"]
-                ]}
-              />
+              <GridItem container xs={12} justify="center">
+                {walletDistributionHistogramLoading && (
+                  <CircularProgress/>
+                )}
+                {!walletDistributionHistogramLoading && (
+                  <Pie
+                    data={prepareHistogramBalanceData(walletDistributionHistogram)}
+                  />
+                )}
+              </GridItem>
             </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                The diagram shows how many users have a specific range of balance
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} lg={6}>
+          <Card>
+            <CardHeader color="warning">
+              <h4 className={classes.cardTitleWhite}>Distributions (Transactions)</h4>
+            </CardHeader>
+            <CardBody>
+              <GridItem container xs={12} justify="center">
+                {transactionDistributionHistogramLoading && (
+                  <CircularProgress/>
+                )}
+                {!transactionDistributionHistogramLoading && (
+                  <Pie
+                    data={prepareHistogramTransactionData(transactionDistributionHistogram)}
+                  />
+                )}
+              </GridItem>
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                The diagram shows how many users did a specific range of transactions
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+      </GridContainer>
+      <GridContainer>
+        <GridItem xs={12} lg={6}>
+          <Card>
+            <CardHeader color="success">
+              <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Balances)</h4>
+            </CardHeader>
+            <CardBody>
+              {walletTopAccountsLoading && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!walletTopAccountsLoading && walletTopAccounts && (
+                <Table
+                  tableHeaderColor="success"
+                  tableHead={['#', 'Address', 'Balance']}
+                  lastColumnClass={'tableCellRight'}
+                  tableData={walletTopAccounts.map(
+                    (d, index) => [String(index + 1), d.address, `${priceFormat(d.balance / 100)} G$`])}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Top 10 User accounts by balances
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} lg={6}>
+          <Card>
+            <CardHeader color="warning">
+              <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Transactions)</h4>
+            </CardHeader>
+            <CardBody>
+              {transactionTopAccountsLoading && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!transactionTopAccountsLoading && transactionTopAccounts && (
+                <Table
+                  tableHeaderColor="warning"
+                  tableHead={['#', 'Address', 'Count']}
+                  lastColumnClass={'tableCellRight'}
+                  tableData={transactionTopAccounts.map(
+                    (d, index) => [String(index + 1), d.address, String(d.countTx)])}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Top 10 User accounts by number of transactions
+              </div>
+            </CardFooter>
           </Card>
         </GridItem>
       </GridContainer>
     </div>
-  );
+  )
 }
