@@ -1,5 +1,6 @@
 import React from 'react'
 import { Pie } from '@nivo/pie'
+import { COLORS } from '../../../constants'
 
 const commonProperties = {
   width: 550,
@@ -20,6 +21,7 @@ const commonProperties = {
     left: 150,
     right: 150,
   },
+  colors: COLORS
 }
 
 

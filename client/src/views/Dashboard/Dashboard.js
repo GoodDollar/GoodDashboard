@@ -5,8 +5,8 @@ import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
 import DataUsageIcon from "@material-ui/icons/DataUsage"
 import ReceiptIcon from '@material-ui/icons/Receipt'
 import EqualizerIcon from '@material-ui/icons/Equalizer'
-import Warning from 'components/Typography/Warning'
 import Success from 'components/Typography/Success'
+import Primary from 'components/Typography/Primary'
 import GridItem from 'components/Grid/GridItem'
 import GridContainer from 'components/Grid/GridContainer'
 import Table from 'components/Table/Table'
@@ -42,7 +42,7 @@ import priceFormat from '../../utils/priceFormat'
 const useStyles = makeStyles(styles)
 
 const prepareHistogramBalanceData = histogram => Object.keys(histogram).map((key) => {
-  const label = `${key.split('-').map(v => priceFormat(v / 100)).join('-')} G$`
+  const label = `${key.split('-').map(v => priceFormat(v / 100,0)).join('-')} G$`
   return ({
     id: label,
     label,
@@ -117,11 +117,17 @@ export default function Dashboard() {
       setClaimPerDayData([
         {
           id: 'Transactions',
-          data: claimPerDay,
+          data: claimPerDay.map(v=>({
+            x: v.date,
+            y: v.count_txs
+          })),
         },
         {
           id: 'Total amount',
-          data: claimPerDay,
+          data: claimPerDay.map(v=>({
+            x: v.date,
+            y: v.total_amount_txs/100
+          })),
         },
 
       ])
@@ -137,17 +143,17 @@ export default function Dashboard() {
       <GridContainer>
         <GridItem xs={12} md={6} lg={3}>
           <Card>
-            <CardHeader color="success" stats icon>
-              <CardIcon color="success">
+            <CardHeader color="primary" stats icon>
+              <CardIcon color="primary">
                 <DataUsageIcon/>
               </CardIcon>
               <p className={classes.cardCategory}>General</p>
-              <Success>
+              <Primary>
                 GD in circulation: <Balance amount={GDTotal} fromCents/>
-              </Success>
-              <Success>
+              </Primary>
+              <Primary>
                 GD held in escrow: <Balance amount={GDInEscrow} fromCents/>
-              </Success>
+              </Primary>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
@@ -158,31 +164,31 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} md={6} lg={3}>
           <Card>
-            <CardHeader color="success" stats icon>
-              <CardIcon color="success">
+            <CardHeader color="primary" stats icon>
+              <CardIcon color="primary">
                 <AccountBalanceWalletIcon/>
               </CardIcon>
               <p className={classes.cardCategory}>User Accounts Balance</p>
-              <Success>
+              <Primary>
                 Top: {!walletTopMedianLowLoading && (
                 <Balance amount={walletTopMedianLow.top} fromCents/>
               )}
-              </Success>
-              <Success>
+              </Primary>
+              <Primary>
                 Median: {!walletTopMedianLowLoading && (
                 <Balance amount={walletTopMedianLow.median} fromCents/>
               )}
-              </Success>
-              <Success>
+              </Primary>
+              <Primary>
                 Average: {!walletTopMedianLowLoading && (
                 <Balance amount={walletTopMedianLow.avg} fromCents/>
               )}
-              </Success>
-              <Success>
+              </Primary>
+              <Primary>
                 Low: {!walletTopMedianLowLoading && (
                 <Balance amount={walletTopMedianLow.low} fromCents/>
               )}
-              </Success>
+              </Primary>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
@@ -193,23 +199,23 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} md={6} lg={3}>
           <Card>
-            <CardHeader color="warning" stats icon className={classes.cardHeader}>
-              <CardIcon color="warning">
+            <CardHeader color="success" stats icon className={classes.cardHeader}>
+              <CardIcon color="success">
                 <ReceiptIcon/>
               </CardIcon>
               <p className={classes.cardCategory}>User Transactions</p>
-              <Warning>
+              <Success>
                 Top: {!transactionTopMedianLowLoading && transactionTopMedianLow.top}
-              </Warning>
-              <Warning>
+              </Success>
+              <Success>
                 Median: {!transactionTopMedianLowLoading && transactionTopMedianLow.median}
-              </Warning>
-              <Warning>
+              </Success>
+              <Success>
                 Average: {!transactionTopMedianLowLoading && priceFormat(transactionTopMedianLow.avg)}
-              </Warning>
-              <Warning>
+              </Success>
+              <Success>
                 Low: {!transactionTopMedianLowLoading && transactionTopMedianLow.low}
-              </Warning>
+              </Success>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
@@ -220,25 +226,25 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} md={6} lg={3}>
           <Card>
-            <CardHeader color="warning" stats icon>
-              <CardIcon color="warning">
+            <CardHeader color="success" stats icon>
+              <CardIcon color="success">
                 <EqualizerIcon/>
               </CardIcon>
               <p className={classes.cardCategory}>Transactions</p>
-              <Warning>
+              <Success>
                 Total: {!transactionTotalLoading && transactionTotal}
-              </Warning>
-              <Warning>
+              </Success>
+              <Success>
                 Total Amount: {!transactionTotalAmountLoading && transactionTotalAmount &&
               <Balance amount={transactionTotalAmount} fromCents/>}
-              </Warning>
-              <Warning>
+              </Success>
+              <Success>
                 Average Daily TXs: {!transactionDailyAverageLoading && transactionDailyAverage &&
               priceFormat(transactionDailyAverage)}
-              </Warning>
-              <Warning>
+              </Success>
+              <Success>
                 &nbsp;
-              </Warning>
+              </Success>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
@@ -251,7 +257,7 @@ export default function Dashboard() {
       <GridContainer>
         <GridItem xs={12} lg={12}>
           <Card>
-            <CardHeader color="success">
+            <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Daily G$ claim</h4>
             </CardHeader>
             <CardBody>
@@ -265,7 +271,6 @@ export default function Dashboard() {
                   data={claimPerDayData}
                   height={400}
                   legendY={'G$'}
-                  colors={['#fb8c00', '#43a047']}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
@@ -292,7 +297,7 @@ export default function Dashboard() {
       <GridContainer>
         <GridItem xs={12} lg={6}>
           <Card>
-            <CardHeader color="success">
+            <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
             </CardHeader>
             <CardBody>
@@ -306,7 +311,6 @@ export default function Dashboard() {
                   data={transactionAmountPerDayData}
                   height={400}
                   legendY={'G$'}
-                  colors={['#fb8c00', '#43a047']}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
@@ -331,7 +335,7 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} lg={6}>
           <Card>
-            <CardHeader color="warning">
+            <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Daily count of transactions</h4>
             </CardHeader>
             <CardBody>
@@ -344,7 +348,6 @@ export default function Dashboard() {
                 <Line
                   data={transactionCountPerDayData}
                   height={400} legendY={'Count'}
-                  colors={['#fb8c00', '#43a047']}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
@@ -370,7 +373,7 @@ export default function Dashboard() {
       <GridContainer>
         <GridItem xs={12} lg={6}>
           <Card>
-            <CardHeader color="success">
+            <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Distributions (Balances)</h4>
             </CardHeader>
             <CardBody>
@@ -394,7 +397,7 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} lg={6}>
           <Card>
-            <CardHeader color="warning">
+            <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Distributions (Transactions)</h4>
             </CardHeader>
             <CardBody>
@@ -420,7 +423,7 @@ export default function Dashboard() {
       <GridContainer>
         <GridItem xs={12} lg={6}>
           <Card>
-            <CardHeader color="success">
+            <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Balances)</h4>
             </CardHeader>
             <CardBody>
@@ -431,7 +434,7 @@ export default function Dashboard() {
               )}
               {!walletTopAccountsLoading && walletTopAccounts && (
                 <Table
-                  tableHeaderColor="success"
+                  tableHeaderColor="primary"
                   tableHead={['#', 'Address', 'Balance']}
                   lastColumnClass={'tableCellRight'}
                   tableData={walletTopAccounts.map(
@@ -448,7 +451,7 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} lg={6}>
           <Card>
-            <CardHeader color="warning">
+            <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Transactions)</h4>
             </CardHeader>
             <CardBody>
@@ -459,7 +462,7 @@ export default function Dashboard() {
               )}
               {!transactionTopAccountsLoading && transactionTopAccounts && (
                 <Table
-                  tableHeaderColor="warning"
+                  tableHeaderColor="success"
                   tableHead={['#', 'Address', 'Count']}
                   lastColumnClass={'tableCellRight'}
                   tableData={transactionTopAccounts.map(
