@@ -190,17 +190,17 @@ class Wallets {
     for (let j = 0; j < step; j++) {
       let minStep: number = stepAmount * j + minMaxForStepCeil
       let maxStep: number = stepAmount * j + stepAmount + minMaxForStepCeil
-      let key = `${minStep}-${maxStep}`
+      let key = `${ceilFunc(minStep+1)}-${maxStep}`
 
       const filter = {
         [field]:{ $gt: minStep, $lte: maxStep }
       }
       if (j===0) {
         filter[field] = { $gt: 0, $lte: maxStep }
-        key = `${min}-${maxStep}`
+        key = `${ceilFunc(min+1)}-${maxStep}`
       } else if (j>=step-1) {
         filter[field] = { $gt: minStep, $lte: max }
-        key = `${minStep}-${max}`
+        key = `${(ceilFunc(minStep+1)}-${max}`
       }
 
       result[key] = await this.model.count(filter)
