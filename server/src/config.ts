@@ -61,6 +61,12 @@ const conf = convict({
     default: 5,
     env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_TRANSACTION',
   },
+  systemAccounts:{
+    doc: 'system accounts address',
+    format: Array,
+    default: [],
+    env: 'SYSTEM_ACCOUNTS',
+  },
   ethereum: {
     network_id: 42,
     httpWeb3Provider: 'https://kovan.infura.io/v3/',

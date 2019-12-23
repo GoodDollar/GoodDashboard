@@ -1,6 +1,10 @@
 import { Router } from 'express'
 import transaction from '../../controllers/transaction'
+import service from './service'
+
 const router = Router()
+
+router.use('/service', service)
 
 router.get('/total', transaction.getTotal)
 router.get('/total-amount', transaction.getTotalAmount)

@@ -183,18 +183,18 @@ class Wallets {
     const minMaxForStep = await this.getCustomMinMaxField(field,0.05)
     const minMax = await this.getMinMaxField(field)
     const stepAmount = Math.ceil((minMaxForStep.max - minMaxForStep.min) / step)
-
+    const min = Math.ceil(minMaxForStep.min)
     for (let j = 0; j < step; j++) {
-      let minStep: number = stepAmount * j + minMaxForStep.min
-      let maxStep: number = stepAmount * j + stepAmount + minMaxForStep.min
+      let minStep: number = stepAmount * j + min
+      let maxStep: number = stepAmount * j + stepAmount + min
       let key = `${minStep}-${maxStep}`
       const filter = {
         [field]:{ $gt: minStep, $lte: maxStep }
       }
-      if(j===0){
+      if (j===0) {
         filter[field] = { $gt: 0, $lte: maxStep }
         key = `${minMax.min}-${maxStep}`
-      }else if(j>=step-1){
+      } else if (j>=step-1) {
         filter[field] = { $gt: minStep, $lte: minMax.max }
         key = `${minStep}-${minMax.max}`
       }

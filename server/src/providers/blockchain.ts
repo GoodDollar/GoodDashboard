@@ -14,6 +14,7 @@ import walletsProvider from './wallets'
 import surveyProvider from './survey'
 import surveyDB from '../gun/models/survey'
 import AboutTransactionProvider from './about-transaction'
+import AboutServiceTransactionProvider from './about-service-transactions'
 import Amplitude from './amplitude'
 import IPFSLog from './ipfs'
 
@@ -57,6 +58,7 @@ export class blockchain {
     this.networkId = conf.ethereum.network_id
     this.ready = this.init()
     this.listPrivateAddress = _invert(get(ContractsAddress, `${this.network}`))
+    this.listPrivateAddress.concat(conf.systemAccounts)
     this.amplitude = new Amplitude()
     this.ipfslog = new IPFSLog()
     log.info('Starting blockchain reader:', {
@@ -219,7 +221,7 @@ export class blockchain {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
     })
-
+    let aboutClaimTXs:any = {}
     log.info('got Claim events:', allEvents.length)
 
     for (let index in allEvents) {
@@ -230,8 +232,21 @@ export class blockchain {
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
+      let timestamp = moment.unix(txTime)
+      let date = timestamp.format('YYYY-MM-DD')
 
       const amountTX = web3Utils.hexToNumber(event.returnValues.amount)
+
+      if (aboutClaimTXs.hasOwnProperty(date)) {
+        aboutClaimTXs[date].total_amount_txs += amountTX
+        aboutClaimTXs[date].count_txs += 1
+      } else {
+        aboutClaimTXs[date] = {
+          date,
+          total_amount_txs: amountTX,
+          count_txs: 1
+        }
+      }
 
       this.amplitude.logEvent({
         user_id: toAddr,
@@ -253,6 +268,8 @@ export class blockchain {
         insert_id: event.transactionHash + '_' + event.logIndex,
       })
     }
+
+    await AboutServiceTransactionProvider.updateOrSet(aboutClaimTXs)
   }
 
   async updateOTPLEvents(toBlock: number) {

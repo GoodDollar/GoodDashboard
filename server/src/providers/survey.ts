@@ -46,9 +46,9 @@ class SurveyTransaction {
    */
   async getAll(skip: number = 0, limit: number = 20) {
     if (skip === -1){
-      return this.model.find({}).sort({ date: 1 })
+      return this.model.find({}).sort({ date: -1 })
     } else {
-      return this.model.find({}).sort({ date: 1 }).skip(skip).limit(limit);
+      return this.model.find({}).sort({ date: -1 }).skip(skip).limit(limit);
     }
   }
 
