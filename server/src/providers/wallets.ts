@@ -113,7 +113,7 @@ class Wallets {
     const minMax = await this.model.aggregate([
       {$sort: { [field]: 1 }},
       {$skip: parseInt(String(total * percent))},
-      {$limit: parseInt(String(total * (1-percent * 2)))},
+      {$limit: parseInt(String(total * ( 1-percent * 2 )))},
       {
         $group: {
           _id: null,
