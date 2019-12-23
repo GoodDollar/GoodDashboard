@@ -57,8 +57,7 @@ export class blockchain {
     this.network = conf.network
     this.networkId = conf.ethereum.network_id
     this.ready = this.init()
-    this.listPrivateAddress = _invert(get(ContractsAddress, `${this.network}`))
-    this.listPrivateAddress.concat(conf.systemAccounts)
+    this.listPrivateAddress = _invert(Object.assign(get(ContractsAddress, `${this.network}`), conf.systemAccounts));
     this.amplitude = new Amplitude()
     this.ipfslog = new IPFSLog()
     log.info('Starting blockchain reader:', {
