@@ -5,6 +5,8 @@ import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
 import DataUsageIcon from "@material-ui/icons/DataUsage"
 import ReceiptIcon from '@material-ui/icons/Receipt'
 import EqualizerIcon from '@material-ui/icons/Equalizer'
+import Warning from 'components/Typography/Warning'
+import Info from 'components/Typography/Info'
 import Success from 'components/Typography/Success'
 import Primary from 'components/Typography/Primary'
 import GridItem from 'components/Grid/GridItem'
@@ -164,31 +166,31 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} md={6} lg={3}>
           <Card>
-            <CardHeader color="primary" stats icon>
-              <CardIcon color="primary">
+            <CardHeader color="warning" stats icon>
+              <CardIcon color="warning">
                 <AccountBalanceWalletIcon/>
               </CardIcon>
               <p className={classes.cardCategory}>User Accounts Balance</p>
-              <Primary>
+              <Warning>
                 Top: {!walletTopMedianLowLoading && (
                 <Balance amount={walletTopMedianLow.top} fromCents/>
               )}
-              </Primary>
-              <Primary>
+              </Warning>
+              <Warning>
                 Median: {!walletTopMedianLowLoading && (
                 <Balance amount={walletTopMedianLow.median} fromCents/>
               )}
-              </Primary>
-              <Primary>
+              </Warning>
+              <Warning>
                 Average: {!walletTopMedianLowLoading && (
                 <Balance amount={walletTopMedianLow.avg} fromCents/>
               )}
-              </Primary>
-              <Primary>
+              </Warning>
+              <Warning>
                 Low: {!walletTopMedianLowLoading && (
                 <Balance amount={walletTopMedianLow.low} fromCents/>
               )}
-              </Primary>
+              </Warning>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
@@ -199,23 +201,23 @@ export default function Dashboard() {
         </GridItem>
         <GridItem xs={12} md={6} lg={3}>
           <Card>
-            <CardHeader color="success" stats icon className={classes.cardHeader}>
-              <CardIcon color="success">
+            <CardHeader color="info" stats icon className={classes.cardHeader}>
+              <CardIcon color="info">
                 <ReceiptIcon/>
               </CardIcon>
               <p className={classes.cardCategory}>User Transactions</p>
-              <Success>
+              <Info>
                 Top: {!transactionTopMedianLowLoading && transactionTopMedianLow.top}
-              </Success>
-              <Success>
+              </Info>
+              <Info>
                 Median: {!transactionTopMedianLowLoading && transactionTopMedianLow.median}
-              </Success>
-              <Success>
+              </Info>
+              <Info>
                 Average: {!transactionTopMedianLowLoading && priceFormat(transactionTopMedianLow.avg)}
-              </Success>
-              <Success>
+              </Info>
+              <Info>
                 Low: {!transactionTopMedianLowLoading && transactionTopMedianLow.low}
-              </Success>
+              </Info>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
