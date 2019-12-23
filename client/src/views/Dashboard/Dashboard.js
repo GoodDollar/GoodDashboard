@@ -35,6 +35,7 @@ import {
   useWalletDistributionHistogram,
   useWalletTopAccounts,
   useWalletTopMedianLow,
+  useGetClaimPerDay
 } from 'hooks/api'
 import priceFormat from '../../utils/priceFormat'
 
@@ -73,11 +74,13 @@ export default function Dashboard() {
   const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([], 20)
   const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay([], 20)
 
+  const [claimPerDay = [], claimPerDayLoading] = useGetClaimPerDay([], 20)
   const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], 20)
   const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], 20)
 
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
+  const [claimPerDayData, setClaimPerDayData] = useState([])
   useEffect(() => {
     if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0) {
       setTransactionAmountPerDayData([
@@ -108,6 +111,22 @@ export default function Dashboard() {
       ])
     }
   }, [transactionCountPerDay, transactionUniquePerDay])
+
+  useEffect(() => {
+    if (claimPerDay.length > 0 && claimPerDay.length > 0) {
+      setClaimPerDayData([
+        {
+          id: 'Transactions',
+          data: claimPerDay,
+        },
+        {
+          id: 'Total amount',
+          data: claimPerDay,
+        },
+
+      ])
+    }
+  }, [claimPerDay])
   // gd
   const [GDTotal] = useGetGDTotal()
   const [GDInEscrow] = useGetGDInEscrow()
@@ -224,6 +243,47 @@ export default function Dashboard() {
             <CardFooter stats>
               <div className={classes.stats}>
                 Transactions (total, total amount, Average Daily TXs)
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+      </GridContainer>
+      <GridContainer>
+        <GridItem xs={12} lg={12}>
+          <Card>
+            <CardHeader color="success">
+              <h4 className={classes.cardTitleWhite}>Daily G$ claim</h4>
+            </CardHeader>
+            <CardBody>
+              {(claimPerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!claimPerDayLoading && (
+                <Line
+                  data={claimPerDayData}
+                  height={400}
+                  legendY={'G$'}
+                  colors={['#fb8c00', '#43a047']}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  yFormat={v => `G$ ${priceFormat(v)}`}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows total volume and number of claim transactions per day
               </div>
             </CardFooter>
           </Card>
