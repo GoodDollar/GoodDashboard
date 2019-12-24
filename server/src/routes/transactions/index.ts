@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import transaction from '../../controllers/transaction'
-import service from './service'
+import claim from './claim'
 
 const router = Router()
 
-router.use('/service', service)
+router.use('/claim', claim)
 
 router.get('/total', transaction.getTotal)
 router.get('/total-amount', transaction.getTotalAmount)

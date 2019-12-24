@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import AboutServiceTransactionProvider from "../providers/about-service-transactions";
+import AboutClaimTransactionProvider from "../providers/about-claim-transactions";
 
 const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const total = await AboutServiceTransactionProvider.getAll();
+    const total = await AboutClaimTransactionProvider.getAll();
 
     return res.status(200).json({
       responseCode: 200,

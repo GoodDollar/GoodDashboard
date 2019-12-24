@@ -115,7 +115,7 @@ export default function Dashboard() {
   }, [transactionCountPerDay, transactionUniquePerDay])
 
   useEffect(() => {
-    if (claimPerDay.length > 0 && claimPerDay.length > 0) {
+    if (claimPerDay.length > 0) {
       setClaimPerDayData([
         {
           id: 'Transactions',

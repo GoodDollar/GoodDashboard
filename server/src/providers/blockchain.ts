@@ -14,7 +14,7 @@ import walletsProvider from './wallets'
 import surveyProvider from './survey'
 import surveyDB from '../gun/models/survey'
 import AboutTransactionProvider from './about-transaction'
-import AboutServiceTransactionProvider from './about-service-transactions'
+import AboutClaimTransactionProvider from './about-claim-transactions'
 import Amplitude from './amplitude'
 import IPFSLog from './ipfs'
 
@@ -268,7 +268,7 @@ export class blockchain {
       })
     }
 
-    await AboutServiceTransactionProvider.updateOrSet(aboutClaimTXs)
+    await AboutClaimTransactionProvider.updateOrSet(aboutClaimTXs)
   }
 
   async updateOTPLEvents(toBlock: number) {
