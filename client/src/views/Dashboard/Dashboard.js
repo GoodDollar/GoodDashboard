@@ -257,47 +257,7 @@ export default function Dashboard() {
         </GridItem>
       </GridContainer>
       <GridContainer>
-        <GridItem xs={12} lg={12}>
-          <Card>
-            <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Daily G$ claim</h4>
-            </CardHeader>
-            <CardBody>
-              {(claimPerDayLoading) && (
-                <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
-                </GridItem>
-              )}
-              {!claimPerDayLoading && (
-                <Line
-                  data={claimPerDayData}
-                  height={400}
-                  legendY={'G$'}
-                  xScale={{
-                    type: 'time',
-                    format: '%Y-%m-%d',
-                    precision: 'day',
-                  }}
-                  axisBottom={{
-                    format: '%b %d',
-                    tickValues: 'every 5 days',
-                    legendOffset: -12,
-                  }}
-                  xFormat="time:%Y-%m-%d"
-                  yFormat={v => `G$ ${priceFormat(v)}`}
-                />
-              )}
-            </CardBody>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                Chart shows total volume and number of claim transactions per day
-              </div>
-            </CardFooter>
-          </Card>
-        </GridItem>
-      </GridContainer>
-      <GridContainer>
-        <GridItem xs={12} lg={6}>
+        <GridItem xs={12} md={6} lg={4}>
           <Card>
             <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
@@ -335,7 +295,7 @@ export default function Dashboard() {
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} lg={6}>
+        <GridItem xs={12} md={6} lg={4}>
           <Card>
             <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Daily count of transactions</h4>
@@ -367,6 +327,44 @@ export default function Dashboard() {
             <CardFooter stats>
               <div className={classes.stats}>
                 Chart shows number of transactions and number of unique users per day
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} md={12} lg={4}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Daily G$ claim</h4>
+            </CardHeader>
+            <CardBody>
+              {(claimPerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!claimPerDayLoading && (
+                <Line
+                  data={claimPerDayData}
+                  height={400}
+                  legendY={'G$'}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  yFormat={v => `G$ ${priceFormat(v)}`}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows total volume and number of claim transactions per day
               </div>
             </CardFooter>
           </Card>
