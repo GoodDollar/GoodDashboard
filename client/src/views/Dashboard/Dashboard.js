@@ -257,7 +257,7 @@ export default function Dashboard() {
         </GridItem>
       </GridContainer>
       <GridContainer>
-        <GridItem xs={12} md={6} lg={4}>
+        <GridItem xs={12} lg={6} xl={4}>
           <Card>
             <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
@@ -295,7 +295,7 @@ export default function Dashboard() {
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} md={6} lg={4}>
+        <GridItem xs={12} lg={6} xl={4}>
           <Card>
             <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Daily count of transactions</h4>
@@ -331,7 +331,7 @@ export default function Dashboard() {
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} md={12} lg={4}>
+        <GridItem xs={12} lg={12} xl={4}>
           <Card>
             <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Daily G$ claim</h4>
