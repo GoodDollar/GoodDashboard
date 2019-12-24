@@ -422,7 +422,7 @@ export class blockchain {
             address: fromAddr,
             outTXs: 1,
             inTXs: 0,
-            balance: await this.getAddressBalance(toAddr),
+            balance: await this.getAddressBalance(fromAddr),
             countTx: 1,
           }
         }
