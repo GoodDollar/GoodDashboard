@@ -1,5 +1,6 @@
 import React from 'react'
 import { ResponsiveLine } from '@nivo/line'
+import { COLORS } from '../../../constants'
 
 export default ({ legendX='',legendY='', height = 300 ,...props}) => (
   <div style={{ height }}>
@@ -51,6 +52,7 @@ export default ({ legendX='',legendY='', height = 300 ,...props}) => (
           symbolBorderColor: 'rgba(0, 0, 0, .5)',
         },
       ]}
+      colors={COLORS}
       {...props}
     />
   </div>

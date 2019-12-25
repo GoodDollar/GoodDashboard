@@ -42,7 +42,8 @@ const getTopAccounts = async (req: Request, res: Response, next: NextFunction) =
 const getDistributionHistogram  = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
-    const data = await walletsProvider.getDistributionHistogramByField('balance', config.stepDistributionHistogramWalletBalance)
+    const ceilFunc = (v:any) => Math.ceil(v /100)*100
+    const data = await walletsProvider.getDistributionHistogramByField('balance', config.stepDistributionHistogramWalletBalance, ceilFunc)
 
     return res.status(200).json({
       responseCode: 200,
@@ -50,7 +51,6 @@ const getDistributionHistogram  = async (req: Request, res: Response, next: Next
       success: true
     })
   }
-
   catch (error) {
     return res.status(500).json({
       message: error.message ? error.message : 'Unexpected error occure.'

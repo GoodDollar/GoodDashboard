@@ -40,6 +40,7 @@ export const useGetTransactionCountPerDay = (deps=[], ...params) => useApi(api.g
 export const useGetTransactionUniquePerDay = (deps=[], ...params) => useApi(api.getTransactionUniquePerDay, deps, params)
 export const useGetTransactionAmountPerDay = (deps=[], ...params) => useApi(api.getTransactionAmountPerDay, deps, params)
 export const useGetTransactionSumAmountPerDay = (deps=[], ...params) => useApi(api.getTransactionSumAmountPerDay, deps, params)
+export const useGetClaimPerDay = (deps=[], ...params) => useApi(api.getClaimPerDay, deps, params)
 
 // gd
 export const useGetGDTotal = (deps=[]) => useApi(api.getGDTotal, deps)
