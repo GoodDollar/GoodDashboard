@@ -40,7 +40,7 @@ import {
   useGetClaimPerDay
 } from 'hooks/api'
 import priceFormat from '../../utils/priceFormat'
-
+import TooltipUserInfo from '../UserProfile/TooltipUserInfo'
 const useStyles = makeStyles(styles)
 
 const prepareHistogramBalanceData = histogram => Object.keys(histogram).map((key) => {
@@ -438,7 +438,7 @@ export default function Dashboard() {
                   tableHead={['#', 'Address', 'Balance']}
                   lastColumnClass={'tableCellRight'}
                   tableData={walletTopAccounts.map(
-                    (d, index) => [String(index + 1), d.address, `${priceFormat(d.balance / 100)} G$`])}
+                    (d, index) => [String(index + 2), (<TooltipUserInfo hash={d.address}/>), `${priceFormat(d.balance / 100)} G$`])}
                 />
               )}
             </CardBody>
@@ -466,7 +466,7 @@ export default function Dashboard() {
                   tableHead={['#', 'Address', 'Count']}
                   lastColumnClass={'tableCellRight'}
                   tableData={transactionTopAccounts.map(
-                    (d, index) => [String(index + 1), d.address, String(d.countTx)])}
+                    (d, index) => [String(index + 1), (<TooltipUserInfo hash={d.address}/>), String(d.countTx)])}
                 />
               )}
             </CardBody>
