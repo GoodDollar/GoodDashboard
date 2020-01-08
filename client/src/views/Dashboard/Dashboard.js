@@ -12,6 +12,7 @@ import Primary from 'components/Typography/Primary'
 import GridItem from 'components/Grid/GridItem'
 import GridContainer from 'components/Grid/GridContainer'
 import Table from 'components/Table/Table'
+import SortTitle from 'components/Table/SortTitle'
 import Card from 'components/Card/Card'
 import CardHeader from 'components/Card/CardHeader'
 import CardBody from 'components/Card/CardBody'
@@ -64,8 +65,13 @@ export default function Dashboard() {
   const [walletTopMedianLow = {}, walletTopMedianLowLoading] = useWalletTopMedianLow()
   const [walletDistributionHistogram = {}, walletDistributionHistogramLoading] = useWalletDistributionHistogram()
 
+  const [transactionSort, setTransactionSort] = useState('countTx')
+  const [transactionSortDirection, setTransactionSortDirection] = useState('desc')
   // transactions
-  const [transactionTopAccounts = [], transactionTopAccountsLoading] = useTransactionTopAccounts()
+  const [transactionTopAccounts = [], transactionTopAccountsLoading] = useTransactionTopAccounts(
+    [transactionSort, transactionSortDirection],
+    {transactionSort, transactionSortDirection}
+  )
   const [transactionTopMedianLow = {}, transactionTopMedianLowLoading] = useTransactionTopMedianLow()
   const [transactionDistributionHistogram = {}, transactionDistributionHistogramLoading] = useTransactionDistributionHistogram()
   const [transactionTotal, transactionTotalLoading] = useGetTransactionTotal()
@@ -140,6 +146,12 @@ export default function Dashboard() {
   const [GDInEscrow] = useGetGDInEscrow()
 
   const classes = useStyles()
+
+  const handleSortTransaction = (field, direction) => {
+    setTransactionSort(field)
+    setTransactionSortDirection(direction)
+  }
+
   return (
     <div>
       <GridContainer>
@@ -421,7 +433,7 @@ export default function Dashboard() {
         </GridItem>
       </GridContainer>
       <GridContainer>
-        <GridItem xs={12} lg={6}>
+        <GridItem xs={12} lg={5}>
           <Card>
             <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Balances)</h4>
@@ -449,7 +461,7 @@ export default function Dashboard() {
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} lg={6}>
+        <GridItem xs={12} lg={7}>
           <Card>
             <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Transactions)</h4>
@@ -463,10 +475,19 @@ export default function Dashboard() {
               {!transactionTopAccountsLoading && transactionTopAccounts && (
                 <Table
                   tableHeaderColor="success"
-                  tableHead={['#', 'Address', 'Count']}
+                  tableHead={[
+                    '#',
+                    'Address',
+                    (<SortTitle title={"In"} onPress={handleSortTransaction}
+                                sortFieldNow={transactionSort} direction={transactionSortDirection} field={"inTXs"} />),
+                    (<SortTitle title={"Out"} onPress={handleSortTransaction}
+                                sortFieldNow={transactionSort} direction={transactionSortDirection} field={"outTXs"} />),
+                    (<SortTitle title={"Count"} onPress={handleSortTransaction}
+                                sortFieldNow={transactionSort} direction={transactionSortDirection} field={"countTx"} />)]
+                  }
                   lastColumnClass={'tableCellRight'}
                   tableData={transactionTopAccounts.map(
-                    (d, index) => [String(index + 1), (<TooltipUserInfo hash={d.address}/>), String(d.countTx)])}
+                    (d, index) => [String(index + 1), (<TooltipUserInfo hash={d.address}/>), d.inTXs ? String(d.inTXs) : 0, d.outTXs ? String(d.outTXs) : 0, String(d.countTx)])}
                 />
               )}
             </CardBody>

@@ -12,7 +12,7 @@ export default class ApiClient {
   getWalletTopAccounts = () => this.http.get('/wallets/balance/top-accounts')
   getWalletDistributionHistogram = () => this.http.get('/wallets/balance/distribution-histogram')
   getTransactionTopMedianLow = () => this.http.get('/wallets/transactions/top-low-medium-avg-balance')
-  getTransactionTopAccounts = () => this.http.get('/wallets/transactions/top-accounts')
+  getTransactionTopAccounts = (query) => this.http.get('/wallets/transactions/top-accounts', query)
   getTransactionDistributionHistogram = () => this.http.get('/wallets/transactions/distribution-histogram')
 
   getTransactionTotal = () => this.http.get('/transactions/total')

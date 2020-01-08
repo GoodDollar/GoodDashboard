@@ -23,7 +23,7 @@ const getTopLowMediumBalance = async (req: Request, res: Response, next: NextFun
 
 const getTopAccounts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await walletsProvider.getTopAccountsByField('balance', 10)
+    const data = await walletsProvider.getTopAccountsByField('balance', 'desc', 10)
 
     return res.status(200).json({
       responseCode: 200,

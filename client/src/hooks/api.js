@@ -28,7 +28,7 @@ export const useWalletTopMedianLow = (deps = []) => useApi(api.getWalletTopMedia
 export const useWalletDistributionHistogram = (deps = []) => useApi(api.getWalletDistributionHistogram, deps)
 
 // transactions
-export const useTransactionTopAccounts = (deps = []) => useApi(api.getTransactionTopAccounts, deps)
+export const useTransactionTopAccounts = (deps = [], ...params) => useApi(api.getTransactionTopAccounts, deps, params)
 export const useTransactionTopMedianLow = (deps = []) => useApi(api.getTransactionTopMedianLow, deps)
 export const useTransactionDistributionHistogram = (deps = []) => useApi(api.getTransactionDistributionHistogram, deps)
 export const useGetTransactionTotal = (deps = []) => useApi(api.getTransactionTotal, deps)

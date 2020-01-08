@@ -13,9 +13,14 @@ type wallet = {
 
 class Wallets {
   model: any
+  sortDirection: any
 
   constructor() {
     this.model = WalletsModel
+    this.sortDirection = {
+      desc: -1,
+      asc: 1
+    }
   }
 
   /**
@@ -166,12 +171,12 @@ class Wallets {
    * @param filed
    * @param count
    */
-  async getTopAccountsByField(filed: string, count: number) {
+  async getTopAccountsByField(filed: string, sort: string, count: number) {
     const topAccounts = await this.model.find({}, [], {
       skip: 0,
       limit: count,
       sort: {
-        [filed]: -1, //Sort by balance DESC
+        [filed]: this.sortDirection[sort], //Sort by balance DESC
       },
     })
 
