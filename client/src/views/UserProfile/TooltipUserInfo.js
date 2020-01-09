@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { makeStyles, withStyles } from '@material-ui/core/styles'
+import { withStyles } from '@material-ui/core/styles'
 import Tooltip from '@material-ui/core/Tooltip'
 import Button from '@material-ui/core/Button'
 import userModel from '../../lib/gun/models/user'
@@ -20,6 +20,10 @@ tooltip: {
 },
 }))(Tooltip);
 
+/**
+ * @return {null}
+ */
+
 export default function TooltipUserInfo({hash}) {
   const [user, setUser] = useState(false)
 
@@ -34,17 +38,16 @@ export default function TooltipUserInfo({hash}) {
 
   if (!user) return null
 
-
   return (
       <HtmlTooltip title={
           <React.Fragment>
             <GridContainer >
               <Card profile>
                 <CardAvatar profile>
-                    <img src={user && user.avatar ? user.avatar : logo} alt="..." />
+                    <img src={user.avatar ? user.avatar : logo} alt="..." />
                 </CardAvatar>
                 <CardBody profile>
-                  <h6 >User full name: {user && user.fullName}</h6>
+                  <h6 >User full name: {user.fullName}</h6>
                 </CardBody>
               </Card>
             </GridContainer>
