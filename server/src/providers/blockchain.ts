@@ -44,6 +44,8 @@ export class blockchain {
 
   listPrivateAddress: any
 
+  paymentLinkContracts: any
+
   network: string
 
   networkId: number
@@ -57,7 +59,8 @@ export class blockchain {
     this.network = conf.network
     this.networkId = conf.ethereum.network_id
     this.ready = this.init()
-    this.listPrivateAddress = _invert(Object.assign(get(ContractsAddress, `${this.network}`), conf.systemAccounts));
+    this.listPrivateAddress = _invert(Object.assign(get(ContractsAddress, `${this.network}`), conf.systemAccounts))
+    this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
     this.ipfslog = new IPFSLog()
     log.info('Starting blockchain reader:', {
@@ -132,6 +135,14 @@ export class blockchain {
    */
   isClientWallet(wallet: string) {
     return this.listPrivateAddress[this.web3.utils.toChecksumAddress(wallet)] === undefined
+  }
+
+  /**
+   * Get true if wallet is paymentlink contracts
+   * @param wallet
+   */
+  isPaymentlinkContracts(wallet: string) {
+    return this.paymentLinkContracts === this.web3.utils.toChecksumAddress(wallet)
   }
 
   /**
@@ -396,7 +407,7 @@ export class blockchain {
       })
 
       // log.debug("Event:", { fromAddr, toAddr, event });
-      if (this.isClientWallet(fromAddr)) {
+      if (this.isClientWallet(fromAddr) || this.isPaymentlinkContracts(fromAddr)) {
         let timestamp = moment.unix(txTime)
         let date = timestamp.format('YYYY-MM-DD')
         log.debug('Client Event:', { date, fromAddr, toAddr })
