@@ -14,11 +14,11 @@ export default function SortTitle(props) {
   const { title, sortFieldNow, field, direction, onPress} = props;
   const directionIcon = {
     asc : (<i className="material-icons">
-      arrow_drop_down
+      arrow_drop_up
     </i>),
     desc: (
       <i className="material-icons">
-        arrow_drop_up
+        arrow_drop_down
       </i>
     )
   }

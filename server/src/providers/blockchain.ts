@@ -142,7 +142,7 @@ export class blockchain {
    * @param wallet
    */
   isPaymentlinkContracts(wallet: string) {
-    return this.paymentLinkContracts === this.web3.utils.toChecksumAddress(wallet)
+    return this.web3.utils.toChecksumAddress(this.paymentLinkContracts) === this.web3.utils.toChecksumAddress(wallet)
   }
 
   /**
@@ -407,7 +407,7 @@ export class blockchain {
       })
 
       // log.debug("Event:", { fromAddr, toAddr, event });
-      if (this.isClientWallet(fromAddr) || this.isPaymentlinkContracts(fromAddr)) {
+      if (this.isClientWallet(fromAddr)) {
         let timestamp = moment.unix(txTime)
         let date = timestamp.format('YYYY-MM-DD')
         log.debug('Client Event:', { date, fromAddr, toAddr })
@@ -441,7 +441,7 @@ export class blockchain {
         log.trace('Skipping system contracts event', { fromAddr })
       }
 
-      if (this.isClientWallet(toAddr)) {
+      if (this.isClientWallet(toAddr) && (this.isClientWallet(fromAddr) || this.isPaymentlinkContracts(fromAddr))) {
         if (wallets.hasOwnProperty(toAddr)) {
           wallets[toAddr].inTXs += 1
           wallets[toAddr].countTx += 1

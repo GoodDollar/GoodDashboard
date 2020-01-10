@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { withStyles } from '@material-ui/core/styles'
+import { withStyles, makeStyles } from '@material-ui/core/styles'
+import CircularProgress from '@material-ui/core/CircularProgress'
 import Tooltip from '@material-ui/core/Tooltip'
 import Button from '@material-ui/core/Button'
 import userModel from '../../lib/gun/models/user'
@@ -14,29 +15,40 @@ tooltip: {
   backgroundColor: '#f5f5f9',
   color: 'rgba(0, 0, 0, 0.87)',
   maxWidth: 250,
-  height: 50,
+  height: 200,
   fontSize: theme.typography.pxToRem(12),
   border: '1px solid #dadde9',
 },
 }))(Tooltip);
 
+const styles = {
+  titleBlock: {
+    fontSize: 13,
+  }
+}
+const useStyles = makeStyles(styles);
 /**
  * @return {null}
  */
 
 export default function TooltipUserInfo({hash}) {
   const [user, setUser] = useState(false)
-
+  const classes = useStyles();
   const loadUser = async () => {
-    const userFromGun = await userModel.getByAddress(hash)
-    setUser(userFromGun)
+    try {
+      let userFromGun = await userModel.getByAddress(hash)
+      if (!userFromGun.fullName) {
+        userFromGun = await userModel.getByAddress(hash)
+      }
+      setUser(userFromGun)
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   useEffect(() => {
     loadUser()
   }, [])
-
-  if (!user) return null
 
   return (
       <HtmlTooltip title={
@@ -47,14 +59,14 @@ export default function TooltipUserInfo({hash}) {
                     <img src={user.avatar ? user.avatar : logo} alt="..." />
                 </CardAvatar>
                 <CardBody profile>
-                  <h6 >User full name: {user.fullName}</h6>
+                  <h6 >{user ?  user.fullName: (  <CircularProgress/>)}</h6>
                 </CardBody>
               </Card>
             </GridContainer>
           </React.Fragment>
         }
       >
-        <Button>{hash}</Button>
+        <Button className={classes.titleBlock}>{hash}</Button>
       </HtmlTooltip>
   )
 }

@@ -433,7 +433,7 @@ export default function Dashboard() {
         </GridItem>
       </GridContainer>
       <GridContainer>
-        <GridItem xs={12} lg={5}>
+        <GridItem xs={12} lg={6}>
           <Card>
             <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Balances)</h4>
@@ -450,7 +450,7 @@ export default function Dashboard() {
                   tableHead={['#', 'Address', 'Balance']}
                   lastColumnClass={'tableCellRight'}
                   tableData={walletTopAccounts.map(
-                    (d, index) => [String(index + 2), (<TooltipUserInfo hash={d.address}/>), `${priceFormat(d.balance / 100)} G$`])}
+                    (d, index) => [String(index + 1), (<TooltipUserInfo hash={d.address}/>), `${priceFormat(d.balance / 100)} G$`])}
                 />
               )}
             </CardBody>
@@ -461,7 +461,7 @@ export default function Dashboard() {
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem xs={12} lg={7}>
+        <GridItem xs={12} lg={6}>
           <Card>
             <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Transactions)</h4>
