@@ -433,7 +433,7 @@ export default function Dashboard() {
         </GridItem>
       </GridContainer>
       <GridContainer>
-        <GridItem lg={12} xl={6}>
+        <GridItem xs={12} sm={12} md={12} lg={12} xl={6}>
           <Card>
             <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Balances)</h4>
@@ -461,7 +461,7 @@ export default function Dashboard() {
             </CardFooter>
           </Card>
         </GridItem>
-        <GridItem lg={12} xl={6}>
+        <GridItem xs={12} sm={12} md={12} lg={12} xl={6}>
           <Card>
             <CardHeader color="success">
               <h4 className={classes.cardTitleWhite}>Top 10 Accounts (Transactions)</h4>
