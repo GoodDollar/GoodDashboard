@@ -5,25 +5,45 @@ class SurveyProperties {
   constructor() {
     this.gun = gunDB
     this.mutex = new Mutex()
+    this.timer = null
+  }
+
+  clearTimer () {
+    if (this.timer) {
+      clearTimeout(this.timer)
+    }
   }
 
   async getByAddress(address) {
-    let release = await this.mutex.lock()
-    try {
-      const profileToShow = this.gun
-        .get('users/bywalletAddress')
-        .get(address.toLowerCase())
-        .get('profile')
-      const avatar = await profileToShow.get('avatar').get('display');
-      const fullName = await profileToShow.get('fullName').get('display');
+    return new Promise(async (resolve) => {
+      let release = await this.mutex.lock()
+      let result = {
+        fullName: '',
+        avatar: ''
+      }
+      this.clearTimer()
+      this.timer = setTimeout(() => {
+        release()
+        resolve(result)
+      }, 2000)
+      try {
+        const profileToShow = this.gun
+          .get('users/bywalletAddress')
+          .get(address.toLowerCase())
+          .get('profile')
+        result.avatar = await profileToShow.get('avatar').get('display');
+        result.fullName = await profileToShow.get('fullName').get('display');
+        this.clearTimer()
+        release()
+        resolve(result)
+      } catch (e) {
+        console.log(e)
+      }
+      this.clearTimer()
       release()
-      return { fullName, avatar }
-    } catch (e) {
-      console.log(e)
-      release()
-    }
+      resolve(result)
+    })
 
-    return {}
   }
 
 }

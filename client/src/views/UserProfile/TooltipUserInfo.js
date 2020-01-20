@@ -31,9 +31,10 @@ const useStyles = makeStyles(styles);
  * @return {null}
  */
 
-export default function TooltipUserInfo({hash}) {
+export default function TooltipUserInfo({ hash }) {
   const [user, setUser] = useState(false)
   const classes = useStyles();
+
   const loadUser = async () => {
     try {
       let userFromGun = await userModel.getByAddress(hash)
@@ -46,10 +47,11 @@ export default function TooltipUserInfo({hash}) {
     }
   }
 
-  useEffect(() => {
-    loadUser()
-  }, [])
-
+  const handledHover = () => {
+    if (!user) {
+      loadUser()
+    }
+  }
   return (
       <HtmlTooltip title={
           <React.Fragment>
@@ -66,7 +68,7 @@ export default function TooltipUserInfo({hash}) {
           </React.Fragment>
         }
       >
-        <Button className={classes.titleBlock}>{hash}</Button>
+        <Button onMouseOver={handledHover} className={classes.titleBlock}>{hash}</Button>
       </HtmlTooltip>
   )
 }
