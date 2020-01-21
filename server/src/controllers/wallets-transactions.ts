@@ -23,7 +23,11 @@ const getTopLowMediumBalance = async (req: Request, res: Response, next: NextFun
 
 const getTopAccounts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await walletsProvider.getTopAccountsByField('countTx', 10)
+    const transactionSortDirection = (req.query.transactionSortDirection) ? req.query.transactionSortDirection : 'desc'
+    const transactionSort = (req.query.transactionSort) ? req.query.transactionSort : 'countTx'
+
+    const data = await walletsProvider.getTopAccountsByField(transactionSort, transactionSortDirection, 10)
+
 
     return res.status(200).json({
       responseCode: 200,

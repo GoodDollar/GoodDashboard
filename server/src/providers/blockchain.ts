@@ -44,6 +44,8 @@ export class blockchain {
 
   listPrivateAddress: any
 
+  paymentLinkContracts: any
+
   network: string
 
   networkId: number
@@ -57,7 +59,8 @@ export class blockchain {
     this.network = conf.network
     this.networkId = conf.ethereum.network_id
     this.ready = this.init()
-    this.listPrivateAddress = _invert(Object.assign(get(ContractsAddress, `${this.network}`), conf.systemAccounts));
+    this.listPrivateAddress = _invert(Object.assign(get(ContractsAddress, `${this.network}`), conf.systemAccounts))
+    this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
     this.ipfslog = new IPFSLog()
     log.info('Starting blockchain reader:', {
@@ -132,6 +135,14 @@ export class blockchain {
    */
   isClientWallet(wallet: string) {
     return this.listPrivateAddress[this.web3.utils.toChecksumAddress(wallet)] === undefined
+  }
+
+  /**
+   * Get true if wallet is paymentlink contracts
+   * @param wallet
+   */
+  isPaymentlinkContracts(wallet: string) {
+    return this.web3.utils.toChecksumAddress(this.paymentLinkContracts) === this.web3.utils.toChecksumAddress(wallet)
   }
 
   /**
@@ -430,7 +441,7 @@ export class blockchain {
         log.trace('Skipping system contracts event', { fromAddr })
       }
 
-      if (this.isClientWallet(toAddr)) {
+      if (this.isClientWallet(toAddr) && (this.isClientWallet(fromAddr) || this.isPaymentlinkContracts(fromAddr))) {
         if (wallets.hasOwnProperty(toAddr)) {
           wallets[toAddr].inTXs += 1
           wallets[toAddr].countTx += 1
