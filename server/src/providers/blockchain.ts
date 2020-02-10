@@ -16,7 +16,7 @@ import surveyDB from '../gun/models/survey'
 import AboutTransactionProvider from './about-transaction'
 import AboutClaimTransactionProvider from './about-claim-transactions'
 import Amplitude from './amplitude'
-// import IPFSLog from './ipfs'
+import IPFSLog from './ipfs'
 
 import * as web3Utils from 'web3-utils'
 const log = logger.child({ from: 'Blockchain' })
@@ -52,7 +52,7 @@ export class blockchain {
 
   amplitude: Amplitude
 
-  // ipfslog: IPFSLog
+  ipfslog: any
 
   constructor() {
     this.lastBlock = 0
@@ -62,7 +62,7 @@ export class blockchain {
     this.listPrivateAddress = _invert(Object.assign(get(ContractsAddress, `${this.network}`), conf.systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
-    // this.ipfslog = new IPFSLog()
+    this.ipfslog = null
     log.info('Starting blockchain reader:', {
       network: this.network,
       networkdId: this.networkId,
@@ -103,12 +103,13 @@ export class blockchain {
    * Main process, it run all update
    */
   async init() {
+    log.info('RUN init:')
     log.debug('Initializing blockchain:', { conf: conf.ethereum })
     this.lastBlock = await propertyProvider
       .get('lastBlock')
       .then(_ => +_)
       .catch(_ => 0)
-    // await this.ipfslog.ready
+
     this.web3 = new Web3(this.getWeb3TransportProvider())
     const address: any = get(ContractsAddress, `${this.network}.GoodDollar`)
     this.tokenContract = new this.web3.eth.Contract(GoodDollarABI.abi, address)
@@ -145,11 +146,20 @@ export class blockchain {
     return this.web3.utils.toChecksumAddress(this.paymentLinkContracts) === this.web3.utils.toChecksumAddress(wallet)
   }
 
+  async initIPFSStore () {
+    log.info('RUN initIPFSStore:')
+    this.ipfslog = new IPFSLog()
+    await this.ipfslog.ready
+    log.info('END initIPFSStore:')
+  }
+
   /**
    * Update all date BChain
    */
   async updateData() {
+    log.info('RUN updateData:')
     await this.ready
+    await this.initIPFSStore()
     await this.updateEvents()
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`)
     const inEscrow = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call()

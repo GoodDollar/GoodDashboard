@@ -16,6 +16,7 @@ export default class IPFSLog {
   }
 
   async init(): Promise<boolean> {
+    log.info('init ipfs:')
     const id = await propertyProvider.get('ipfsID').then(_ => _ && JSON.parse(_))
     let identity
     if (id) {
@@ -53,6 +54,7 @@ export default class IPFSLog {
     return propertyProvider.set('ipfsMultiHash', multiHash)
   }
   getAsCSV(): string {
+    log.info('getAsCSV to ipfs:')
     return this.log.values.map((e: any) => e.payload).join('\n')
   }
 }
