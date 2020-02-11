@@ -164,6 +164,7 @@ export class blockchain {
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`)
     const inEscrow = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call()
     await propertyProvider.set('inEscrow', +inEscrow)
+    await this.ipfslog.stop()
   }
 
   async updateEvents() {
@@ -179,7 +180,7 @@ export class blockchain {
     await propertyProvider.set('lastBlock', +blockNumber)
     this.lastBlock = +blockNumber
     await this.amplitude.sendBatch()
-    // await this.ipfslog.persist()
+    await this.ipfslog.persist()
   }
 
   async updateWalletsBalance() {
@@ -226,13 +227,13 @@ export class blockchain {
           isToSystem: this.isClientWallet(toAddr) === false,
         },
       })
-      // this.ipfslog.logEventAsCSV('FUSE_BONUS', {
-      //   time: txTime,
-      //   toAddr,
-      //   value: amountTX / 100,
-      //   isToSystem: this.isClientWallet(toAddr) === false,
-      //   insert_id: event.transactionHash + '_' + event.logIndex,
-      // })
+      this.ipfslog.logEventAsCSV('FUSE_BONUS', {
+        time: txTime,
+        toAddr,
+        value: amountTX / 100,
+        isToSystem: this.isClientWallet(toAddr) === false,
+        insert_id: event.transactionHash + '_' + event.logIndex,
+      })
     }
   }
 
@@ -280,13 +281,13 @@ export class blockchain {
         },
       })
 
-      // this.ipfslog.logEventAsCSV('FUSE_CLAIM', {
-      //   time: txTime,
-      //   toAddr,
-      //   value: amountTX / 100,
-      //   isToSystem: this.isClientWallet(toAddr) === false,
-      //   insert_id: event.transactionHash + '_' + event.logIndex,
-      // })
+      this.ipfslog.logEventAsCSV('FUSE_CLAIM', {
+        time: txTime,
+        toAddr,
+        value: amountTX / 100,
+        isToSystem: this.isClientWallet(toAddr) === false,
+        insert_id: event.transactionHash + '_' + event.logIndex,
+      })
     }
 
     await AboutClaimTransactionProvider.updateOrSet(aboutClaimTXs)
@@ -326,15 +327,15 @@ export class blockchain {
         },
       })
 
-      // this.ipfslog.logEventAsCSV('FUSE_' + event.event, {
-      //   time: txTime,
-      //   fromAddr,
-      //   toAddr,
-      //   value: amountTX / 100,
-      //   isFromSystem: this.isClientWallet(fromAddr) === false,
-      //   isToSystem: this.isClientWallet(toAddr) === false,
-      //   insert_id: event.transactionHash + '_' + event.logIndex,
-      // })
+      this.ipfslog.logEventAsCSV('FUSE_' + event.event, {
+        time: txTime,
+        fromAddr,
+        toAddr,
+        value: amountTX / 100,
+        isFromSystem: this.isClientWallet(fromAddr) === false,
+        isToSystem: this.isClientWallet(toAddr) === false,
+        insert_id: event.transactionHash + '_' + event.logIndex,
+      })
     }
   }
 
@@ -406,17 +407,17 @@ export class blockchain {
         },
       })
 
-      // this.ipfslog.logEventAsCSV('FUSE_TRANSFER', {
-      //   time: txTime,
-      //   fromAddr,
-      //   toAddr,
-      //   value: amountTX / 100,
-      //   isFromSystem: this.isClientWallet(fromAddr) === false,
-      //   isToSystem: this.isClientWallet(toAddr) === false,
-      //   insert_id: event.transactionHash + '_' + event.logIndex,
-      // })
+      this.ipfslog.logEventAsCSV('FUSE_TRANSFER', {
+        time: txTime,
+        fromAddr,
+        toAddr,
+        value: amountTX / 100,
+        isFromSystem: this.isClientWallet(fromAddr) === false,
+        isToSystem: this.isClientWallet(toAddr) === false,
+        insert_id: event.transactionHash + '_' + event.logIndex,
+      })
 
-      // log.debug("Event:", { fromAddr, toAddr, event });
+      log.debug("Event:", { fromAddr, toAddr, event });
       if (this.isClientWallet(fromAddr)) {
         let timestamp = moment.unix(txTime)
         let date = timestamp.format('YYYY-MM-DD')

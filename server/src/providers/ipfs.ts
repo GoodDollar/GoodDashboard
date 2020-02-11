@@ -10,9 +10,11 @@ export default class IPFSLog {
   ready: Promise<boolean>
 
   log: any
+  ipfs: any
 
   constructor() {
     this.ready = this.init()
+    this.ipfs = new IPFS()
   }
 
   async init(): Promise<boolean> {
@@ -32,14 +34,12 @@ export default class IPFSLog {
       identity = await IdentityProvider.createIdentity({ id: 'gooddashboard' })
       await propertyProvider.set('ipfsID', JSON.stringify(identity.toJSON()))
     }
-    log.debug({ identity })
-    const ipfs = new IPFS()
-    await ipfs.ready
+    await this.ipfs.ready
     const multiHash = await propertyProvider.get('ipfsMultiHash')
     log.info('Reading events from ipfs:', { multiHash })
 
-    if (multiHash) this.log = await Log.fromMultihash(ipfs, identity, multiHash)
-    else this.log = new Log(ipfs, identity, { logId: 'fuse-events' })
+    if (multiHash) this.log = await Log.fromMultihash(this.ipfs, identity, multiHash)
+    else this.log = new Log(this.ipfs, identity, { logId: 'fuse-events' })
     return true
   }
 
@@ -49,12 +49,21 @@ export default class IPFSLog {
   }
 
   async persist(): Promise<any> {
-    const multiHash = await this.log.toMultihash()
-    log.info('Persisting events to ipfs:', { multiHash })
-    return propertyProvider.set('ipfsMultiHash', multiHash)
+    try {
+      const multiHash = await this.log.toMultihash()
+      log.info('Persisting events to ipfs:', { multiHash })
+      return propertyProvider.set('ipfsMultiHash', multiHash)
+    } catch (e) {
+      console.log(e)
+    }
   }
+
   getAsCSV(): string {
     log.info('getAsCSV to ipfs:')
     return this.log.values.map((e: any) => e.payload).join('\n')
+  }
+
+  async stop(): Promise<any> {
+    return this.ipfs.stop()
   }
 }
