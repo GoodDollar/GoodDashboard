@@ -180,7 +180,7 @@ export class blockchain {
     await propertyProvider.set('lastBlock', +blockNumber)
     this.lastBlock = +blockNumber
     await this.amplitude.sendBatch()
-    await this.ipfslog.persist()
+    // await this.ipfslog.persist()
   }
 
   async updateWalletsBalance() {
