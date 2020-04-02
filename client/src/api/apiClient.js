@@ -27,7 +27,4 @@ export default class ApiClient {
 
   getGDTotal = () => this.http.get('/gd/total')
   getGDInEscrow = () => this.http.get('/gd/in-escrow')
-
-  getSurveyTable = (query) => this.http.get('/survey/total-per-day', query)
-  getSurveySummaryTable = (query) => this.http.get('/survey/total', query)
 }

@@ -27,7 +27,6 @@ import ViewList from "@material-ui/icons/ViewList";
 // import Language from "@material-ui/icons/Language";
 // core components/views for Admin layout
 import DashboardPage from "views/Dashboard/Dashboard.js";
-import SurveySummaryPage from "views/Survey/SurveySummary.js";
 // import UserProfile from "views/UserProfile/UserProfile.js";
 // import TableList from "views/TableList/TableList.js";
 // import Typography from "views/Typography/Typography.js";
@@ -45,14 +44,6 @@ const dashboardRoutes = [
     rtlName: "لوحة القيادة",
     icon: Dashboard,
     component: DashboardPage,
-    layout: "/admin"
-  },
-  {
-    path: "/survey",
-    name: "Survey Summary",
-    rtlName: "لوحة القيادة",
-    icon: ViewList,
-    component: SurveySummaryPage,
     layout: "/admin"
   },
   // {
