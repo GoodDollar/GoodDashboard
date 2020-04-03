@@ -63,14 +63,14 @@ const prepareHistogramTransactionData = histogram => Object.keys(histogram).map(
 // chart configs for mobile devices
 const lineChartDataLimiter = isMobileOnly ? 10 : 20
 const lineChartTickRotation = isMobileOnly ? -90 : 0
-const mobilePieChartProps = isMobileOnly ? {
+const mobilePieChartProps = !isMobileOnly ? {} : {
   width: 500,
   height: 275,
   radialLabelsLinkDiagonalLength: 7,
   radialLabelsLinkHorizontalLength: 10,
   radialLabelsTextXOffset: 4,
-} : {}
-const mobileLineChartProps = isMobileOnly ? {
+}
+const mobileLineChartProps = !isMobileOnly ? {} : {
   lineWidth: 1.5,
   pointSize: 8,
   theme: {
@@ -82,7 +82,7 @@ const mobileLineChartProps = isMobileOnly ? {
       },
     },
   }
-} : {}
+}
 
 export default function Dashboard() {
   // wallet
