@@ -41,6 +41,7 @@ import {
   useGetClaimPerDay
 } from 'hooks/api'
 import priceFormat from '../../utils/priceFormat'
+import isMobileOnly from '../../utils/isMobile'
 import TooltipUserInfo from '../UserProfile/TooltipUserInfo'
 const useStyles = makeStyles(styles)
 
@@ -59,8 +60,6 @@ const prepareHistogramTransactionData = histogram => Object.keys(histogram).map(
   value: histogram[key],
 }))
 
-const isMobileOnly = window.matchMedia('(max-width: 480px)').matches
-
 // chart configs for mobile devices
 const lineChartDataLimiter = isMobileOnly ? 10 : 20
 const lineChartTickRotation = isMobileOnly ? -90 : 0
@@ -73,7 +72,7 @@ const mobilePieChartProps = isMobileOnly ? {
 } : {}
 const mobileLineChartProps = isMobileOnly ? {
   lineWidth: 1.5,
-  pointSize: 9,
+  pointSize: 8,
   theme: {
     axis: {
       ticks: {
@@ -310,7 +309,6 @@ export default function Dashboard() {
                 <Line
                   data={transactionAmountPerDayData}
                   height={400}
-                  legendY={'G$'}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
@@ -350,7 +348,6 @@ export default function Dashboard() {
                 <Line
                   data={transactionCountPerDayData}
                   height={400}
-                  legendY={'Count'}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
@@ -389,7 +386,6 @@ export default function Dashboard() {
                 <Line
                   data={claimPerDayData}
                   height={400}
-                  legendY={'G$'}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
