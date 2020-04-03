@@ -5,6 +5,7 @@ import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
 import DataUsageIcon from "@material-ui/icons/DataUsage"
 import ReceiptIcon from '@material-ui/icons/Receipt'
 import EqualizerIcon from '@material-ui/icons/Equalizer'
+import { isMobileOnly } from 'mobile-device-detect'
 import Warning from 'components/Typography/Warning'
 import Info from 'components/Typography/Info'
 import Success from 'components/Typography/Success'
@@ -78,13 +79,15 @@ export default function Dashboard() {
   const [transactionTotalAmount, transactionTotalAmountLoading] = useGetTransactionTotalAmount()
   const [transactionDailyAverage, transactionDailyAverageLoading] = useGetTransactionDailyAverage()
 
+  const lineChartDataLimiter = isMobileOnly ? 10 : 20
+
   // per day
-  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([], 20)
-  const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay([], 20)
+  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([], lineChartDataLimiter)
+  const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay([], lineChartDataLimiter)
 
   const [claimPerDay = [], claimPerDayLoading] = useGetClaimPerDay([], 20)
-  const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], 20)
-  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], 20)
+  const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], lineChartDataLimiter)
+  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], lineChartDataLimiter)
 
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
@@ -144,6 +147,10 @@ export default function Dashboard() {
   // gd
   const [GDTotal] = useGetGDTotal()
   const [GDInEscrow] = useGetGDInEscrow()
+
+  // chart configs for mobile devices
+  const lineChartTickRotation = isMobileOnly ? -45 : 0
+  const mobilePieChartProps = isMobileOnly ? { width: 400, height: 250 } : {}
 
   const classes = useStyles()
 
@@ -293,6 +300,7 @@ export default function Dashboard() {
                   axisBottom={{
                     format: '%b %d',
                     tickValues: 'every 5 days',
+                    tickRotation: lineChartTickRotation,
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
@@ -321,7 +329,8 @@ export default function Dashboard() {
               {!(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
                 <Line
                   data={transactionCountPerDayData}
-                  height={400} legendY={'Count'}
+                  height={400}
+                  legendY={'Count'}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
@@ -330,6 +339,7 @@ export default function Dashboard() {
                   axisBottom={{
                     format: '%b %d',
                     tickValues: 'every 5 days',
+                    tickRotation: lineChartTickRotation,
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
@@ -396,6 +406,7 @@ export default function Dashboard() {
                 {!walletDistributionHistogramLoading && (
                   <Pie
                     data={prepareHistogramBalanceData(walletDistributionHistogram)}
+                    {...mobilePieChartProps}
                   />
                 )}
               </GridItem>
@@ -420,6 +431,7 @@ export default function Dashboard() {
                 {!transactionDistributionHistogramLoading && (
                   <Pie
                     data={prepareHistogramTransactionData(transactionDistributionHistogram)}
+                    {...mobilePieChartProps}
                   />
                 )}
               </GridItem>

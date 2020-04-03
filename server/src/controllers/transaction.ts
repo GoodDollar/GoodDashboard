@@ -35,7 +35,7 @@ const getTotalAmount = async (req: Request, res: Response, next: NextFunction) =
 
 const getUniquePerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await AboutTransactionProvider.getAll();
+    let data = await AboutTransactionProvider.getAll(0,req.query.limit && parseInt(req.query.limit));
     data = prepareDataForGraph(data, "unique_txs", arr => arr.length);
 
     return res.status(200).json({
@@ -68,7 +68,7 @@ const getAvgCount = async (req: Request, res: Response, next: NextFunction) => {
 
 const getCountPerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await AboutTransactionProvider.getAll();
+    let data = await AboutTransactionProvider.getAll(0,req.query.limit && parseInt(req.query.limit));
     data = prepareDataForGraph(data, "count_txs");
     return res.status(200).json({
       responseCode: 200,
