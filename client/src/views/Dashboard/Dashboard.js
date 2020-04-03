@@ -62,9 +62,28 @@ const prepareHistogramTransactionData = histogram => Object.keys(histogram).map(
 const isMobileOnly = window.matchMedia('(max-width: 480px)').matches
 
 // chart configs for mobile devices
-const lineChartTickRotation = isMobileOnly ? -45 : 0
-const mobilePieChartProps = isMobileOnly ? { width: 400, height: 250 } : {}
 const lineChartDataLimiter = isMobileOnly ? 10 : 20
+const lineChartTickRotation = isMobileOnly ? -90 : 0
+const mobilePieChartProps = isMobileOnly ? {
+  width: 500,
+  height: 275,
+  radialLabelsLinkDiagonalLength: 7,
+  radialLabelsLinkHorizontalLength: 10,
+  radialLabelsTextXOffset: 4,
+} : {}
+const mobileLineChartProps = isMobileOnly ? {
+  lineWidth: 1.5,
+  pointSize: 9,
+  theme: {
+    axis: {
+      ticks: {
+        text: {
+          fontSize: 10,
+        },
+      },
+    },
+  }
+} : {}
 
 export default function Dashboard() {
   // wallet
@@ -305,6 +324,7 @@ export default function Dashboard() {
                   }}
                   xFormat="time:%Y-%m-%d"
                   yFormat={v => `G$ ${priceFormat(v)}`}
+                  {...mobileLineChartProps}
                 />
               )}
             </CardBody>
@@ -343,6 +363,7 @@ export default function Dashboard() {
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
+                  {...mobileLineChartProps}
                 />
               )}
             </CardBody>
@@ -381,6 +402,7 @@ export default function Dashboard() {
                   }}
                   xFormat="time:%Y-%m-%d"
                   yFormat={v => `G$ ${priceFormat(v)}`}
+                  {...mobileLineChartProps}
                 />
               )}
             </CardBody>
