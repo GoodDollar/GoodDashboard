@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import AboutTransactionProvider from "../providers/about-transaction";
+import reqLimit from '../helpers/reqLimit'
 
 const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -35,7 +36,7 @@ const getTotalAmount = async (req: Request, res: Response, next: NextFunction) =
 
 const getUniquePerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await AboutTransactionProvider.getAll(0,req.query.limit && parseInt(req.query.limit));
+    let data = await AboutTransactionProvider.getAll(...reqLimit(req));
     data = prepareDataForGraph(data, "unique_txs", arr => arr.length);
 
     return res.status(200).json({
@@ -68,7 +69,7 @@ const getAvgCount = async (req: Request, res: Response, next: NextFunction) => {
 
 const getCountPerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await AboutTransactionProvider.getAll(0,req.query.limit && parseInt(req.query.limit));
+    let data = await AboutTransactionProvider.getAll(...reqLimit(req));
     data = prepareDataForGraph(data, "count_txs");
     return res.status(200).json({
       responseCode: 200,
@@ -84,7 +85,7 @@ const getCountPerDay = async (req: Request, res: Response, next: NextFunction) =
 
 const getAmountPerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await AboutTransactionProvider.getAll(0,req.query.limit && parseInt(req.query.limit));
+    let data = await AboutTransactionProvider.getAll(...reqLimit(req));
     data = prepareDataForGraph(data, "amount_txs");
     return res.status(200).json({
       responseCode: 200,
@@ -113,7 +114,7 @@ const prepareDataForGraph = (data: any, yField: string, transform: (value: any) 
 
 const getAvgAmountPerDay = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let data = await AboutTransactionProvider.getAll(0, req.query.limit && parseInt(req.query.limit));
+    let data = await AboutTransactionProvider.getAll(...reqLimit(req));
     let result = [];
     for (let i in data) {
       let item = data[i];
