@@ -41,6 +41,7 @@ import {
   useGetClaimPerDay
 } from 'hooks/api'
 import priceFormat from '../../utils/priceFormat'
+import isMobileOnly from '../../utils/isMobile'
 import TooltipUserInfo from '../UserProfile/TooltipUserInfo'
 const useStyles = makeStyles(styles)
 
@@ -58,6 +59,30 @@ const prepareHistogramTransactionData = histogram => Object.keys(histogram).map(
   label: key,
   value: histogram[key],
 }))
+
+// chart configs for mobile devices
+const lineChartDataLimiter = isMobileOnly ? 10 : 20
+const lineChartTickRotation = isMobileOnly ? -90 : 0
+const mobilePieChartProps = !isMobileOnly ? {} : {
+  width: 500,
+  height: 275,
+  radialLabelsLinkDiagonalLength: 7,
+  radialLabelsLinkHorizontalLength: 10,
+  radialLabelsTextXOffset: 4,
+}
+const mobileLineChartProps = !isMobileOnly ? {} : {
+  lineWidth: 1.5,
+  pointSize: 8,
+  theme: {
+    axis: {
+      ticks: {
+        text: {
+          fontSize: 10,
+        },
+      },
+    },
+  }
+}
 
 export default function Dashboard() {
   // wallet
@@ -79,12 +104,12 @@ export default function Dashboard() {
   const [transactionDailyAverage, transactionDailyAverageLoading] = useGetTransactionDailyAverage()
 
   // per day
-  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([], 20)
-  const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay([], 20)
+  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([], lineChartDataLimiter)
+  const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay([], lineChartDataLimiter)
 
   const [claimPerDay = [], claimPerDayLoading] = useGetClaimPerDay([], 20)
-  const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], 20)
-  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], 20)
+  const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], lineChartDataLimiter)
+  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], lineChartDataLimiter)
 
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
@@ -284,7 +309,6 @@ export default function Dashboard() {
                 <Line
                   data={transactionAmountPerDayData}
                   height={400}
-                  legendY={'G$'}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
@@ -293,10 +317,12 @@ export default function Dashboard() {
                   axisBottom={{
                     format: '%b %d',
                     tickValues: 'every 5 days',
+                    tickRotation: lineChartTickRotation,
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
                   yFormat={v => `G$ ${priceFormat(v)}`}
+                  {...mobileLineChartProps}
                 />
               )}
             </CardBody>
@@ -321,7 +347,7 @@ export default function Dashboard() {
               {!(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
                 <Line
                   data={transactionCountPerDayData}
-                  height={400} legendY={'Count'}
+                  height={400}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
@@ -330,9 +356,11 @@ export default function Dashboard() {
                   axisBottom={{
                     format: '%b %d',
                     tickValues: 'every 5 days',
+                    tickRotation: lineChartTickRotation,
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
+                  {...mobileLineChartProps}
                 />
               )}
             </CardBody>
@@ -358,7 +386,6 @@ export default function Dashboard() {
                 <Line
                   data={claimPerDayData}
                   height={400}
-                  legendY={'G$'}
                   xScale={{
                     type: 'time',
                     format: '%Y-%m-%d',
@@ -371,6 +398,7 @@ export default function Dashboard() {
                   }}
                   xFormat="time:%Y-%m-%d"
                   yFormat={v => `G$ ${priceFormat(v)}`}
+                  {...mobileLineChartProps}
                 />
               )}
             </CardBody>
@@ -396,6 +424,7 @@ export default function Dashboard() {
                 {!walletDistributionHistogramLoading && (
                   <Pie
                     data={prepareHistogramBalanceData(walletDistributionHistogram)}
+                    {...mobilePieChartProps}
                   />
                 )}
               </GridItem>
@@ -420,6 +449,7 @@ export default function Dashboard() {
                 {!transactionDistributionHistogramLoading && (
                   <Pie
                     data={prepareHistogramTransactionData(transactionDistributionHistogram)}
+                    {...mobilePieChartProps}
                   />
                 )}
               </GridItem>
