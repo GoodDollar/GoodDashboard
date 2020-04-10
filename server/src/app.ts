@@ -9,7 +9,7 @@ import conf from './config'
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.urlencoded({ extended: false }))
 
 // Routes configuration
 app.use('/api', routes)
@@ -19,15 +19,12 @@ app.use((req, res) => res.sendFile(path.join(__dirname, '..', '..', 'client', 'b
 // Express configuration
 app.set('port', process.env.PORT || 3055)
 
-if (conf.env === 'production') {
-  Blockchain.updateData()
-  if (Blockchain.ready) {
-    setInterval(() => {
-      console.log('********Start update data**************')
-      Blockchain.updateData()
-    },  conf.timeUpdate);
-
-  }
-}
+Blockchain.updateData()
+Blockchain.ready.then(() => {
+  setInterval(() => {
+    console.log('********Start update data**************')
+    Blockchain.updateData()
+  }, conf.timeUpdate)
+})
 
 export default app

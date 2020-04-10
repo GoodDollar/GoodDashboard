@@ -99,11 +99,12 @@ export class blockchain {
    * Main process, it run all update
    */
   async init() {
+    log.debug('Config/Status:', await propertyProvider.getAll())
     log.debug('Initializing blockchain:', { conf: conf.ethereum })
     this.lastBlock = await propertyProvider
       .get('lastBlock')
-      .then(_ => +_)
-      .catch(_ => 0)
+      .then((_) => +_)
+      .catch((_) => 0)
     this.web3 = new Web3(this.getWeb3TransportProvider())
     const address: any = get(ContractsAddress, `${this.network}.GoodDollar`)
     this.tokenContract = new this.web3.eth.Contract(GoodDollarABI.abi, address)
@@ -155,11 +156,13 @@ export class blockchain {
     const blockNumber = await this.web3.eth.getBlockNumber()
     log.info('updateEvents starting:', { blockNumber })
     await Promise.all([
-      this.updateListWalletsAndTransactions(blockNumber).catch(e => log.error('transfer events failed', e.message, e)),
+      this.updateListWalletsAndTransactions(blockNumber).catch((e) =>
+        log.error('transfer events failed', e.message, e)
+      ),
       this.updateSurvey(),
-      this.updateBonusEvents(blockNumber).catch(e => log.error('bonus events failed', e.message, e)),
-      this.updateClaimEvents(blockNumber).catch(e => log.error('claim events failed', e.message, e)),
-      this.updateOTPLEvents(blockNumber).catch(e => log.error('otpl events failed', e.message, e)),
+      this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),
+      this.updateClaimEvents(blockNumber).catch((e) => log.error('claim events failed', e.message, e)),
+      this.updateOTPLEvents(blockNumber).catch((e) => log.error('otpl events failed', e.message, e)),
     ])
     await propertyProvider.set('lastBlock', +blockNumber)
     this.lastBlock = +blockNumber
@@ -171,7 +174,7 @@ export class blockchain {
     const wallets = await walletsProvider.getAll()
     for (let i in wallets) {
       // @ts-ignore
-      const address =  wallets[i].address
+      const address = wallets[i].address
       newBalanceWallets[address] = {
         address,
         balance: await this.getAddressBalance(address),
@@ -218,7 +221,7 @@ export class blockchain {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
     })
-    let aboutClaimTXs:any = {}
+    let aboutClaimTXs: any = {}
     log.info('got Claim events:', allEvents.length)
 
     for (let index in allEvents) {
@@ -241,7 +244,7 @@ export class blockchain {
         aboutClaimTXs[date] = {
           date,
           total_amount_txs: amountTX,
-          count_txs: 1
+          count_txs: 1,
         }
       }
 
@@ -302,27 +305,26 @@ export class blockchain {
     let startDate = timestamp.format('YYYY-MM-DD')
     let lastDate = await propertyProvider
       .get('lastSurveyDate')
-      .then(date => {
-        if(!date) {
+      .then((date) => {
+        if (!date) {
           return startDate
         } else {
           return date
         }
       })
-      .catch(_ => startDate)
+      .catch((_) => startDate)
 
     let from = new Date(lastDate)
     let to = new Date()
 
-    for (; from <= to;) {
+    for (; from <= to; ) {
       const surveys = await surveyDB.getByDate(from)
       await surveyProvider.updateOrSet(surveys)
-      from.setDate(from.getDate() + 1);
+      from.setDate(from.getDate() + 1)
     }
 
-    let lastSurveyDate:string = moment(to).format('YYYY-MM-DD')
+    let lastSurveyDate: string = moment(to).format('YYYY-MM-DD')
     await propertyProvider.set('lastSurveyDate', lastSurveyDate)
-
   }
   /**
    * Update list wallets and transactions info

@@ -3,7 +3,7 @@ import blockchainProvider from '../providers/blockchain'
 
 const getEventsCSV = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const csv = blockchainProvider.ipfslog.getAsCSV()
+    const csv = await blockchainProvider.ipfslog.getAsCSV()
     const today = new Date()
       .toISOString()
       .slice(0, 10)
