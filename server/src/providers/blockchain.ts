@@ -56,9 +56,10 @@ export class blockchain {
     this.network = conf.network
     this.networkId = conf.ethereum.network_id
     this.ready = this.init()
-    let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`)).concat(conf.systemAccounts)
-    console.log({ systemAccounts })
-    systemAccounts = systemAccounts.map((x, i, arr) => (x as string).toLowerCase())
+    let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
+      .filter((_) => typeof _ === 'string')
+      .concat(conf.systemAccounts)
+      .map((x) => (x as string).toLowerCase())
     this.listPrivateAddress = _invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
