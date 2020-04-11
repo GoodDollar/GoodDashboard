@@ -56,7 +56,10 @@ export class blockchain {
     this.network = conf.network
     this.networkId = conf.ethereum.network_id
     this.ready = this.init()
-    this.listPrivateAddress = _invert(Object.assign(get(ContractsAddress, `${this.network}`), conf.systemAccounts))
+    const systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
+      .concat(conf.systemAccounts)
+      .map((_) => _.toLocaleLowerCase())
+    this.listPrivateAddress = _invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
     log.info('Starting blockchain reader:', {
@@ -130,7 +133,7 @@ export class blockchain {
    * @param wallet
    */
   isClientWallet(wallet: string) {
-    return this.listPrivateAddress[this.web3.utils.toChecksumAddress(wallet)] === undefined
+    return this.listPrivateAddress[wallet.toLocaleLowerCase()] === undefined
   }
 
   /**
