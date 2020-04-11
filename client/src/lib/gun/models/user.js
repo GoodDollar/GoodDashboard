@@ -1,7 +1,7 @@
 import gunDB from '../gundb'
 import Mutex from 'await-mutex'
 
-class SurveyProperties {
+class User {
   constructor() {
     this.gun = gunDB
     this.mutex = new Mutex()
@@ -48,4 +48,4 @@ class SurveyProperties {
 
 }
 
-export default new SurveyProperties()
+export default new User()
