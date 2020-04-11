@@ -58,7 +58,7 @@ export class blockchain {
     this.ready = this.init()
     const systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
       .concat(conf.systemAccounts)
-      .map((_) => _.toLocaleLowerCase())
+      .map((x) => (x as string).toLowerCase())
     this.listPrivateAddress = _invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
@@ -133,7 +133,7 @@ export class blockchain {
    * @param wallet
    */
   isClientWallet(wallet: string) {
-    return this.listPrivateAddress[wallet.toLocaleLowerCase()] === undefined
+    return this.listPrivateAddress[wallet.toLowerCase()] === undefined
   }
 
   /**
