@@ -58,7 +58,7 @@ export class blockchain {
     this.ready = this.init()
     let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
       .filter((_) => typeof _ === 'string')
-      .concat(conf.systemAccounts)
+      .concat(conf.systemAccounts, ['0x0000000000000000000000000000000000000000'])
       .map((x) => (x as string).toLowerCase())
     this.listPrivateAddress = _invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
