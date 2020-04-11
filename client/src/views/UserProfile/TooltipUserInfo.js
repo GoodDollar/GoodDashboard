@@ -53,7 +53,9 @@ export default function TooltipUserInfo({ hash }) {
     }
   }
   return (
-      <HtmlTooltip title={
+      <HtmlTooltip
+        disableTouchListener
+        title={
           <React.Fragment>
             <GridContainer >
               <Card profile>

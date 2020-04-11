@@ -114,6 +114,7 @@ export default function Dashboard() {
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
   const [claimPerDayData, setClaimPerDayData] = useState([])
+
   useEffect(() => {
     if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0) {
       setTransactionAmountPerDayData([

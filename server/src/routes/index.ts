@@ -13,7 +13,7 @@ router.get('/health-check', healthCheck)
 // router.get('/transactions/total', transactions.getTotal)
 
 router.use('/wallets', wallets)
-router.use('/survey', survey)
+//router.use('/survey', survey)
 router.use('/transactions', transactions)
 router.use('/gd', gd)
 router.use('/events', events)
