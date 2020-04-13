@@ -2,7 +2,7 @@
   "name": "gooddashboard-server",
   "version": "0.1.0",
   "dependencies": {
-    "@gooddollar/goodcontracts": "^1.0.3",
+    "@gooddollar/goodcontracts": "^1.1.0",
     "@gooddollar/gun-appendonly": "^1.0.1",
     "@types/cors": "^2.8.6",
     "@types/gun": "^0.9.2",
