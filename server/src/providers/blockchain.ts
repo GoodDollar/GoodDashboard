@@ -163,7 +163,7 @@ export class blockchain {
       this.updateListWalletsAndTransactions(blockNumber).catch((e) =>
         log.error('transfer events failed', e.message, e)
       ),
-      this.updateSurvey(),
+      // this.updateSurvey(),
       this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),
       this.updateClaimEvents(blockNumber).catch((e) => log.error('claim events failed', e.message, e)),
       this.updateOTPLEvents(blockNumber).catch((e) => log.error('otpl events failed', e.message, e)),

@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { badRequest, clientErrorHandler, healthCheck, logErrors } from './common.js'
 import wallets from './wallets'
-import survey from './survey'
+// import survey from './survey'
 import transactions from './transactions/index'
 import gd from './gd/index'
 import events from './events'

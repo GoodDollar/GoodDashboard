@@ -45,3 +45,7 @@ export const useGetClaimPerDay = (deps=[], ...params) => useApi(api.getClaimPerD
 // gd
 export const useGetGDTotal = (deps=[]) => useApi(api.getGDTotal, deps)
 export const useGetGDInEscrow = (deps=[]) => useApi(api.getGDInEscrow, deps)
+
+// survey
+export const useGetSurveyTable = (deps=[], params) => useApi(api.getSurveyTable, deps, params)
+export const useGetSurveySummaryTable = (deps=[], params) => useApi(api.getSurveySummaryTable, deps, params)
