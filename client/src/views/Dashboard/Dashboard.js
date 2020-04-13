@@ -179,13 +179,13 @@ export default function Dashboard() {
     setTransactionSortDirection(direction)
   }
 
-  const [claimPerDaySeries, claimPerDayFormatter] = useSeriesSpecificValueFormatter(
+  const claimPerDayFormatter = useSeriesSpecificValueFormatter(
     claimPerDayData, (value, seriesId) => {
       switch (seriesId) {
         case 'Transactions':
-          return String(value)
+          return value
         case 'Total amount':
-          return `G$ ${value}`
+          return `G$ ${priceFormat(value)}`
         default:
           throw new Error(`Unknown series '${seriesId}'`)
       }
@@ -399,7 +399,7 @@ export default function Dashboard() {
               )}
               {!claimPerDayLoading && (
                 <Line
-                  data={claimPerDaySeries}
+                  data={claimPerDayData}
                   height={400}
                   xScale={{
                     type: 'time',

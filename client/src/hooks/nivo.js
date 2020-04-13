@@ -1,16 +1,34 @@
-import { useCallback, useMemo } from "react"
+import { useCallback, useRef, useEffect } from "react"
 
 export const useSeriesSpecificValueFormatter = (series, formatter = null) => {
-  const data = useMemo(() => series.map(({ id, data }) => ({
-    id, data: data.map(({ x, y }) => ({
-      x, y: { id, value: y }
-    }))
-  })), [series])
+  const invocationsCount = useRef(0)
+  const seriesIndex = useRef(0)
 
-  const yFormat = useCallback(({ value, id }) =>
-    formatter ? formatter(value, id) : value,
-    [formatter]
-  )
+  const yFormat = useCallback(value => {
 
-  return [data, yFormat]
+    let index = seriesIndex.current
+    let count = invocationsCount.current
+
+    const seriesId = series[index].id
+    const formatted = formatter ? formatter(value, seriesId) : value
+
+    if (++count >= series[index].data.length) {
+      count = 0
+      if (++index >= series.length) {
+        index = 0
+      }
+    }
+
+    invocationsCount.current = count
+    seriesIndex.current = index
+
+    return formatted
+  }, [series, formatter])
+
+  useEffect(() => () => {
+    invocationsCount.current = 0
+    seriesIndex.current = 0
+  }, [series, formatter])
+
+  return yFormat
 }
