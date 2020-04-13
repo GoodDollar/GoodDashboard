@@ -178,6 +178,13 @@ export default function Dashboard() {
     setTransactionSortDirection(direction)
   }
 
+  let claimPerDayLoadingIteration = 0
+  const yFormatPerDay = (value) => {
+    claimPerDayLoadingIteration++
+    value = priceFormat(value)
+    return claimPerDay.length < claimPerDayLoadingIteration ? `G$ ${value}` : `${value}`
+  }
+
   return (
     <div>
       <GridContainer>
@@ -398,7 +405,7 @@ export default function Dashboard() {
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
-                  yFormat={v => `G$ ${priceFormat(v)}`}
+                  yFormat={yFormatPerDay}
                   {...mobileLineChartProps}
                 />
               )}
