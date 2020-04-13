@@ -11,8 +11,6 @@ import get from 'lodash/get'
 import _invert from 'lodash/invert'
 import propertyProvider from './property'
 import walletsProvider from './wallets'
-import surveyProvider from './survey'
-import surveyDB from '../gun/models/survey'
 import AboutTransactionProvider from './about-transaction'
 import AboutClaimTransactionProvider from './about-claim-transactions'
 import Amplitude from './amplitude'
@@ -159,7 +157,6 @@ export class blockchain {
       this.updateListWalletsAndTransactions(blockNumber).catch((e) =>
         log.error('transfer events failed', e.message, e)
       ),
-      this.updateSurvey(),
       this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),
       this.updateClaimEvents(blockNumber).catch((e) => log.error('claim events failed', e.message, e)),
       this.updateOTPLEvents(blockNumber).catch((e) => log.error('otpl events failed', e.message, e)),
@@ -300,32 +297,6 @@ export class blockchain {
     }
   }
 
-  async updateSurvey() {
-    let timestamp = moment.unix(conf.startTimeTransaction)
-    let startDate = timestamp.format('YYYY-MM-DD')
-    let lastDate = await propertyProvider
-      .get('lastSurveyDate')
-      .then((date) => {
-        if (!date) {
-          return startDate
-        } else {
-          return date
-        }
-      })
-      .catch((_) => startDate)
-
-    let from = new Date(lastDate)
-    let to = new Date()
-
-    for (; from <= to; ) {
-      const surveys = await surveyDB.getByDate(from)
-      await surveyProvider.updateOrSet(surveys)
-      from.setDate(from.getDate() + 1)
-    }
-
-    let lastSurveyDate: string = moment(to).format('YYYY-MM-DD')
-    await propertyProvider.set('lastSurveyDate', lastSurveyDate)
-  }
   /**
    * Update list wallets and transactions info
    */
