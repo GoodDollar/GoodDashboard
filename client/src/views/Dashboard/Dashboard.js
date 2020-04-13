@@ -43,6 +43,7 @@ import {
 import priceFormat from '../../utils/priceFormat'
 import isMobileOnly from '../../utils/isMobile'
 import TooltipUserInfo from '../UserProfile/TooltipUserInfo'
+import { useSeriesSpecificValueFormatter } from '../../hooks/nivo'
 const useStyles = makeStyles(styles)
 
 const prepareHistogramBalanceData = histogram => Object.keys(histogram).map((key) => {
@@ -178,12 +179,18 @@ export default function Dashboard() {
     setTransactionSortDirection(direction)
   }
 
-  let claimPerDayLoadingIteration = 0
-  const yFormatPerDay = (value) => {
-    claimPerDayLoadingIteration++
-    value = priceFormat(value)
-    return claimPerDay.length < claimPerDayLoadingIteration ? `G$ ${value}` : `${value}`
-  }
+  const [claimPerDaySeries, claimPerDayFormatter] = useSeriesSpecificValueFormatter(
+    claimPerDayData, (value, seriesId) => {
+      switch (seriesId) {
+        case 'Transactions':
+          return String(value)
+        case 'Total amount':
+          return `G$ ${value}`
+        default:
+          throw new Error(`Unknown series '${seriesId}'`)
+      }
+    }
+  )
 
   return (
     <div>
@@ -392,7 +399,7 @@ export default function Dashboard() {
               )}
               {!claimPerDayLoading && (
                 <Line
-                  data={claimPerDayData}
+                  data={claimPerDaySeries}
                   height={400}
                   xScale={{
                     type: 'time',
@@ -405,7 +412,7 @@ export default function Dashboard() {
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
-                  yFormat={yFormatPerDay}
+                  yFormat={claimPerDayFormatter}
                   {...mobileLineChartProps}
                 />
               )}
