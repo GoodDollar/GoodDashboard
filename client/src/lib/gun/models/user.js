@@ -3,6 +3,8 @@ import { delay } from "../../../utils/async";
 class User {
   constructor() {
     this.gun = gunDB;
+    //init users list
+    this.gun.get("users/bywalletAddress").then();
   }
 
   async getByAddress(address) {

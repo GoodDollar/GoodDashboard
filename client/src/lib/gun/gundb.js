@@ -1,9 +1,15 @@
 import Gun from "gun";
-import "gun/lib/then";
+import SEA from "gun/sea";
 import Config from "../../config";
 
 let gunDb;
-
+Gun.chain.then = function(cb) {
+  var gun = this,
+    p = new Promise(function(res, rej) {
+      gun.once(res, { wait: 1000 });
+    });
+  return cb ? p.then(cb) : p;
+};
 const initGunDB = () => {
   if (!gunDb) {
     global.gun = gunDb = Gun({
