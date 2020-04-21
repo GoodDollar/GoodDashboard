@@ -17,7 +17,7 @@ class User {
         .get("profile");
       const avatarAndNameP = Promise.all([
         profileToShow.get("avatar").get("display"),
-        rofileToShow.get("fullName").get("display"),
+        profileToShow.get("fullName").get("display"),
       ]);
       const [avatar, fullName] = await Promise.race([
         avatarAndNameP,
