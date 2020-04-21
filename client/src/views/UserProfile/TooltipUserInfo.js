@@ -66,7 +66,11 @@ export default function TooltipUserInfo({ hash }) {
         </React.Fragment>
       }
     >
-      <Button onMouseEnter={handleHover} className={classes.titleBlock}>
+      <Button
+        onClick={handleHover}
+        onMouseEnter={handleHover}
+        className={classes.titleBlock}
+      >
         {hash}
       </Button>
     </HtmlTooltip>
