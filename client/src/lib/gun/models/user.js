@@ -9,7 +9,7 @@ class User {
 
   async getByAddress(address) {
     let result = {
-      fullName: "",
+      fullName: undefined,
       avatar: undefined,
     };
     try {
@@ -17,14 +17,21 @@ class User {
         .get("users/bywalletAddress")
         .get(address.toLowerCase())
         .get("profile");
+      const profile = await profileToShow.onThen();
+      if (profile === undefined) return result;
       const avatarAndNameP = Promise.all([
-        profileToShow.get("avatar").get("display"),
-        profileToShow.get("fullName").get("display"),
+        profile.avatar &&
+          profileToShow
+            .get("avatar")
+            .get("display")
+            .onThen(),
+        profile.fullName &&
+          profileToShow
+            .get("fullName")
+            .get("display")
+            .onThen(),
       ]);
-      const [avatar, fullName] = await Promise.race([
-        avatarAndNameP,
-        delay(3000, [undefined, "Unknown"]),
-      ]);
+      const [avatar, fullName] = await avatarAndNameP;
       result.avatar = avatar;
       result.fullName = fullName;
     } catch (e) {

@@ -1,8 +1,21 @@
 import Gun from "gun";
 import SEA from "gun/sea";
 import Config from "../../config";
-
+import { delay } from "../../utils/async";
 let gunDb;
+
+Gun.chain.onThen = function(cb, timeout = 5000) {
+  var gun = this,
+    p = new Promise(function(res, rej) {
+      delay(5000).then((_) => res());
+      gun.on(function(v, k, at, event) {
+        event.off();
+        res(v);
+      });
+    });
+  return cb ? p.then(cb) : p;
+};
+
 Gun.chain.then = function(cb) {
   var gun = this,
     p = new Promise(function(res, rej) {

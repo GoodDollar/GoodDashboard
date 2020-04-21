@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -45,14 +45,12 @@ export default function TooltipUserInfo({ hash }) {
   };
 
   const handleHover = () => {
-    if (!user) {
+    if (!user || user.fullName === undefined) {
       loadUser();
     }
   };
   return (
     <HtmlTooltip
-      onOpen={handleHover}
-      disableTouchListener
       title={
         <React.Fragment>
           <GridContainer>
@@ -68,7 +66,7 @@ export default function TooltipUserInfo({ hash }) {
         </React.Fragment>
       }
     >
-      <Button onClick={handleHover} className={classes.titleBlock}>
+      <Button onMouseEnter={handleHover} className={classes.titleBlock}>
         {hash}
       </Button>
     </HtmlTooltip>
