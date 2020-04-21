@@ -8,7 +8,7 @@ class User {
   async getByAddress(address) {
     let result = {
       fullName: "",
-      avatar: "",
+      avatar: undefined,
     };
     try {
       const profileToShow = this.gun
@@ -21,7 +21,7 @@ class User {
       ]);
       const [avatar, fullName] = await Promise.race([
         avatarAndNameP,
-        delay(3000, ["", "Unknown"]),
+        delay(3000, [undefined, "Unknown"]),
       ]);
       result.avatar = avatar;
       result.fullName = fullName;
