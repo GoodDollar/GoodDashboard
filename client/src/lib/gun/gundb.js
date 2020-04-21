@@ -1,18 +1,16 @@
-import Gun from '@gooddollar/gun-appendonly'
-import Config from '../../config';
-import 'gun/lib/rindexed'
+import Gun from "gun";
+import Config from "../../config";
 
-let gunDb
+let gunDb;
 
 const initGunDB = () => {
+  if (!gunDb) {
+    gunDb = Gun({
+      localStorage: true,
+      peers: [Config.gunUrl],
+    });
+  }
 
-    if (!gunDb) {
-        gunDb = Gun({
-            localStorage: false,
-            peers: [Config.gunUrl]
-        })
-    }
-
-  return gunDb
-}
-export default initGunDB()
+  return gunDb;
+};
+export default initGunDB();
