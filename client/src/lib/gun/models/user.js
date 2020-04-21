@@ -1,51 +1,35 @@
-import gunDB from '../gundb'
-import Mutex from 'await-mutex'
-
+import gunDB from "../gundb";
+import { delay } from "../../../utils/async";
 class User {
   constructor() {
-    this.gun = gunDB
-    this.mutex = new Mutex()
-    this.timer = null
-  }
-
-  clearTimer () {
-    if (this.timer) {
-      clearTimeout(this.timer)
-    }
+    this.gun = gunDB;
   }
 
   async getByAddress(address) {
-    return new Promise(async (resolve) => {
-      let release = await this.mutex.lock()
-      let result = {
-        fullName: '',
-        avatar: ''
-      }
-      this.clearTimer()
-      this.timer = setTimeout(() => {
-        release()
-        resolve(result)
-      }, 2000)
-      try {
-        const profileToShow = this.gun
-          .get('users/bywalletAddress')
-          .get(address.toLowerCase())
-          .get('profile')
-        result.avatar = await profileToShow.get('avatar').get('display');
-        result.fullName = await profileToShow.get('fullName').get('display');
-        this.clearTimer()
-        release()
-        resolve(result)
-      } catch (e) {
-        console.log(e)
-      }
-      this.clearTimer()
-      release()
-      resolve(result)
-    })
-
+    let result = {
+      fullName: "",
+      avatar: "",
+    };
+    try {
+      const profileToShow = this.gun
+        .get("users/bywalletAddress")
+        .get(address.toLowerCase())
+        .get("profile");
+      const avatarAndNameP = Promise.all([
+        profileToShow.get("avatar").get("display"),
+        rofileToShow.get("fullName").get("display"),
+      ]);
+      const [avatar, fullName] = await Promise.race([
+        avatarAndNameP,
+        delay(3000, ["", "Unknown"]),
+      ]);
+      result.avatar = avatar;
+      result.fullName = fullName;
+    } catch (e) {
+      console.log(e);
+    }
+    return result;
   }
-
 }
 
-export default new User()
+export default new User();
