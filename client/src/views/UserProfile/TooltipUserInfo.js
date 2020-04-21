@@ -51,6 +51,7 @@ export default function TooltipUserInfo({ hash }) {
   };
   return (
     <HtmlTooltip
+      disableTouchListener
       title={
         <React.Fragment>
           <GridContainer>
@@ -67,7 +68,7 @@ export default function TooltipUserInfo({ hash }) {
       }
     >
       <Button
-        onClick={handleHover}
+        onTouchStart={handleHover}
         onMouseEnter={handleHover}
         className={classes.titleBlock}
       >
