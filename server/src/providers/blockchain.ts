@@ -297,7 +297,7 @@ export class blockchain {
           fromAddr,
           toAddr,
           value: amountTX / 100,
-          isFromSystem: this.isClientWallet(fromAddr) === false,
+          isFromSystem: fromAddr && this.isClientWallet(fromAddr) === false,
           isToSystem: toAddr && this.isClientWallet(toAddr) === false,
         },
       })
