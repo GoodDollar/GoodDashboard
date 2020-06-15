@@ -167,6 +167,7 @@ export class blockchain {
       this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),
       this.updateClaimEvents(blockNumber).catch((e) => log.error('claim events failed', e.message, e)),
       this.updateOTPLEvents(blockNumber).catch((e) => log.error('otpl events failed', e.message, e)),
+      this.updateSupplyAmount(blockNumber).catch((e) => log.error('supply amount update failed', e.message, e)),
     ])
     await propertyProvider.set('lastBlock', +blockNumber)
     this.lastBlock = +blockNumber
@@ -304,7 +305,7 @@ export class blockchain {
     }
   }
 
-  async updateG$Supply() {
+  async updateSupplyAmount(toBlock: number) {
     const amount = 0 // todo get G$ supply amount from contracts v2
     const date = moment().format('YYYY-MM-DD')
 
