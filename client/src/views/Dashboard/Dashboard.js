@@ -29,6 +29,7 @@ import {
   useGetTransactionCountPerDay,
   useGetTransactionDailyAverage,
   useGetTransactionSumAmountPerDay,
+  useGetSupplyAmountPerDay,
   useGetTransactionTotal,
   useGetTransactionTotalAmount,
   useGetTransactionUniquePerDay,
@@ -111,14 +112,19 @@ export default function Dashboard() {
   const [claimPerDay = [], claimPerDayLoading] = useGetClaimPerDay([], 20)
   const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], lineChartDataLimiter)
   const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], lineChartDataLimiter)
+  const [supplyAmountPerDay = [], supplyAmountPerDayLoading] = useGetSupplyAmountPerDay([], lineChartDataLimiter)
 
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
   const [claimPerDayData, setClaimPerDayData] = useState([])
 
   useEffect(() => {
-    if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0) {
+    if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0 && supplyAmountPerDay.length > 0) {
       setTransactionAmountPerDayData([
+        {
+          id: 'Supply amount',
+          data: supplyAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
+        },
         {
           id: 'Average amount',
           data: transactionAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
@@ -129,7 +135,7 @@ export default function Dashboard() {
         },
       ])
     }
-  }, [transactionAmountPerDay, transactionSumAmountPerDay])
+  }, [transactionAmountPerDay, transactionSumAmountPerDay, supplyAmountPerDay])
 
   useEffect(() => {
     if (transactionCountPerDay.length > 0 && transactionUniquePerDay.length > 0) {
@@ -315,12 +321,12 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
             </CardHeader>
             <CardBody>
-              {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
+              {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading || supplyAmountPerDayLoading) && (
                 <GridItem container xs={12} justify="center">
                   <CircularProgress/>
                 </GridItem>
               )}
-              {!(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
+              {!(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading || supplyAmountPerDayLoading) && (
                 <Line
                   data={transactionAmountPerDayData}
                   height={400}
