@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import AboutClaimTransactionProvider from "../providers/about-claim-transactions";
+import reqLimit from "../helpers/reqLimit";
 
 const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const total = await AboutClaimTransactionProvider.getAll();
+    const total = await AboutClaimTransactionProvider.getAll(...reqLimit(req));
 
     return res.status(200).json({
       responseCode: 200,

@@ -304,6 +304,24 @@ export class blockchain {
     }
   }
 
+  async updateG$Supply() {
+    const amount = 0 // todo get G$ supply amount from contracts v2
+    const date = moment().format('YYYY-MM-DD')
+
+    log.info('got amount of G$ supply:', {
+      amount,
+      date
+    })
+
+    const aboutClaimTXs = {
+      [date]: {
+        supply_amount: Number(amount),
+      }
+    }
+
+    await AboutClaimTransactionProvider.updateOrSet(aboutClaimTXs)
+  }
+
   async updateSurvey() {
     let timestamp = moment.unix(conf.startTimeTransaction)
     let startDate = timestamp.format('YYYY-MM-DD')

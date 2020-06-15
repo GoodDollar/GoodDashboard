@@ -135,6 +135,29 @@ const getAvgAmountPerDay = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+const getSupplyAmountPerDay = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    let data = await AboutTransactionProvider.getAll(...reqLimit(req)) || [];
+
+    let result = data.map(
+      (el: any) => ({
+        x: el.date,
+        y: el.supply_amount || 0,
+      })
+    );
+
+    return res.status(200).json({
+      responseCode: 200,
+      data: result,
+      success: true
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message ? error.message : "Unexpected error occure."
+    });
+  }
+};
+
 export default {
   getTotal,
   getTotalAmount,
@@ -142,5 +165,6 @@ export default {
   getAvgCount,
   getCountPerDay,
   getAmountPerDay,
-  getAvgAmountPerDay
+  getAvgAmountPerDay,
+  getSupplyAmountPerDay
 };
