@@ -32,15 +32,15 @@ const conf = convict({
     env: 'LOG_LEVEL',
   },
   cronTimeExpression: {
-    doc: 'cron time expression - used to determine execution interval',
+    doc: 'Cron schedule string for the data refresh task',
     format: String,
     default: '*/30 * * * *',
     env: 'CRON_TIME_EXPRESSION',
   },
   cronTimeZone: {
-    doc: 'cron interval to refresh data',
+    doc: 'Timezone for the data refresh task execution context'
     format: String,
-    default: 'Asia/Jerusalem',
+    default: Intl.DateTimeFormat().resolvedOptions().timeZone, // falling back to the system tz if not set
     env: 'CRON_TIMEZONE',
   },
   startTimeTransaction: {
