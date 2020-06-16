@@ -153,7 +153,7 @@ export default function Dashboard() {
           data: transactionUniquePerDay,
         },
         {
-          id: 'Transactions',
+          id: 'Total claimers',
           data: transactionCountPerDay,
         },
 
@@ -364,7 +364,7 @@ export default function Dashboard() {
         <GridItem xs={12} lg={6} xl={4}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
+              <h4 className={classes.cardTitleWhite}>Daily G$ Usage</h4>
             </CardHeader>
             <CardBody>
               {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
@@ -403,7 +403,7 @@ export default function Dashboard() {
         <GridItem xs={12} lg={6} xl={4}>
           <Card>
             <CardHeader color="success">
-              <h4 className={classes.cardTitleWhite}>Daily count of transactions</h4>
+              <h4 className={classes.cardTitleWhite}>Daily Count Of Transactions</h4>
             </CardHeader>
             <CardBody>
               {(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
@@ -441,7 +441,7 @@ export default function Dashboard() {
         <GridItem xs={12} lg={12} xl={4}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Daily G$ claim</h4>
+              <h4 className={classes.cardTitleWhite}>Daily G$ Claim</h4>
             </CardHeader>
             <CardBody>
               {(claimPerDayLoading) && (
