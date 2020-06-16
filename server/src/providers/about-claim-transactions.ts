@@ -27,12 +27,11 @@ class AboutClaimTransactions {
         // push a query to update or create tx record
         queries.push({
           updateOne: {
-            filter: { date: txData.date },
+            filter: { date },
             update: {
-              ...txData,
+              $set: txData,
             },
             upsert: true,
-            new: true
           }
         })
       }
@@ -68,7 +67,6 @@ class AboutClaimTransactions {
               $inc: inc,
             },
             upsert: true,
-            new: true
           }
         });
       }
