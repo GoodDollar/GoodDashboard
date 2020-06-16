@@ -114,17 +114,25 @@ export default function Dashboard() {
   const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], lineChartDataLimiter)
   const [supplyAmountPerDay = [], supplyAmountPerDayLoading] = useGetSupplyAmountPerDay([], lineChartDataLimiter)
 
+  const [supplyAmountPerDayData, setSupplyAmountPerDayData] = useState([])
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
   const [claimPerDayData, setClaimPerDayData] = useState([])
 
   useEffect(() => {
-    if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0 && supplyAmountPerDay.length > 0) {
-      setTransactionAmountPerDayData([
+    if (supplyAmountPerDay.length > 0) {
+      setSupplyAmountPerDayData([
         {
-          id: 'Supply amount',
+          id: 'Total G$ Supply',
           data: supplyAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
         },
+      ])
+    }
+  }, [supplyAmountPerDay])
+
+  useEffect(() => {
+    if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0) {
+      setTransactionAmountPerDayData([
         {
           id: 'Average amount',
           data: transactionAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
@@ -135,7 +143,7 @@ export default function Dashboard() {
         },
       ])
     }
-  }, [transactionAmountPerDay, transactionSumAmountPerDay, supplyAmountPerDay])
+  }, [transactionAmountPerDay, transactionSumAmountPerDay])
 
   useEffect(() => {
     if (transactionCountPerDay.length > 0 && transactionUniquePerDay.length > 0) {
@@ -315,18 +323,56 @@ export default function Dashboard() {
         </GridItem>
       </GridContainer>
       <GridContainer>
+        <GridItem xs={12} lg={12} xl={4}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Total G$ supply</h4>
+            </CardHeader>
+            <CardBody>
+              {(supplyAmountPerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!supplyAmountPerDayLoading && (
+                <Line
+                  data={supplyAmountPerDayData}
+                  height={400}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  yFormat={v => `G$ ${priceFormat(v)}`}
+                  {...mobileLineChartProps}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows total G$ supply per day
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
         <GridItem xs={12} lg={6} xl={4}>
           <Card>
             <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
             </CardHeader>
             <CardBody>
-              {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading || supplyAmountPerDayLoading) && (
+              {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
                 <GridItem container xs={12} justify="center">
                   <CircularProgress/>
                 </GridItem>
               )}
-              {!(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading || supplyAmountPerDayLoading) && (
+              {!(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
                 <Line
                   data={transactionAmountPerDayData}
                   height={400}
