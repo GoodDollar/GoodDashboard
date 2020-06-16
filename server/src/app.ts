@@ -27,4 +27,9 @@ const job = new CronJob(conf.cronTimeExpression, function() {
 
 job.start();
 
+const exitEvents = ['SIGINT', 'SIGTERM', 'exit']
+
+// @ts-ignore
+exitEvents.forEach((event: string) => process.on(event, job.stop))
+
 export default app
