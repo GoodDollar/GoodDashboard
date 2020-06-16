@@ -31,9 +31,9 @@ const lock = new AsyncLock()
 // initializing cron jobs
 const job = new CronJob(cronTimeExpression, async () => {
   try {
-    logger.info('******** Start update blockchain data **************')
 
     await lock.acquire('updateData', async () => {
+      logger.info('******** Start update blockchain data **************')
       await Blockchain.updateData()
     })
 
