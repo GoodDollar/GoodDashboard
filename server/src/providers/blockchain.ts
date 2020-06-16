@@ -167,7 +167,7 @@ export class blockchain {
       this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),
       this.updateClaimEvents(blockNumber).catch((e) => log.error('claim events failed', e.message, e)),
       this.updateOTPLEvents(blockNumber).catch((e) => log.error('otpl events failed', e.message, e)),
-      this.updateSupplyAmount(blockNumber).catch((e) => log.error('supply amount update failed', e.message, e)),
+      this.updateSupplyAmount().catch((e) => log.error('supply amount update failed', e.message, e)),
     ])
     await propertyProvider.set('lastBlock', +blockNumber)
     this.lastBlock = +blockNumber
@@ -266,7 +266,7 @@ export class blockchain {
       })
     }
 
-    await AboutClaimTransactionProvider.updateOrSet(aboutClaimTXs)
+    await AboutClaimTransactionProvider.updateOrSetInc(aboutClaimTXs)
   }
 
   async updateOTPLEvents(toBlock: number) {
@@ -305,8 +305,12 @@ export class blockchain {
     }
   }
 
-  async updateSupplyAmount(toBlock: number) {
-    const amount = 0 // todo get G$ supply amount from contracts v2
+  async updateSupplyAmount() {
+    // todo get G$ supply amount from contracts v2
+    const amount = await this.tokenContract.methods
+      .totalSupply().call()
+      .then((n: any) => n.toNumber())
+      .catch(() => 0)
     const date = moment().format('YYYY-MM-DD')
 
     log.info('got amount of G$ supply:', {
@@ -314,13 +318,13 @@ export class blockchain {
       date
     })
 
-    const aboutClaimTXs = {
+    const listOfTransactionsData = {
       [date]: {
         supply_amount: Number(amount),
       }
     }
 
-    await AboutClaimTransactionProvider.updateOrSet(aboutClaimTXs)
+    await AboutClaimTransactionProvider.updateOrSet(listOfTransactionsData)
   }
 
   async updateSurvey() {
