@@ -32,9 +32,9 @@ const conf = convict({
     env: 'LOG_LEVEL',
   },
   cronTimeExpression: {
-    doc: 'cron interval to refresh data',
+    doc: 'cron time expression - used to determine execution interval',
     format: String,
-    default: '59 23 * * *',
+    default: '*/30 * * * *',
     env: 'CRON_TIME_EXPRESSION',
   },
   cronTimeZone: {

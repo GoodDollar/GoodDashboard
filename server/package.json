@@ -11,6 +11,7 @@
     "@types/mongoose": "^5.5.32",
     "@types/node-fetch": "^2.5.4",
     "@types/pino": "^5.8.13",
+    "async-lock": "^1.2.4",
     "bip39-light": "^1.0.7",
     "body-parser": "^1.19.0",
     "convict": "^5.2.0",
