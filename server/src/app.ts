@@ -49,6 +49,6 @@ const job = new CronJob(cronTimeExpression, async () => {
 job.start();
 
 // @ts-ignore
-['SIGINT', 'SIGTERM', 'exit'].forEach((event: string) => process.on(event, () => job.stop))
+['SIGINT', 'SIGTERM', 'exit'].forEach((event: string) => process.on(event, () => job.stop()))
 
 export default app
