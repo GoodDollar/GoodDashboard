@@ -362,6 +362,44 @@ export default function Dashboard() {
             </CardFooter>
           </Card>
         </GridItem>
+        <GridItem xs={12} lg={12} xl={4}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Total G$ supply</h4>
+            </CardHeader>
+            <CardBody>
+              {(supplyAmountPerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!supplyAmountPerDayLoading && (
+                <Line
+                  data={supplyAmountPerDayData}
+                  height={400}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  yFormat={v => `G$ ${priceFormat(v)}`}
+                  {...mobileLineChartProps}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows total G$ supply per day
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
         <GridItem xs={12} lg={6} xl={4}>
           <Card>
             <CardHeader color="primary">
