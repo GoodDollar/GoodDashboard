@@ -1,4 +1,5 @@
 import express from 'express'
+import { CronJob } from 'cron'
 import path from 'path'
 import cors from 'cors'
 import routes from './routes'
@@ -19,12 +20,11 @@ app.use((req, res) => res.sendFile(path.join(__dirname, '..', '..', 'client', 'b
 // Express configuration
 app.set('port', process.env.PORT || 3055)
 
-Blockchain.updateData()
-Blockchain.ready.then(() => {
-  setInterval(() => {
-    console.log('********Start update data**************')
-    Blockchain.updateData()
-  }, conf.timeUpdate)
-})
+const job = new CronJob(conf.cronTimeExpression, function() {
+  console.log('******** Start update data **************')
+  Blockchain.updateData()
+}, null, true, conf.cronTimeZone, null, true);
+
+job.start();
 
 export default app
