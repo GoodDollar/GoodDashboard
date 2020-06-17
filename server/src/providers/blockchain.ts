@@ -320,6 +320,7 @@ export class blockchain {
 
     const listOfTransactionsData = {
       [date]: {
+        date,
         supply_amount: Number(amount),
       }
     }
