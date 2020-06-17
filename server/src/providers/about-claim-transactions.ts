@@ -15,7 +15,7 @@ class AboutClaimTransactions {
 
   async updateOrSet(listOfTransactionsData: any) {
     // verify if any data received - otherwise return true
-    if (!(listOfTransactionsData && Object.keys(listOfTransactionsData).length)) {
+    if (listOfTransactionsData && Object.keys(listOfTransactionsData).length) {
       // the array where db queries accumulates
       const queries = []
 
