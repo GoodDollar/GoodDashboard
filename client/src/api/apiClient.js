@@ -23,6 +23,7 @@ export default class ApiClient {
   getTransactionUniquePerDay = (limit) => this.http.get('/transactions/unique-per-day', {limit})
   getTransactionAmountPerDay = (limit) => this.http.get('/transactions/avg-amount-per-day', {limit})
   getTransactionSumAmountPerDay = (limit) => this.http.get('/transactions/total-amount-per-day', {limit})
+  getSupplyAmountPerDay = (limit) => this.http.get('/transactions/supply-amount-per-day', {limit})
   getClaimPerDay = (limit) => this.http.get('/transactions/claim', {limit})
 
   getGDTotal = () => this.http.get('/gd/total')

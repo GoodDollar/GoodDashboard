@@ -23,12 +23,13 @@ import Line from 'components/Charts/Line'
 import Balance from 'components/Balance'
 import styles from 'assets/jss/material-dashboard-react/views/dashboardStyle'
 import {
-  useGetGDInEscrow,
-  useGetGDTotal,
+  // useGetGDInEscrow,
+  // useGetGDTotal,
   useGetTransactionAmountPerDay,
   useGetTransactionCountPerDay,
   useGetTransactionDailyAverage,
   useGetTransactionSumAmountPerDay,
+  useGetSupplyAmountPerDay,
   useGetTransactionTotal,
   useGetTransactionTotalAmount,
   useGetTransactionUniquePerDay,
@@ -111,10 +112,23 @@ export default function Dashboard() {
   const [claimPerDay = [], claimPerDayLoading] = useGetClaimPerDay([], 20)
   const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], lineChartDataLimiter)
   const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], lineChartDataLimiter)
+  const [supplyAmountPerDay = [], supplyAmountPerDayLoading] = useGetSupplyAmountPerDay([], lineChartDataLimiter)
 
+  const [supplyAmountPerDayData, setSupplyAmountPerDayData] = useState([])
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
   const [claimPerDayData, setClaimPerDayData] = useState([])
+
+  useEffect(() => {
+    if (supplyAmountPerDay.length > 0) {
+      setSupplyAmountPerDayData([
+        {
+          id: 'Total G$ Supply',
+          data: supplyAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
+        },
+      ])
+    }
+  }, [supplyAmountPerDay])
 
   useEffect(() => {
     if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0) {
@@ -139,7 +153,7 @@ export default function Dashboard() {
           data: transactionUniquePerDay,
         },
         {
-          id: 'Transactions',
+          id: 'Total claimers',
           data: transactionCountPerDay,
         },
 
@@ -168,9 +182,10 @@ export default function Dashboard() {
       ])
     }
   }, [claimPerDay])
+
   // gd
-  const [GDTotal] = useGetGDTotal()
-  const [GDInEscrow] = useGetGDInEscrow()
+  // const [GDTotal] = useGetGDTotal()
+  // const [GDInEscrow] = useGetGDInEscrow()
 
   const classes = useStyles()
 
@@ -195,7 +210,7 @@ export default function Dashboard() {
   return (
     <div>
       <GridContainer>
-        <GridItem xs={12} md={6} lg={3}>
+        {/*<GridItem xs={12} md={6} lg={3}>
           <Card>
             <CardHeader color="primary" stats icon>
               <CardIcon color="primary">
@@ -215,7 +230,7 @@ export default function Dashboard() {
               </div>
             </CardFooter>
           </Card>
-        </GridItem>
+        </GridItem>*/}
         <GridItem xs={12} md={6} lg={3}>
           <Card>
             <CardHeader color="warning" stats icon>
@@ -309,10 +324,86 @@ export default function Dashboard() {
         </GridItem>
       </GridContainer>
       <GridContainer>
+        <GridItem xs={12} lg={12} xl={4}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Daily G$ Claim</h4>
+            </CardHeader>
+            <CardBody>
+              {(claimPerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!claimPerDayLoading && (
+                <Line
+                  data={claimPerDayData}
+                  height={400}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  yFormat={claimPerDayFormatter}
+                  {...mobileLineChartProps}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows total volume and number of claim transactions per day
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} lg={12} xl={4}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Total G$ supply</h4>
+            </CardHeader>
+            <CardBody>
+              {(supplyAmountPerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!supplyAmountPerDayLoading && (
+                <Line
+                  data={supplyAmountPerDayData}
+                  height={400}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  yFormat={v => `G$ ${priceFormat(v)}`}
+                  {...mobileLineChartProps}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows total G$ supply per day
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
         <GridItem xs={12} lg={6} xl={4}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Daily G$ usage</h4>
+              <h4 className={classes.cardTitleWhite}>Daily G$ Usage</h4>
             </CardHeader>
             <CardBody>
               {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
@@ -351,7 +442,7 @@ export default function Dashboard() {
         <GridItem xs={12} lg={6} xl={4}>
           <Card>
             <CardHeader color="success">
-              <h4 className={classes.cardTitleWhite}>Daily count of transactions</h4>
+              <h4 className={classes.cardTitleWhite}>Daily Count Of Transactions</h4>
             </CardHeader>
             <CardBody>
               {(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
@@ -382,44 +473,6 @@ export default function Dashboard() {
             <CardFooter stats>
               <div className={classes.stats}>
                 Chart shows number of transactions and number of unique users per day
-              </div>
-            </CardFooter>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} lg={12} xl={4}>
-          <Card>
-            <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Daily G$ claim</h4>
-            </CardHeader>
-            <CardBody>
-              {(claimPerDayLoading) && (
-                <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
-                </GridItem>
-              )}
-              {!claimPerDayLoading && (
-                <Line
-                  data={claimPerDayData}
-                  height={400}
-                  xScale={{
-                    type: 'time',
-                    format: '%Y-%m-%d',
-                    precision: 'day',
-                  }}
-                  axisBottom={{
-                    format: '%b %d',
-                    tickValues: 'every 5 days',
-                    legendOffset: -12,
-                  }}
-                  xFormat="time:%Y-%m-%d"
-                  yFormat={claimPerDayFormatter}
-                  {...mobileLineChartProps}
-                />
-              )}
-            </CardBody>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                Chart shows total volume and number of claim transactions per day
               </div>
             </CardFooter>
           </Card>

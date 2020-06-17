@@ -14,6 +14,6 @@ router.get('/count-per-day', transaction.getCountPerDay)
 router.get('/unique-per-day', transaction.getUniquePerDay)
 router.get('/total-amount-per-day', transaction.getAmountPerDay)
 router.get('/avg-amount-per-day', transaction.getAvgAmountPerDay)
-
+router.get('/supply-amount-per-day', transaction.getSupplyAmountPerDay)
 
 export default router

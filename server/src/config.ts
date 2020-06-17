@@ -31,11 +31,17 @@ const conf = convict({
     default: 'debug',
     env: 'LOG_LEVEL',
   },
-  timeUpdate: {
-    doc: 'data refresh interval',
-    format: Number,
-    default: 1800000,
-    env: 'DATA_REFRESH_INTERVAL',
+  cronTimeExpression: {
+    doc: 'Cron schedule string for the data refresh task',
+    format: String,
+    default: '*/30 * * * *',
+    env: 'CRON_TIME_EXPRESSION',
+  },
+  cronTimeZone: {
+    doc: 'Timezone for the data refresh task execution context'
+    format: String,
+    default: Intl.DateTimeFormat().resolvedOptions().timeZone, // falling back to the system tz if not set
+    env: 'CRON_TIMEZONE',
   },
   startTimeTransaction: {
     doc: 'start time transaction',
