@@ -210,120 +210,6 @@ export default function Dashboard() {
   return (
     <div>
       <GridContainer>
-        {/*<GridItem xs={12} md={6} lg={3}>
-          <Card>
-            <CardHeader color="primary" stats icon>
-              <CardIcon color="primary">
-                <DataUsageIcon/>
-              </CardIcon>
-              <p className={classes.cardCategory}>General</p>
-              <Primary>
-                GD in circulation: <Balance amount={GDTotal} fromCents/>
-              </Primary>
-              <Primary>
-                GD held in escrow: <Balance amount={GDInEscrow} fromCents/>
-              </Primary>
-            </CardHeader>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                GD in circulation, GD held in escrow
-              </div>
-            </CardFooter>
-          </Card>
-        </GridItem>*/}
-        <GridItem xs={12} md={6} lg={3}>
-          <Card>
-            <CardHeader color="warning" stats icon>
-              <CardIcon color="warning">
-                <AccountBalanceWalletIcon/>
-              </CardIcon>
-              <p className={classes.cardCategory}>User Accounts Balance</p>
-              <Warning>
-                Top: {!walletTopMedianLowLoading && (
-                <Balance amount={walletTopMedianLow.top} fromCents/>
-              )}
-              </Warning>
-              <Warning>
-                Median: {!walletTopMedianLowLoading && (
-                <Balance amount={walletTopMedianLow.median} fromCents/>
-              )}
-              </Warning>
-              <Warning>
-                Average: {!walletTopMedianLowLoading && (
-                <Balance amount={walletTopMedianLow.avg} fromCents/>
-              )}
-              </Warning>
-              <Warning>
-                Low: {!walletTopMedianLowLoading && (
-                <Balance amount={walletTopMedianLow.low} fromCents/>
-              )}
-              </Warning>
-            </CardHeader>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                User Accounts Balance (top, median, average, low)
-              </div>
-            </CardFooter>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} md={6} lg={3}>
-          <Card>
-            <CardHeader color="info" stats icon className={classes.cardHeader}>
-              <CardIcon color="info">
-                <ReceiptIcon/>
-              </CardIcon>
-              <p className={classes.cardCategory}>User Transactions</p>
-              <Info>
-                Top: {!transactionTopMedianLowLoading && transactionTopMedianLow.top}
-              </Info>
-              <Info>
-                Median: {!transactionTopMedianLowLoading && transactionTopMedianLow.median}
-              </Info>
-              <Info>
-                Average: {!transactionTopMedianLowLoading && priceFormat(transactionTopMedianLow.avg)}
-              </Info>
-              <Info>
-                Low: {!transactionTopMedianLowLoading && transactionTopMedianLow.low}
-              </Info>
-            </CardHeader>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                User Transactions (top, median, average, low)
-              </div>
-            </CardFooter>
-          </Card>
-        </GridItem>
-        <GridItem xs={12} md={6} lg={3}>
-          <Card>
-            <CardHeader color="success" stats icon>
-              <CardIcon color="success">
-                <EqualizerIcon/>
-              </CardIcon>
-              <p className={classes.cardCategory}>Transactions</p>
-              <Success>
-                Total: {!transactionTotalLoading && transactionTotal}
-              </Success>
-              <Success>
-                Total Amount: {!transactionTotalAmountLoading && transactionTotalAmount &&
-              <Balance amount={transactionTotalAmount} fromCents/>}
-              </Success>
-              <Success>
-                Average Daily TXs: {!transactionDailyAverageLoading && transactionDailyAverage &&
-              priceFormat(transactionDailyAverage)}
-              </Success>
-              <Success>
-                &nbsp;
-              </Success>
-            </CardHeader>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                Transactions (total, total amount, Average Daily TXs)
-              </div>
-            </CardFooter>
-          </Card>
-        </GridItem>
-      </GridContainer>
-      <GridContainer>
         <GridItem xs={12} lg={12} xl={4}>
           <Card>
             <CardHeader color="primary">
@@ -473,6 +359,120 @@ export default function Dashboard() {
             <CardFooter stats>
               <div className={classes.stats}>
                 Chart shows number of transactions and number of unique users per day
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+      </GridContainer>
+      <GridContainer>
+        {/*<GridItem xs={12} md={6} lg={3}>
+          <Card>
+            <CardHeader color="primary" stats icon>
+              <CardIcon color="primary">
+                <DataUsageIcon/>
+              </CardIcon>
+              <p className={classes.cardCategory}>General</p>
+              <Primary>
+                GD in circulation: <Balance amount={GDTotal} fromCents/>
+              </Primary>
+              <Primary>
+                GD held in escrow: <Balance amount={GDInEscrow} fromCents/>
+              </Primary>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                GD in circulation, GD held in escrow
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>*/}
+        <GridItem xs={12} md={6} lg={3}>
+          <Card>
+            <CardHeader color="warning" stats icon>
+              <CardIcon color="warning">
+                <AccountBalanceWalletIcon/>
+              </CardIcon>
+              <p className={classes.cardCategory}>User Accounts Balance</p>
+              <Warning>
+                Top: {!walletTopMedianLowLoading && (
+                <Balance amount={walletTopMedianLow.top} fromCents/>
+              )}
+              </Warning>
+              <Warning>
+                Median: {!walletTopMedianLowLoading && (
+                <Balance amount={walletTopMedianLow.median} fromCents/>
+              )}
+              </Warning>
+              <Warning>
+                Average: {!walletTopMedianLowLoading && (
+                <Balance amount={walletTopMedianLow.avg} fromCents/>
+              )}
+              </Warning>
+              <Warning>
+                Low: {!walletTopMedianLowLoading && (
+                <Balance amount={walletTopMedianLow.low} fromCents/>
+              )}
+              </Warning>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                User Accounts Balance (top, median, average, low)
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} md={6} lg={3}>
+          <Card>
+            <CardHeader color="info" stats icon className={classes.cardHeader}>
+              <CardIcon color="info">
+                <ReceiptIcon/>
+              </CardIcon>
+              <p className={classes.cardCategory}>User Transactions</p>
+              <Info>
+                Top: {!transactionTopMedianLowLoading && transactionTopMedianLow.top}
+              </Info>
+              <Info>
+                Median: {!transactionTopMedianLowLoading && transactionTopMedianLow.median}
+              </Info>
+              <Info>
+                Average: {!transactionTopMedianLowLoading && priceFormat(transactionTopMedianLow.avg)}
+              </Info>
+              <Info>
+                Low: {!transactionTopMedianLowLoading && transactionTopMedianLow.low}
+              </Info>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                User Transactions (top, median, average, low)
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} md={6} lg={3}>
+          <Card>
+            <CardHeader color="success" stats icon>
+              <CardIcon color="success">
+                <EqualizerIcon/>
+              </CardIcon>
+              <p className={classes.cardCategory}>Transactions</p>
+              <Success>
+                Total: {!transactionTotalLoading && transactionTotal}
+              </Success>
+              <Success>
+                Total Amount: {!transactionTotalAmountLoading && transactionTotalAmount &&
+              <Balance amount={transactionTotalAmount} fromCents/>}
+              </Success>
+              <Success>
+                Average Daily TXs: {!transactionDailyAverageLoading && transactionDailyAverage &&
+              priceFormat(transactionDailyAverage)}
+              </Success>
+              <Success>
+                &nbsp;
+              </Success>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Transactions (total, total amount, Average Daily TXs)
               </div>
             </CardFooter>
           </Card>
