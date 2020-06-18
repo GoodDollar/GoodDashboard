@@ -1,6 +1,6 @@
 import AboutClaimTransactionModel from "../models/about-claim-transactions";
 
-type aboutClaimTransactions = {
+type aboutClaimTransactionsType = {
   count_txs: number;
   total_amount_txs: number;
   date: string;
@@ -49,7 +49,7 @@ class AboutClaimTransactions {
 
       for (const i in aboutClaimTransactions) {
         // @ts-ignore
-        let aboutClaimTransaction: aboutClaimTransactions = aboutClaimTransactions[i];
+        let aboutClaimTransaction: aboutClaimTransactionsType = aboutClaimTransactions[i];
         let inc = {};
         for (let field in aboutClaimTransaction) {
           // @ts-ignore
@@ -71,7 +71,9 @@ class AboutClaimTransactions {
         });
       }
 
-      await this.model.bulkWrite(params);
+      if (params.length) {
+        await this.model.bulkWrite(params);
+      }
     }
 
     return true;

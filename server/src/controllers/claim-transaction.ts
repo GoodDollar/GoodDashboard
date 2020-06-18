@@ -4,11 +4,17 @@ import reqLimit from "../helpers/reqLimit";
 
 const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const total = await AboutClaimTransactionProvider.getAll(...reqLimit(req));
+    const data = await AboutClaimTransactionProvider.getAll(...reqLimit(req));
+
+    const result = data.map((rec: any) => ({
+      total_amount_txs: rec.total_amount_txs || 0,
+      count_txs: rec.count_txs || 0,
+      date: rec.date,
+    }));
 
     return res.status(200).json({
       responseCode: 200,
-      data: total,
+      data: result,
       success: true
     });
   } catch (error) {
@@ -22,7 +28,7 @@ const getSupplyAmountPerDay = async (req: Request, res: Response, next: NextFunc
   try {
     let data = await AboutClaimTransactionProvider.getAll(...reqLimit(req)) || [];
 
-    let result = data.map(
+    const result = data.map(
       (el: any) => ({
         x: el.date,
         y: el.supply_amount || 0,
