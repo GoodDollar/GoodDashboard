@@ -25,6 +25,7 @@ import styles from 'assets/jss/material-dashboard-react/views/dashboardStyle'
 import {
   // useGetGDInEscrow,
   // useGetGDTotal,
+  useGetTotalImpactStatistics,
   useGetTransactionAmountPerDay,
   useGetTransactionCountPerDay,
   useGetTransactionDailyAverage,
@@ -186,6 +187,14 @@ export default function Dashboard() {
   // gd
   // const [GDTotal] = useGetGDTotal()
   // const [GDInEscrow] = useGetGDInEscrow()
+  const [
+    {
+      totalUniqueClaimers,
+      totalUBIDistributed,
+      totalGDVolume,
+    } = {},
+    totalImpactStatisticsLoading,
+  ] = useGetTotalImpactStatistics()
 
   const classes = useStyles()
 
@@ -209,6 +218,62 @@ export default function Dashboard() {
 
   return (
     <div>
+      <GridContainer>
+        <GridItem xs={12} md={6} lg={3}>
+          <Card>
+            <CardHeader color="warning" stats icon>
+              <CardIcon color="warning">
+                <AccountBalanceWalletIcon/>
+              </CardIcon>
+              <p className={classes.cardCategory}>Total Unique Claimers</p>
+              <Warning>
+                Value: {!totalImpactStatisticsLoading && totalUniqueClaimers}
+              </Warning>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Total Unique Claimers
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} md={6} lg={3}>
+          <Card>
+            <CardHeader color="info" stats icon className={classes.cardHeader}>
+              <CardIcon color="info">
+                <ReceiptIcon/>
+              </CardIcon>
+              <p className={classes.cardCategory}>Total UBI Distributed</p>
+              <Info>
+                Value: {!totalImpactStatisticsLoading && <Balance amount={totalUBIDistributed} fromCents />}
+              </Info>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Total UBI Distributed
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} md={6} lg={3}>
+          <Card>
+            <CardHeader color="success" stats icon>
+              <CardIcon color="success">
+                <EqualizerIcon/>
+              </CardIcon>
+              <p className={classes.cardCategory}>Total G$ Volume</p>
+              <Success>
+                Value: {!totalImpactStatisticsLoading && <Balance amount={totalGDVolume} fromCents />}
+              </Success>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Total G$ Volume
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+      </GridContainer>
       <GridContainer>
         <GridItem xs={12} lg={12} xl={4}>
           <Card>
