@@ -15,6 +15,8 @@ import surveyProvider from './survey'
 import surveyDB from '../gun/models/survey'
 import AboutTransactionProvider from './about-transaction'
 import AboutClaimTransactionProvider from './about-claim-transactions'
+import AddressesClaimedProvider from './addresses-claimed'
+import PropertyProvider from './property'
 import Amplitude from './amplitude'
 
 import * as web3Utils from 'web3-utils'
@@ -188,6 +190,7 @@ export class blockchain {
     await walletsProvider.updateOrSet(newBalanceWallets)
     console.log('Finish update wallets balance')
   }
+
   async updateBonusEvents(toBlock: number) {
     const allEvents = await this.bonusContract.getPastEvents('BonusClaimed', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
@@ -221,17 +224,42 @@ export class blockchain {
     }
   }
 
+  /*
+  * Checking if provided addresses did claim at least once
+  * if not - then mark as claimed and increment total unique claimers value
+  *
+  * @param {string} address - the address to be checked
+  *
+  * @return {Promise<void>}
+  */
+  async checkAddressesClaimed(arrayOfAddresses: string[]): Promise<void> {
+    const promises = arrayOfAddresses.map(async address => {
+      if (!(await AddressesClaimedProvider.checkIfExists(address))) {
+        await PropertyProvider.increment('totalUniqueClaimers')
+        await AddressesClaimedProvider.create({ address })
+      }
+    })
+
+    await Promise.all(promises)
+  }
+
   async updateClaimEvents(toBlock: number) {
     const allEvents = await this.ubiContract.getPastEvents('UBIClaimed', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
     })
-    let aboutClaimTXs: any = {}
+
+    const aboutClaimTXs: any = {}
+    const allAddresses: string[] = []
+
     log.info('got Claim events:', allEvents.length)
 
     for (let index in allEvents) {
       let event = allEvents[index]
       let toAddr = event.returnValues.claimer
+
+      allAddresses.push(toAddr)
+
       let blockNumber = event.blockNumber
       const txTime = (await this.web3.eth.getBlock(blockNumber)).timestamp
       if (+txTime < +conf.startTimeTransaction) {
@@ -266,7 +294,13 @@ export class blockchain {
       })
     }
 
-    await AboutClaimTransactionProvider.updateOrSetInc(aboutClaimTXs)
+    if (allAddresses.length) {
+      await this.checkAddressesClaimed(allAddresses)
+    }
+
+    if (Object.keys(aboutClaimTXs).length) {
+      await AboutClaimTransactionProvider.updateOrSetInc(aboutClaimTXs)
+    }
   }
 
   async updateOTPLEvents(toBlock: number) {
