@@ -251,6 +251,7 @@ export class blockchain {
 
     const aboutClaimTXs: any = {}
     const allAddresses: string[] = []
+    let totalUBIDistributed: number = 0
 
     log.info('got Claim events:', allEvents.length)
 
@@ -265,10 +266,12 @@ export class blockchain {
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
-      let timestamp = moment.unix(txTime)
-      let date = timestamp.format('YYYY-MM-DD')
 
       const amountTX = web3Utils.hexToNumber(event.returnValues.amount)
+      totalUBIDistributed += amountTX
+
+      let timestamp = moment.unix(txTime)
+      let date = timestamp.format('YYYY-MM-DD')
 
       if (aboutClaimTXs.hasOwnProperty(date)) {
         aboutClaimTXs[date].total_amount_txs += amountTX
@@ -292,6 +295,10 @@ export class blockchain {
           isToSystem: this.isClientWallet(toAddr) === false,
         },
       })
+    }
+
+    if (totalUBIDistributed) {
+      await PropertyProvider.increment('totalUBIDistributed', totalUBIDistributed)
     }
 
     if (allAddresses.length) {
