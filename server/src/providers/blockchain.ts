@@ -402,13 +402,17 @@ export class blockchain {
     let wallets: any = {}
     let aboutTXs: any = {}
     let lastBlock = this.lastBlock
-    log.info('last Block', lastBlock)
+    let totalGDVolume: number = 0
+
+    log.info('updateListWalletsAndTransactions - last Block', lastBlock)
 
     const allEvents = await this.tokenContract.getPastEvents('Transfer', {
       fromBlock: +lastBlock > 0 ? +lastBlock : 0,
       toBlock,
     })
-    log.info('got Transfer events:', allEvents.length)
+
+    log.info('updateListWalletsAndTransactions - got Transfer events:', allEvents.length)
+
     for (let index in allEvents) {
       let event = allEvents[index]
       let fromAddr = event.returnValues.from
@@ -421,6 +425,7 @@ export class blockchain {
       }
 
       const amountTX = web3Utils.hexToNumber(event.returnValues.value)
+      totalGDVolume += amountTX
 
       this.amplitude.logEvent({
         user_id: fromAddr,
@@ -486,6 +491,10 @@ export class blockchain {
           }
         }
       }
+    }
+
+    if (totalGDVolume) {
+      await PropertyProvider.increment('totalGDVolume', totalGDVolume)
     }
 
     await walletsProvider.updateOrSet(wallets)
