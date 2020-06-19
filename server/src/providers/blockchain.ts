@@ -257,12 +257,9 @@ export class blockchain {
 
     for (let index in allEvents) {
       let event = allEvents[index]
-      let toAddr = event.returnValues.claimer
-
-      allAddresses.push(toAddr)
-
       let blockNumber = event.blockNumber
       const txTime = (await this.web3.eth.getBlock(blockNumber)).timestamp
+
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
@@ -283,6 +280,9 @@ export class blockchain {
           count_txs: 1,
         }
       }
+
+      let toAddr = event.returnValues.claimer
+      allAddresses.push(toAddr)
 
       this.amplitude.logEvent({
         user_id: toAddr,
