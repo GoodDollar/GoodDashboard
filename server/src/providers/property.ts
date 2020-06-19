@@ -63,7 +63,7 @@ class Property {
   * @return {Promise<boolean>}
   */
   async increment(property: string, by: number = 1): Promise<boolean> {
-    const value = await this.get(property)
+    const value = await this.get(property) || 0
     const newValue = Number(value) + by
 
     await this.set(property, newValue)

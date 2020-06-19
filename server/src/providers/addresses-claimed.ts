@@ -7,6 +7,11 @@ type AddressesClaimedType = {
   address: string;
 };
 
+type MultipleExistsType = {
+  existed: string[],
+  nonExisted: string[],
+};
+
 class AddressesClaimed {
   model: any;
 
@@ -32,6 +37,29 @@ class AddressesClaimed {
     return false;
   }
 
+  /**
+   * Create multiple records with a provided claimed addresses
+   *
+   * @param {string[]} addresses
+   *
+   * @returns {Promise<boolean>}
+   */
+  async bulkCreate(addresses: string[]): Promise<boolean> {
+    try {
+      const insertDocs = addresses.map(address => ({
+        insertOne: { address },
+      }))
+
+      await this.model.bulkWrite(insertDocs)
+
+      return true
+    } catch (ex) {
+      log.error("Creating new addresses-claimed record failed [mongo actions]:", { message: ex.message });
+    }
+
+    return false
+  }
+
   /*
   * Check if the record with provided address already exists
   *
@@ -41,6 +69,29 @@ class AddressesClaimed {
   */
   async checkIfExists(address: string): Promise<boolean> {
     return Boolean(await this.model.findOne({ address }).lean())
+  }
+
+  /*
+  * Check if the provided addresses already exist
+  *
+  * @param {string[]} addresses
+  *
+  * @return {Promise<MultipleExistsType>}
+  */
+  async checkIfExistsMultiple(addresses: string[]): Promise<MultipleExistsType> {
+    const dbResult = await this.model.find({
+      address: {
+        $in: addresses
+      }
+    }, 'address').lean()
+
+    const existed = dbResult.map((record: any) => record.address)
+    const nonExisted = addresses.filter((address: string) => !existed.includes(address))
+
+    return {
+      existed,
+      nonExisted,
+    }
   }
 
   /**

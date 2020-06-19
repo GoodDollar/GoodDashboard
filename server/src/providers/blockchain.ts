@@ -233,16 +233,20 @@ export class blockchain {
   * @return {Promise<void>}
   */
   async checkAddressesClaimed(arrayOfAddresses: string[]): Promise<void> {
+    // there could be duplicates, so need to get unique values
+    // new Set([...]) -> will return unique values from received array
     const uniqueAddresses = [...new Set(arrayOfAddresses)]
 
-    const promises = uniqueAddresses.map(async address => {
-      if (!(await AddressesClaimedProvider.checkIfExists(address))) {
-        await PropertyProvider.increment('totalUniqueClaimers')
-        await AddressesClaimedProvider.create({ address })
-      }
-    })
+    // check multiple addresses exists by one db query
+    const { nonExisted } = await AddressesClaimedProvider.checkIfExistsMultiple(uniqueAddresses)
+    const newAddressesCount: number = nonExisted.length
 
-    await Promise.all(promises)
+    // if there is some not existed addresses then increment total unique claimers
+    // and bulk create for non existed addresses[
+    if (newAddressesCount) {
+      await AddressesClaimedProvider.bulkCreate(nonExisted)
+      await PropertyProvider.increment('totalUniqueClaimers', newAddressesCount)
+    }
   }
 
   async updateClaimEvents(toBlock: number) {
