@@ -233,7 +233,9 @@ export class blockchain {
   * @return {Promise<void>}
   */
   async checkAddressesClaimed(arrayOfAddresses: string[]): Promise<void> {
-    const promises = arrayOfAddresses.map(async address => {
+    const uniqueAddresses = [...new Set(arrayOfAddresses)]
+
+    const promises = uniqueAddresses.map(async address => {
       if (!(await AddressesClaimedProvider.checkIfExists(address))) {
         await PropertyProvider.increment('totalUniqueClaimers')
         await AddressesClaimedProvider.create({ address })
