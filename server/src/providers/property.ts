@@ -63,14 +63,12 @@ class Property {
   * @return {Promise<boolean>}
   */
   async increment(property: string, by: number = 1): Promise<boolean> {
-    try {
-      await this.model.updateOne({ property }, { $inc: { property: by } }, { upsert: true })
-      return true
-    } catch (ex) {
-      log.error('Increment property value failed [mongo actions]:', { message: ex.message, property, by })
-    }
+    const value = await this.get(property)
+    const newValue = Number(value) + by
 
-    return false
+    await this.set(property, newValue)
+
+    return true
   }
 
 }
