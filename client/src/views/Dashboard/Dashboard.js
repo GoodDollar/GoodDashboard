@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
-import DataUsageIcon from "@material-ui/icons/DataUsage"
+// import DataUsageIcon from "@material-ui/icons/DataUsage"
 import ReceiptIcon from '@material-ui/icons/Receipt'
 import EqualizerIcon from '@material-ui/icons/Equalizer'
 import Warning from 'components/Typography/Warning'
 import Info from 'components/Typography/Info'
 import Success from 'components/Typography/Success'
-import Primary from 'components/Typography/Primary'
+// import Primary from 'components/Typography/Primary'
 import GridItem from 'components/Grid/GridItem'
 import GridContainer from 'components/Grid/GridContainer'
 import Table from 'components/Table/Table'
@@ -45,6 +45,8 @@ import priceFormat from '../../utils/priceFormat'
 import isMobileOnly from '../../utils/isMobile'
 import TooltipUserInfo from '../UserProfile/TooltipUserInfo'
 import { useSeriesSpecificValueFormatter } from '../../hooks/nivo'
+import config from "../../config";
+
 const useStyles = makeStyles(styles)
 
 const prepareHistogramBalanceData = histogram => Object.keys(histogram).map((key) => {
@@ -210,7 +212,35 @@ export default function Dashboard() {
   return (
     <div>
       <GridContainer>
-        <GridItem xs={12} lg={12} xl={4}>
+        <GridItem xs={12} lg={12} xl={6}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Google Data Studio</h4>
+            </CardHeader>
+            <CardBody className={classes.googleMapCardBody}>
+              <iframe
+                width="100%"
+                src={config.embedDataStudioUrl}
+                frameBorder="0"
+                style={{
+                  border: 0,
+                  height: '100%',
+                  width: '100%',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                }}
+                allowFullScreen
+              />
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Google Data Studio
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} lg={12} xl={6}>
           <Card>
             <CardHeader color="primary">
               <h4 className={classes.cardTitleWhite}>Daily G$ Claim</h4>
