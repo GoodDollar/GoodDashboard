@@ -226,7 +226,7 @@ export class blockchain {
 
   /*
   * Checking if provided addresses did claim at least once
-  * if not - then mark as claimed and increment total unique claimers value
+  * if not - increment total unique claimers value
   *
   * @param {string} address - the address to be checked
   *
@@ -237,15 +237,12 @@ export class blockchain {
     // new Set([...]) -> will return unique values from received array
     const uniqueAddresses = [...new Set(arrayOfAddresses)]
 
-    // check multiple addresses exists by one db query
-    const { nonExisted } = await AddressesClaimedProvider.checkIfExistsMultiple(uniqueAddresses)
-    const newAddressesCount: number = nonExisted.length
+    // check multiple addresses exists and create new records in case if not exist by one db query
+    const { nonExistedCount } = await AddressesClaimedProvider.checkIfExistsMultiple(uniqueAddresses)
 
     // if there is some not existed addresses then increment total unique claimers
-    // and bulk create for non existed addresses[
-    if (newAddressesCount) {
-      await AddressesClaimedProvider.bulkCreate(nonExisted)
-      await PropertyProvider.increment('totalUniqueClaimers', newAddressesCount)
+    if (nonExistedCount) {
+      await PropertyProvider.increment('totalUniqueClaimers', nonExistedCount)
     }
   }
 

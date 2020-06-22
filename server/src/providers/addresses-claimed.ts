@@ -8,8 +8,8 @@ type AddressesClaimedType = {
 };
 
 type MultipleExistsType = {
-  existed: string[],
-  nonExisted: string[],
+  existedCount: number,
+  nonExistedCount: number,
 };
 
 class AddressesClaimed {
@@ -72,25 +72,34 @@ class AddressesClaimed {
   }
 
   /*
-  * Check if the provided addresses already exist
+  * Check if the provided addresses already exists
+  * create new records in case if not exists
   *
   * @param {string[]} addresses
   *
   * @return {Promise<MultipleExistsType>}
   */
   async checkIfExistsMultiple(addresses: string[]): Promise<MultipleExistsType> {
-    const dbResult = await this.model.find({
-      address: {
-        $in: addresses
-      }
-    }, 'address').lean()
+    const updateDocs = addresses.map(address => ({
+      updateOne: {
+        filter: { address },
+        update: {
+          $setOnInsert: {
+            address,
+          },
+        },
+        upsert: true
+      },
+    }))
 
-    const existed = dbResult.map((record: any) => record.address)
-    const nonExisted = addresses.filter((address: string) => !existed.includes(address))
+    const dbResult = await this.model.bulkWrite(updateDocs)
+
+    const nonExistedCount: number = dbResult.nUpserted
+    const existedCount: number = addresses.length - nonExistedCount
 
     return {
-      existed,
-      nonExisted,
+      existedCount,
+      nonExistedCount,
     }
   }
 
