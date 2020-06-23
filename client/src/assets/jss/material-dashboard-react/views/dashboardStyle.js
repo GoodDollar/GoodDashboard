@@ -79,7 +79,7 @@ const dashboardStyle = {
   },
   googleMapCardBody: {
     overflow: 'hidden',
-    paddingTop: '75%',
+    paddingTop: '45%',
     position: 'relative',
     marginTop: '10px',
   },
