@@ -21,5 +21,6 @@
   "bugs": {
     "url": "https://github.com/GoodDollar/GoodDashboard/issues"
   },
-  "homepage": "https://github.com/GoodDollar/GoodDashboard#readme"
+  "homepage": "https://github.com/GoodDollar/GoodDashboard#readme",
+  "dependencies": {}
 }

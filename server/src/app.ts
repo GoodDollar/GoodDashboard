@@ -3,10 +3,11 @@ import path from 'path'
 import cors from 'cors'
 import routes from './routes'
 import bodyParser from 'body-parser'
-
+import compression from 'compression'
 // Create Express server
 const app = express()
 
+app.use(compression())
 app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))

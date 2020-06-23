@@ -38,7 +38,7 @@ const conf = convict({
     env: 'CRON_TIME_EXPRESSION',
   },
   cronTimeZone: {
-    doc: 'Timezone for the data refresh task execution context'
+    doc: 'Timezone for the data refresh task execution context',
     format: String,
     default: Intl.DateTimeFormat().resolvedOptions().timeZone, // falling back to the system tz if not set
     env: 'CRON_TIMEZONE',
@@ -59,7 +59,7 @@ const conf = convict({
     doc: 'step distribution histogram wallet balance',
     format: Number,
     default: 'http://localhost:8765/gun',
-    env: 'GUN_PUBLIC_URL'
+    env: 'GUN_PUBLIC_URL',
   },
   stepDistributionHistogramWalletTransaction: {
     doc: 'step distribution histogram wallet transaction',
@@ -67,7 +67,7 @@ const conf = convict({
     default: 5,
     env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_TRANSACTION',
   },
-  systemAccounts:{
+  systemAccounts: {
     doc: 'system accounts address',
     format: Array,
     default: [],
