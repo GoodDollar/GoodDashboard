@@ -76,7 +76,13 @@ const dashboardStyle = {
       fontWeight: "400",
       lineHeight: "1"
     }
-  }
+  },
+  googleMapCardBody: {
+    overflow: 'hidden',
+    paddingTop: '75%',
+    position: 'relative',
+    marginTop: '10px',
+  },
 };
 
 export default dashboardStyle;
