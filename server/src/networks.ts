@@ -1,9 +1,22 @@
+const { ALCHEMY_API, INFURA_API } = process.env
 
 const networks = {
+  1: { // production-mainnet
+    network_id: 1,
+    web3Transport: 'HttpProvider',
+    httpWeb3Provider: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API}`,
+    websocketWeb3Provider: 'wss://mainnet.infura.io/ws'
+  },
+  3: { // fuse-mainnet
+    network_id: 3,
+    web3Transport: 'HttpProvider',
+    httpWeb3Provider: `https://eth-ropsten.alchemyapi.io/v2/${ALCHEMY_API}`,
+    websocketWeb3Provider: 'wss://ropsten.infura.io/ws'
+  },
   42: {
     network_id: 42,
     web3Transport: "HttpProvider",
-    httpWeb3Provider: `https://kovan.infura.io/v3/${process.env.INFURA_API}`,
+    httpWeb3Provider: `https://kovan.infura.io/v3/${INFURA_API}`,
     websocketWeb3Provider: "wss://kovan.infura.io/ws"
   },
   4447: { // develop
@@ -18,12 +31,6 @@ const networks = {
     httpWeb3Provider: "https://rpc.fuse.io/",
     websocketWeb3Provider: "wss://rpc.fuse.io/ws"
   },
-  3: { // fuse-mainnet
-    network_id: 3,
-    web3Transport: "WebSocket",
-    httpWeb3Provider: "https://rpc.fuse.io/",
-    websocketWeb3Provider: "wss://rpc.fuse.io/ws"
-  }
 };
 
 export default networks;

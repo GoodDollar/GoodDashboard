@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import ContractsAddress from '@gooddollar/goodcontracts/releases/deployment.json'
-import networks, { MAIN_NET_KEY } from './networks'
+import networks from './networks'
 
 require('dotenv').config()
 const convict = require('convict')
@@ -69,7 +69,7 @@ const conf = convict({
     env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_TRANSACTION',
   },
   systemAccounts: {
-    doc: 'system accounts address',
+    doc: 'A list of system account addresses',
     format: Array,
     default: [],
     env: 'SYSTEM_ACCOUNTS',
@@ -112,6 +112,7 @@ const conf = convict({
     },
   },
   amplitudeKey: {
+    doc: 'Amplitude API Key',
     format: String,
     env: 'AMPLITUDE_KEY',
     default: null,
@@ -126,7 +127,7 @@ const conf = convict({
 
 // Load environment dependent configuration
 const network = conf.get('network')
-const mainNetNetwork = ['fuse', 'staging', 'production'].includes(network) ? `${network}-mainnet` : '' // todo add default mainnet value
+const mainNetNetwork = `${network}-mainnet`
 
 // get the network_id by provided network name
 const getNetworkId = (_network: string) => _.get(networks, `[${_.get(ContractsAddress, `[${_network}].networkId`)}]`)
