@@ -35,6 +35,8 @@ export class blockchain {
 
   tokenContract: any
 
+  mainNetTokenContract: any
+
   ubiContract: any
 
   bonusContract: any
@@ -106,7 +108,7 @@ export class blockchain {
   }
 
   /**
-   * Main process, it run all update
+   * Initializing web3 instances and all required contracts
    */
   async init() {
     log.debug('Config/Status:', await propertyProvider.getAll())
@@ -121,8 +123,10 @@ export class blockchain {
     this.mainNetWeb3 = new Web3(this.getWeb3TransportProvider(true))
 
     const address: any = get(ContractsAddress, `${this.network}.GoodDollar`)
+    const mainNetAddress: any = get(ContractsAddress, `${this.network}.GoodDollar`)
 
     this.tokenContract = new this.web3.eth.Contract(GoodDollarABI.abi, address)
+    this.mainNetTokenContract = new this.mainNetWeb3.eth.Contract(GoodDollarABI.abi, mainNetAddress)
     this.ubiContract = new this.web3.eth.Contract(UBIABI.abi, get(ContractsAddress, `${this.network}.UBI`))
     this.otplContract = new this.web3.eth.Contract(
       OneTimePaymentsABI.abi,
@@ -315,7 +319,7 @@ export class blockchain {
 
   async updateSupplyAmount() {
     // todo get G$ supply amount from contracts v2
-    const amount = await this.tokenContract.methods
+    const amount = await this.mainNetTokenContract.methods
       .totalSupply().call()
       .then((n: any) => n.toNumber())
       .catch(() => 0)
