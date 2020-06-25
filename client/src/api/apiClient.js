@@ -26,8 +26,10 @@ export default class ApiClient {
   getSupplyAmountPerDay = (limit) => this.http.get('/transactions/claim/supply-amount-per-day', {limit})
   getClaimPerDay = (limit) => this.http.get('/transactions/claim', {limit})
 
+  // gd
   getGDTotal = () => this.http.get('/gd/total')
   getGDInEscrow = () => this.http.get('/gd/in-escrow')
+  getTotalImpactStatistics = () => this.http.get('/gd/total-impact-statistics')
 
   getSurveyTable = (query) => this.http.get('/survey/total-per-day', query)
   getSurveySummaryTable = (query) => this.http.get('/survey/total', query)

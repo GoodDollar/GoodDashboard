@@ -24,7 +24,7 @@ class Property {
       await this.model.updateOne({ property }, { $set: {property, value} }, { upsert: true })
       return true
     } catch (ex) {
-      log.error('Update user failed [mongo actions]:', { message: ex.message, property, value })
+      log.error('Update property failed [mongo actions]:', { message: ex.message, property, value })
     }
 
     return false
@@ -52,6 +52,23 @@ class Property {
    */
   async getAll(): Promise<object> {
     return await this.model.find().lean()
+  }
+
+  /*
+  * Increments the number values of provided property
+  *
+  * @param {string} property
+  * @param {number} by - increment value
+  *
+  * @return {Promise<boolean>}
+  */
+  async increment(property: string, by: number = 1): Promise<boolean> {
+    const value = await this.get(property) || 0
+    const newValue = Number(value) + by
+
+    await this.set(property, newValue)
+
+    return true
   }
 
 }

@@ -15,6 +15,8 @@ import surveyProvider from './survey'
 import surveyDB from '../gun/models/survey'
 import AboutTransactionProvider from './about-transaction'
 import AboutClaimTransactionProvider from './about-claim-transactions'
+import AddressesClaimedProvider from './addresses-claimed'
+import PropertyProvider from './property'
 import Amplitude from './amplitude'
 
 import * as web3Utils from 'web3-utils'
@@ -200,6 +202,7 @@ export class blockchain {
     await walletsProvider.updateOrSet(newBalanceWallets)
     console.log('Finish update wallets balance')
   }
+
   async updateBonusEvents(toBlock: number) {
     const allEvents = await this.bonusContract.getPastEvents('BonusClaimed', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
@@ -233,26 +236,54 @@ export class blockchain {
     }
   }
 
+  /*
+  * Checking if provided addresses did claim at least once
+  * if not - increment total unique claimers value
+  *
+  * @param {string} address - the address to be checked
+  *
+  * @return {Promise<void>}
+  */
+  async checkAddressesClaimed(arrayOfAddresses: string[]): Promise<void> {
+    // there could be duplicates, so need to get unique values
+    // new Set([...]) -> will return unique values from received array
+    const uniqueAddresses = [...new Set(arrayOfAddresses)]
+
+    // check multiple addresses exists and create new records in case if not exist by one db query
+    const { nonExistedCount } = await AddressesClaimedProvider.checkIfExistsMultiple(uniqueAddresses)
+
+    // if there is some not existed addresses then increment total unique claimers
+    if (nonExistedCount) {
+      await PropertyProvider.increment('totalUniqueClaimers', nonExistedCount)
+    }
+  }
+
   async updateClaimEvents(toBlock: number) {
     const allEvents = await this.ubiContract.getPastEvents('UBIClaimed', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
     })
-    let aboutClaimTXs: any = {}
+
+    const aboutClaimTXs: any = {}
+    const allAddresses: string[] = []
+    let totalUBIDistributed: number = 0
+
     log.info('got Claim events:', allEvents.length)
 
     for (let index in allEvents) {
       let event = allEvents[index]
-      let toAddr = event.returnValues.claimer
       let blockNumber = event.blockNumber
       const txTime = (await this.web3.eth.getBlock(blockNumber)).timestamp
+
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
-      let timestamp = moment.unix(txTime)
-      let date = timestamp.format('YYYY-MM-DD')
 
       const amountTX = web3Utils.hexToNumber(event.returnValues.amount)
+      totalUBIDistributed += amountTX
+
+      let timestamp = moment.unix(txTime)
+      let date = timestamp.format('YYYY-MM-DD')
 
       if (aboutClaimTXs.hasOwnProperty(date)) {
         aboutClaimTXs[date].total_amount_txs += amountTX
@@ -264,6 +295,9 @@ export class blockchain {
           count_txs: 1,
         }
       }
+
+      let toAddr = event.returnValues.claimer
+      allAddresses.push(toAddr)
 
       this.amplitude.logEvent({
         user_id: toAddr,
@@ -278,7 +312,17 @@ export class blockchain {
       })
     }
 
-    await AboutClaimTransactionProvider.updateOrSetInc(aboutClaimTXs)
+    if (totalUBIDistributed) {
+      await PropertyProvider.increment('totalUBIDistributed', totalUBIDistributed)
+    }
+
+    if (allAddresses.length) {
+      await this.checkAddressesClaimed(allAddresses)
+    }
+
+    if (Object.keys(aboutClaimTXs).length) {
+      await AboutClaimTransactionProvider.updateOrSetInc(aboutClaimTXs)
+    }
   }
 
   async updateOTPLEvents(toBlock: number) {
@@ -373,13 +417,17 @@ export class blockchain {
     let wallets: any = {}
     let aboutTXs: any = {}
     let lastBlock = this.lastBlock
-    log.info('last Block', lastBlock)
+    let totalGDVolume: number = 0
+
+    log.info('updateListWalletsAndTransactions - last Block', lastBlock)
 
     const allEvents = await this.tokenContract.getPastEvents('Transfer', {
       fromBlock: +lastBlock > 0 ? +lastBlock : 0,
       toBlock,
     })
-    log.info('got Transfer events:', allEvents.length)
+
+    log.info('updateListWalletsAndTransactions - got Transfer events:', allEvents.length)
+
     for (let index in allEvents) {
       let event = allEvents[index]
       let fromAddr = event.returnValues.from
@@ -392,6 +440,7 @@ export class blockchain {
       }
 
       const amountTX = web3Utils.hexToNumber(event.returnValues.value)
+      totalGDVolume += amountTX
 
       this.amplitude.logEvent({
         user_id: fromAddr,
@@ -457,6 +506,10 @@ export class blockchain {
           }
         }
       }
+    }
+
+    if (totalGDVolume) {
+      await PropertyProvider.increment('totalGDVolume', totalGDVolume)
     }
 
     await walletsProvider.updateOrSet(wallets)
