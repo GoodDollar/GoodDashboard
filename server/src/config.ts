@@ -1,8 +1,9 @@
 import _ from 'lodash'
+import ContractsAddress from '@gooddollar/goodcontracts/releases/deployment.json'
 import networks from './networks'
+
 require('dotenv').config()
 const convict = require('convict')
-import ContractsAddress from '@gooddollar/goodcontracts/releases/deployment.json'
 
 // Define a schema
 const conf = convict({
@@ -68,7 +69,7 @@ const conf = convict({
     env: 'STEP_DISTRIBUTION_HISTOGRAM_WALLET_TRANSACTION',
   },
   systemAccounts: {
-    doc: 'system accounts address',
+    doc: 'A list of system account addresses',
     format: Array,
     default: [],
     env: 'SYSTEM_ACCOUNTS',
@@ -78,6 +79,12 @@ const conf = convict({
     httpWeb3Provider: 'https://kovan.infura.io/v3/',
     websocketWeb3Provider: 'wss://kovan.infura.io/ws',
     web3Transport: 'HttpProvider',
+  },
+  ethereumMainNet: {
+    network_id: 3,
+    httpWeb3Provider: "https://rpc.fuse.io/",
+    websocketWeb3Provider: "wss://rpc.fuse.io/ws",
+    web3Transport: "WebSocket"
   },
   network: {
     doc: 'The blockchain network to connect to',
@@ -105,6 +112,7 @@ const conf = convict({
     },
   },
   amplitudeKey: {
+    doc: 'Amplitude API Key',
     format: String,
     env: 'AMPLITUDE_KEY',
     default: null,
@@ -119,7 +127,12 @@ const conf = convict({
 
 // Load environment dependent configuration
 const network = conf.get('network')
+const mainNetNetwork = `${network}-mainnet`
 
-conf.set('ethereum', _.get(networks, `[${_.get(ContractsAddress, `[${network}].networkId`)}]`))
+// get the network_id by provided network name
+const getNetworkId = (_network: string) => _.get(networks, `[${_.get(ContractsAddress, `[${_network}].networkId`)}]`)
+
+conf.set('ethereum', getNetworkId(network))
+conf.set('ethereumMainNet', getNetworkId(mainNetNetwork))
 
 export default conf.getProperties()

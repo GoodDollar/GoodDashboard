@@ -29,11 +29,15 @@ const log = logger.child({ from: 'Blockchain' })
 export class blockchain {
   web3: any
 
+  mainNetWeb3: any
+
   wallet: any
 
   ready: any
 
   tokenContract: any
+
+  mainNetTokenContract: any
 
   ubiContract: any
 
@@ -74,46 +78,57 @@ export class blockchain {
 
   /**
    * Return transport provider for web3 connection
+   *
+   * @param {boolean} mainnet - determines whether to get regular or mainnet transport provider
    */
-  getWeb3TransportProvider(): any {
+  getWeb3TransportProvider(mainnet?: boolean): any {
+    const confKey = mainnet ? 'ethereumMainNet' : 'ethereum'
+    const transport = get(conf, `[${confKey}].web3Transport`)
     let provider: string
     let web3Provider: any
-    let transport = conf.ethereum.web3Transport
+
     switch (transport) {
       case 'WebSocket':
-        provider = conf.ethereum.websocketWeb3Provider
+        provider = get(conf, `[${confKey}].websocketWeb3Provider`)
         web3Provider = new Web3.providers.WebsocketProvider(provider)
         break
 
       case 'HttpProvider':
-        provider = conf.ethereum.httpWeb3Provider + conf.infuraKey
+        provider = get(conf, `[${confKey}].httpWeb3Provider`) + conf.infuraKey
         web3Provider = new Web3.providers.HttpProvider(provider)
         break
 
       default:
-        provider = conf.ethereum.httpWeb3Provider + conf.infuraKey
+        provider = get(conf, `[${confKey}].httpWeb3Provider`) + conf.infuraKey
         web3Provider = new Web3.providers.HttpProvider(provider)
         break
     }
 
-    log.debug({ conf, provider })
+    log.debug({ transport, provider })
 
     return web3Provider
   }
 
   /**
-   * Main process, it run all update
+   * Initializing web3 instances and all required contracts
    */
   async init() {
     log.debug('Config/Status:', await propertyProvider.getAll())
-    log.debug('Initializing blockchain:', { conf: conf.ethereum })
+    log.debug('Initializing blockchain:', { ethereum: conf.ethereum, mainnet: conf.ethereumMainNet })
+
     this.lastBlock = await propertyProvider
       .get('lastBlock')
       .then((_) => +_)
       .catch((_) => 0)
+
     this.web3 = new Web3(this.getWeb3TransportProvider())
+    this.mainNetWeb3 = new Web3(this.getWeb3TransportProvider(true))
+
     const address: any = get(ContractsAddress, `${this.network}.GoodDollar`)
+    const mainNetAddress: any = get(ContractsAddress, `${this.network}.GoodDollar`)
+
     this.tokenContract = new this.web3.eth.Contract(GoodDollarABI.abi, address)
+    this.mainNetTokenContract = new this.mainNetWeb3.eth.Contract(GoodDollarABI.abi, mainNetAddress)
     this.ubiContract = new this.web3.eth.Contract(UBIABI.abi, get(ContractsAddress, `${this.network}.UBI`))
     this.otplContract = new this.web3.eth.Contract(
       OneTimePaymentsABI.abi,
@@ -121,13 +136,10 @@ export class blockchain {
     )
     this.bonusContract = new this.web3.eth.Contract(BonusABI.abi, get(ContractsAddress, `${this.network}.SignupBonus`))
 
-    try {
-      log.debug('blockchain Ready:', {
-        network: this.networkId,
-      })
-    } catch (e) {
-      log.error('Error initializing wallet', { e }, e.message)
-    }
+    log.debug('blockchain Ready:', {
+      network: this.networkId,
+    })
+
     return true
   }
 
@@ -351,7 +363,7 @@ export class blockchain {
 
   async updateSupplyAmount() {
     // todo get G$ supply amount from contracts v2
-    const amount = await this.tokenContract.methods
+    const amount = await this.mainNetTokenContract.methods
       .totalSupply().call()
       .then((n: any) => n.toNumber())
       .catch(() => 0)
