@@ -2,9 +2,10 @@ import Web3 from 'web3'
 import moment from 'moment'
 import GoodDollarABI from '@gooddollar/goodcontracts/build/contracts/GoodDollar.json'
 import OneTimePaymentsABI from '@gooddollar/goodcontracts/build/contracts/OneTimePayments.min.json'
-import UBIABI from '@gooddollar/goodcontracts/build/contracts/FixedUBI.min.json'
-import BonusABI from '@gooddollar/goodcontracts/build/contracts/SignUpBonus.min.json'
+import UBIABI from '@gooddollar/goodcontracts/build/contracts/stakingModel/UBIScheme.min.json'
 import ContractsAddress from '@gooddollar/goodcontracts/releases/deployment.json'
+import ContractsModelAddress from '@gooddollar/goodcontracts/stakingModel/releases/deployment.json'
+
 import conf from '../config'
 import logger from '../helpers/pino-logger'
 import get from 'lodash/get'
@@ -57,15 +58,15 @@ export class blockchain {
 
   amplitude: Amplitude
 
-  constructor() {
+  constructor () {
     this.lastBlock = 0
     this.network = conf.network
     this.networkId = conf.ethereum.network_id
     this.ready = this.init()
     let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
-      .filter((_) => typeof _ === 'string')
+      .filter(_ => typeof _ === 'string')
       .concat(conf.systemAccounts, ['0x0000000000000000000000000000000000000000'])
-      .map((x) => (x as string).toLowerCase())
+      .map(x => (x as string).toLowerCase())
     this.listPrivateAddress = _invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
@@ -81,7 +82,7 @@ export class blockchain {
    *
    * @param {boolean} mainnet - determines whether to get regular or mainnet transport provider
    */
-  getWeb3TransportProvider(mainnet?: boolean): any {
+  getWeb3TransportProvider (mainnet?: boolean): any {
     const confKey = mainnet ? 'ethereumMainNet' : 'ethereum'
     const transport = get(conf, `[${confKey}].web3Transport`)
     let provider: string
@@ -112,14 +113,17 @@ export class blockchain {
   /**
    * Initializing web3 instances and all required contracts
    */
-  async init() {
+  async init () {
     log.debug('Config/Status:', await propertyProvider.getAll())
-    log.debug('Initializing blockchain:', { ethereum: conf.ethereum, mainnet: conf.ethereumMainNet })
+    log.debug('Initializing blockchain:', {
+      ethereum: conf.ethereum,
+      mainnet: conf.ethereumMainNet,
+    })
 
     this.lastBlock = await propertyProvider
       .get('lastBlock')
-      .then((_) => +_)
-      .catch((_) => 0)
+      .then(_ => +_)
+      .catch(_ => 0)
 
     this.web3 = new Web3(this.getWeb3TransportProvider())
     this.mainNetWeb3 = new Web3(this.getWeb3TransportProvider(true))
@@ -129,12 +133,11 @@ export class blockchain {
 
     this.tokenContract = new this.web3.eth.Contract(GoodDollarABI.abi, address)
     this.mainNetTokenContract = new this.mainNetWeb3.eth.Contract(GoodDollarABI.abi, mainNetAddress)
-    this.ubiContract = new this.web3.eth.Contract(UBIABI.abi, get(ContractsAddress, `${this.network}.UBI`))
+    this.ubiContract = new this.web3.eth.Contract(UBIABI.abi, get(ContractsModelAddress, `${this.network}.UBIScheme`))
     this.otplContract = new this.web3.eth.Contract(
       OneTimePaymentsABI.abi,
       get(ContractsAddress, `${this.network}.OneTimePayments`)
     )
-    this.bonusContract = new this.web3.eth.Contract(BonusABI.abi, get(ContractsAddress, `${this.network}.SignupBonus`))
 
     log.debug('blockchain Ready:', {
       network: this.networkId,
@@ -147,7 +150,7 @@ export class blockchain {
    * Get true if not private wallet
    * @param wallet
    */
-  isClientWallet(wallet: string) {
+  isClientWallet (wallet: string) {
     return this.listPrivateAddress[wallet.toLowerCase()] === undefined
   }
 
@@ -155,14 +158,14 @@ export class blockchain {
    * Get true if wallet is paymentlink contracts
    * @param wallet
    */
-  isPaymentlinkContracts(wallet: string) {
+  isPaymentlinkContracts (wallet: string) {
     return this.web3.utils.toChecksumAddress(this.paymentLinkContracts) === this.web3.utils.toChecksumAddress(wallet)
   }
 
   /**
    * Update all date BChain
    */
-  async updateData() {
+  async updateData () {
     await this.ready
     await this.updateEvents()
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`)
@@ -170,25 +173,23 @@ export class blockchain {
     await propertyProvider.set('inEscrow', +inEscrow)
   }
 
-  async updateEvents() {
+  async updateEvents () {
     const blockNumber = await this.web3.eth.getBlockNumber()
     log.info('updateEvents starting:', { blockNumber })
     await Promise.all([
-      this.updateListWalletsAndTransactions(blockNumber).catch((e) =>
-        log.error('transfer events failed', e.message, e)
-      ),
+      this.updateListWalletsAndTransactions(blockNumber).catch(e => log.error('transfer events failed', e.message, e)),
       // this.updateSurvey(),
-      this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),
-      this.updateClaimEvents(blockNumber).catch((e) => log.error('claim events failed', e.message, e)),
-      this.updateOTPLEvents(blockNumber).catch((e) => log.error('otpl events failed', e.message, e)),
-      this.updateSupplyAmount().catch((e) => log.error('supply amount update failed', e.message, e)),
+      // this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),
+      this.updateClaimEvents(blockNumber).catch(e => log.error('claim events failed', e.message, e)),
+      this.updateOTPLEvents(blockNumber).catch(e => log.error('otpl events failed', e.message, e)),
+      this.updateSupplyAmount().catch(e => log.error('supply amount update failed', e.message, e)),
     ])
     await propertyProvider.set('lastBlock', +blockNumber)
     this.lastBlock = +blockNumber
     await this.amplitude.sendBatch()
   }
 
-  async updateWalletsBalance() {
+  async updateWalletsBalance () {
     let newBalanceWallets: any = {}
     const wallets = await walletsProvider.getAll()
     for (let i in wallets) {
@@ -203,7 +204,7 @@ export class blockchain {
     console.log('Finish update wallets balance')
   }
 
-  async updateBonusEvents(toBlock: number) {
+  async updateBonusEvents (toBlock: number) {
     const allEvents = await this.bonusContract.getPastEvents('BonusClaimed', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
@@ -237,14 +238,14 @@ export class blockchain {
   }
 
   /*
-  * Checking if provided addresses did claim at least once
-  * if not - increment total unique claimers value
-  *
-  * @param {string} address - the address to be checked
-  *
-  * @return {Promise<void>}
-  */
-  async checkAddressesClaimed(arrayOfAddresses: string[]): Promise<void> {
+   * Checking if provided addresses did claim at least once
+   * if not - increment total unique claimers value
+   *
+   * @param {string} address - the address to be checked
+   *
+   * @return {Promise<void>}
+   */
+  async checkAddressesClaimed (arrayOfAddresses: string[]): Promise<void> {
     // there could be duplicates, so need to get unique values
     // new Set([...]) -> will return unique values from received array
     const uniqueAddresses = [...new Set(arrayOfAddresses)]
@@ -258,7 +259,7 @@ export class blockchain {
     }
   }
 
-  async updateClaimEvents(toBlock: number) {
+  async updateClaimEvents (toBlock: number) {
     const allEvents = await this.ubiContract.getPastEvents('UBIClaimed', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
@@ -325,7 +326,7 @@ export class blockchain {
     }
   }
 
-  async updateOTPLEvents(toBlock: number) {
+  async updateOTPLEvents (toBlock: number) {
     const allEvents = await this.otplContract.getPastEvents('allEvents', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
@@ -361,42 +362,43 @@ export class blockchain {
     }
   }
 
-  async updateSupplyAmount() {
+  async updateSupplyAmount () {
     // todo get G$ supply amount from contracts v2
     const amount = await this.mainNetTokenContract.methods
-      .totalSupply().call()
+      .totalSupply()
+      .call()
       .then((n: any) => n.toNumber())
       .catch(() => 0)
     const date = moment().format('YYYY-MM-DD')
 
     log.info('got amount of G$ supply:', {
       amount,
-      date
+      date,
     })
 
     const listOfTransactionsData = {
       [date]: {
         date,
         supply_amount: Number(amount),
-      }
+      },
     }
 
     await AboutClaimTransactionProvider.updateOrSet(listOfTransactionsData)
   }
 
-  async updateSurvey() {
+  async updateSurvey () {
     let timestamp = moment.unix(conf.startTimeTransaction)
     let startDate = timestamp.format('YYYY-MM-DD')
     let lastDate = await propertyProvider
       .get('lastSurveyDate')
-      .then((date) => {
+      .then(date => {
         if (!date) {
           return startDate
         } else {
           return date
         }
       })
-      .catch((_) => startDate)
+      .catch(_ => startDate)
 
     let from = new Date(lastDate)
     let to = new Date()
@@ -413,7 +415,7 @@ export class blockchain {
   /**
    * Update list wallets and transactions info
    */
-  async updateListWalletsAndTransactions(toBlock: number) {
+  async updateListWalletsAndTransactions (toBlock: number) {
     let wallets: any = {}
     let aboutTXs: any = {}
     let lastBlock = this.lastBlock
@@ -520,7 +522,7 @@ export class blockchain {
    *  Get GD balance by address
    * @param {string} address
    */
-  async getAddressBalance(address: string): Promise<number> {
+  async getAddressBalance (address: string): Promise<number> {
     const gdbalance = await this.tokenContract.methods.balanceOf(address).call()
 
     return gdbalance ? web3Utils.hexToNumber(gdbalance) : 0
