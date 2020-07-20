@@ -2,7 +2,7 @@ import Web3 from 'web3'
 import moment from 'moment'
 import GoodDollarABI from '@gooddollar/goodcontracts/build/contracts/GoodDollar.json'
 import OneTimePaymentsABI from '@gooddollar/goodcontracts/build/contracts/OneTimePayments.min.json'
-import UBIABI from '@gooddollar/goodcontracts/build/contracts/stakingModel/UBIScheme.min.json'
+import UBIABI from '@gooddollar/goodcontracts/stakingModel/build/contracts/UBIScheme.min.json'
 import ContractsAddress from '@gooddollar/goodcontracts/releases/deployment.json'
 import ContractsModelAddress from '@gooddollar/goodcontracts/stakingModel/releases/deployment.json'
 
