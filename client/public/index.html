@@ -81,7 +81,7 @@
         var DOMReady = 'DOMContentLoaded';
         var messenger = (window.ReactNativeWebView || parent || {}).postMessage;
 
-        if ('function' === (typeof messenger)) {
+        if ('function' !== (typeof messenger)) {
           return;
         }
 
