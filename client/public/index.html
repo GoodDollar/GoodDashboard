@@ -74,6 +74,28 @@
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-N7ZPBWH');</script>
     <!-- End Google Tag Manager -->
+    <!-- IFrame DOMContentLoaded support -->
+    <script type="text/javascript">
+      (function () {
+        var DOMReady = 'DOMContentLoaded';
+        var messenger = (window.ReactNativeWebView || parent || {}).postMessage;
+
+        if ('function' === (typeof messenger)) {
+          return;
+        }
+
+        window.addEventListener(DOMReady, function() {
+          var messagePayload = {
+            event: DOMReady,
+            target: 'iframe',
+            src: location.href
+          };
+
+          parent.postMessage(messagePayload, '*')
+        });
+      })()
+    </script>
+    <!-- End IFrame DOMContentLoaded support -->
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->
