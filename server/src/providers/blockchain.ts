@@ -363,13 +363,17 @@ export class blockchain {
   }
 
   async updateSupplyAmount () {
-    // todo get G$ supply amount from contracts v2
-    const amount = await this.mainNetTokenContract.methods
-      .totalSupply()
-      .call()
-      .then((n: any) => n.toNumber())
-      .catch(() => 0)
     const date = moment().format('YYYY-MM-DD')
+    let amount = 0
+
+    try {
+      amount = await this.mainNetTokenContract.methods
+        .totalSupply()
+        .call()
+        .then((n: any) => n.toNumber())
+    } catch (e) {
+      logger.error('Fetch total supply amount failed', e.message, e)
+    }
 
     log.info('got amount of G$ supply:', {
       amount,
