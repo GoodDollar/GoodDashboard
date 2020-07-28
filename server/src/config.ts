@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import ContractsAddress from '@gooddollar/goodcontracts/releases/deployment.json'
-import networks from './networks'
+import getNetworks from './networks'
 
 require('dotenv').config()
 const convict = require('convict')
@@ -130,6 +130,7 @@ const network = conf.get('network')
 const mainNetNetwork = `${network}-mainnet`
 
 // get the network_id by provided network name
+const networks = getNetworks()
 const getNetworkId = (_network: string) => _.get(networks, `[${_.get(ContractsAddress, `[${_network}].networkId`)}]`)
 
 conf.set('ethereum', getNetworkId(network))
