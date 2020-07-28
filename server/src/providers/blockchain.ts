@@ -54,14 +54,20 @@ export class blockchain {
 
   network: string
 
+  networkMainNet: string
+
   networkId: number
+
+  networkIdMainNet: number
 
   amplitude: Amplitude
 
   constructor () {
     this.lastBlock = 0
     this.network = conf.network
+    this.networkMainNet = conf.networkMainNet
     this.networkId = conf.ethereum.network_id
+    this.networkIdMainNet = conf.networkMainNet.network_id
     this.ready = this.init()
     let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
       .filter(_ => typeof _ === 'string')
@@ -70,9 +76,12 @@ export class blockchain {
     this.listPrivateAddress = _invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
+
     log.info('Starting blockchain reader:', {
       network: this.network,
+      networkMainNet: this.networkMainNet,
       networkdId: this.networkId,
+      networkdIdMainNet: this.networkIdMainNet,
       systemContracts: this.listPrivateAddress,
     })
   }
@@ -95,12 +104,12 @@ export class blockchain {
         break
 
       case 'HttpProvider':
-        provider = get(conf, `[${confKey}].httpWeb3Provider`) + conf.infuraKey
+        provider = get(conf, `[${confKey}].httpWeb3Provider`)
         web3Provider = new Web3.providers.HttpProvider(provider)
         break
 
       default:
-        provider = get(conf, `[${confKey}].httpWeb3Provider`) + conf.infuraKey
+        provider = get(conf, `[${confKey}].httpWeb3Provider`)
         web3Provider = new Web3.providers.HttpProvider(provider)
         break
     }
@@ -129,7 +138,7 @@ export class blockchain {
     this.mainNetWeb3 = new Web3(this.getWeb3TransportProvider(true))
 
     const address: any = get(ContractsAddress, `${this.network}.GoodDollar`)
-    const mainNetAddress: any = get(ContractsAddress, `${this.network}.GoodDollar`)
+    const mainNetAddress: any = get(ContractsAddress, `${this.networkMainNet}.GoodDollar`)
 
     this.tokenContract = new this.web3.eth.Contract(GoodDollarABI.abi, address)
     this.mainNetTokenContract = new this.mainNetWeb3.eth.Contract(GoodDollarABI.abi, mainNetAddress)
@@ -140,7 +149,8 @@ export class blockchain {
     )
 
     log.debug('blockchain Ready:', {
-      network: this.networkId,
+      networkId: this.networkId,
+      networkIdMainNet: this.networkIdMainNet,
     })
 
     return true
