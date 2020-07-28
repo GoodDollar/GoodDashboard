@@ -54,20 +54,20 @@ export class blockchain {
 
   network: string
 
-  mainNetwork: string
+  networkMainnet: string
 
   networkId: number
 
-  mainNetworkId: number
+  networkIdMainnet: number
 
   amplitude: Amplitude
 
   constructor () {
     this.lastBlock = 0
     this.network = conf.network
-    this.mainNetwork = conf.mainNetwork
+    this.networkMainnet = conf.networkMainnet
     this.networkId = conf.ethereum.network_id
-    this.mainNetworkId = conf.ethereumMainNet.network_id
+    this.networkIdMainnet = conf.ethereumMainNet.network_id
     this.ready = this.init()
     let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
       .filter(_ => typeof _ === 'string')
@@ -79,9 +79,9 @@ export class blockchain {
 
     log.info('Starting blockchain reader:', {
       network: this.network,
-      mainNetwork: this.mainNetwork,
+      mainNetwork: this.networkMainnet,
       networkdId: this.networkId,
-      networkdIdMainNet: this.mainNetworkId,
+      networkdIdMainNet: this.networkIdMainnet,
       systemContracts: this.listPrivateAddress,
     })
   }
@@ -138,7 +138,7 @@ export class blockchain {
     this.mainNetWeb3 = new Web3(this.getWeb3TransportProvider(true))
 
     const address: any = get(ContractsAddress, `${this.network}.GoodDollar`)
-    const mainNetAddress: any = get(ContractsAddress, `${this.mainNetwork}.GoodDollar`)
+    const mainNetAddress: any = get(ContractsAddress, `${this.networkMainnet}.GoodDollar`)
 
     this.tokenContract = new this.web3.eth.Contract(GoodDollarABI.abi, address)
     this.mainNetTokenContract = new this.mainNetWeb3.eth.Contract(GoodDollarABI.abi, mainNetAddress)
@@ -150,7 +150,7 @@ export class blockchain {
 
     log.debug('blockchain Ready:', {
       networkId: this.networkId,
-      networkIdMainNet: this.mainNetworkId,
+      networkIdMainNet: this.networkIdMainnet,
     })
 
     return true

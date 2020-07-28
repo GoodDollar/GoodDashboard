@@ -80,7 +80,7 @@ const conf = convict({
     websocketWeb3Provider: 'wss://kovan.infura.io/ws',
     web3Transport: 'HttpProvider',
   },
-  ethereumMainNet: {
+  ethereumMainnet: {
     network_id: 3,
     httpWeb3Provider: "https://rpc.fuse.io/",
     websocketWeb3Provider: "wss://rpc.fuse.io/ws",
@@ -103,7 +103,7 @@ const conf = convict({
     default: 'develop',
     env: 'NETWORK',
   },
-  mainNetwork: {
+  networkMainnet: {
     doc: 'The blockchain mainnet network to connect to',
     format: String,
     default: '',
@@ -132,14 +132,14 @@ const conf = convict({
 
 // Load environment dependent configuration
 const network = conf.get('network')
-const mainNetwork = `${network}-mainnet`
+const networkMainnet = `${network}-mainnet`
 
 // get the network_id by provided network name
 const networks = getNetworks()
 const getNetworkId = (_network: string) => _.get(networks, `[${_.get(ContractsAddress, `[${_network}].networkId`)}]`)
 
 conf.set('ethereum', getNetworkId(network))
-conf.set('ethereumMainNet', getNetworkId(mainNetwork))
-conf.set('mainNetwork', mainNetwork)
+conf.set('ethereumMainNet', getNetworkId(networkMainnet))
+conf.set('networkMainnet', networkMainnet)
 
 export default conf.getProperties()
