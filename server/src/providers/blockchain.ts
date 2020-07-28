@@ -67,7 +67,7 @@ export class blockchain {
     this.network = conf.network
     this.networkMainnet = conf.networkMainnet
     this.networkId = conf.ethereum.network_id
-    this.networkIdMainnet = conf.ethereumMainNet.network_id
+    this.networkIdMainnet = conf.ethereumMainnet.network_id
     this.ready = this.init()
     let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
       .filter(_ => typeof _ === 'string')
@@ -92,7 +92,7 @@ export class blockchain {
    * @param {boolean} mainnet - determines whether to get regular or mainnet transport provider
    */
   getWeb3TransportProvider (mainnet?: boolean): any {
-    const confKey = mainnet ? 'ethereumMainNet' : 'ethereum'
+    const confKey = mainnet ? 'ethereumMainnet' : 'ethereum'
     const transport = get(conf, `[${confKey}].web3Transport`)
     let provider: string
     let web3Provider: any
@@ -126,7 +126,7 @@ export class blockchain {
     log.debug('Config/Status:', await propertyProvider.getAll())
     log.debug('Initializing blockchain:', {
       ethereum: conf.ethereum,
-      mainnet: conf.ethereumMainNet,
+      mainnet: conf.ethereumMainnet,
     })
 
     this.lastBlock = await propertyProvider

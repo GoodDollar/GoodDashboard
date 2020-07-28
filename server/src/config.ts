@@ -139,7 +139,7 @@ const networks = getNetworks()
 const getNetworkId = (_network: string) => _.get(networks, `[${_.get(ContractsAddress, `[${_network}].networkId`)}]`)
 
 conf.set('ethereum', getNetworkId(network))
-conf.set('ethereumMainNet', getNetworkId(networkMainnet))
+conf.set('ethereumMainnet', getNetworkId(networkMainnet))
 conf.set('networkMainnet', networkMainnet)
 
 export default conf.getProperties()
