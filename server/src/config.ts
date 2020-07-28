@@ -103,7 +103,7 @@ const conf = convict({
     default: 'develop',
     env: 'NETWORK',
   },
-  networkMainNet: {
+  mainNetwork: {
     doc: 'The blockchain mainnet network to connect to',
     format: String,
     default: '',
@@ -128,30 +128,18 @@ const conf = convict({
     env: 'FUSE_API',
     default: null,
   },
-  infuraKey: {
-    doc: 'Infura API token',
-    format: String,
-    env: 'INFURA_API',
-    default: '',
-  },
-  alchemyKey: {
-    doc: 'Alchemy API token',
-    format: String,
-    env: 'ALCHEMY_API',
-    default: '',
-  }
 })
 
 // Load environment dependent configuration
 const network = conf.get('network')
-const networkMainNet = `${network}-mainnet`
+const mainNetwork = `${network}-mainnet`
 
 // get the network_id by provided network name
 const networks = getNetworks()
 const getNetworkId = (_network: string) => _.get(networks, `[${_.get(ContractsAddress, `[${_network}].networkId`)}]`)
 
 conf.set('ethereum', getNetworkId(network))
-conf.set('ethereumMainNet', getNetworkId(networkMainNet))
-conf.set('networkMainNet', networkMainNet)
+conf.set('ethereumMainNet', getNetworkId(mainNetwork))
+conf.set('mainNetwork', mainNetwork)
 
 export default conf.getProperties()
