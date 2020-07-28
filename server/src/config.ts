@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { get } from 'lodash'
 import ContractsAddress from '@gooddollar/goodcontracts/releases/deployment.json'
 import getNetworks from './networks'
 
@@ -130,16 +130,18 @@ const conf = convict({
   },
 })
 
-// Load environment dependent configuration
-const network = conf.get('network')
-const networkMainnet = `${network}-mainnet`
-
-// get the network_id by provided network name
+// network options
 const networks = getNetworks()
-const getNetworkId = (_network: string) => _.get(networks, `[${_.get(ContractsAddress, `[${_network}].networkId`)}]`)
+const network = conf.get('network')
 
-conf.set('ethereum', getNetworkId(network))
-conf.set('ethereumMainnet', getNetworkId(networkMainnet))
-conf.set('networkMainnet', networkMainnet)
+// @ts-ignore
+const networkId: any = ContractsAddress[network].networkId
+const mainNetworkId = get(ContractsAddress, `${network}-mainnet.networkId`, networkId)
+
+// @ts-ignore
+conf.set('ethereumMainnet', networks[mainNetworkId])
+// @ts-ignore
+conf.set('ethereum', networks[networkId])
+conf.set('networkMainnet', `${network}-mainnet`)
 
 export default conf.getProperties()
