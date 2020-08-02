@@ -1,6 +1,6 @@
-import _ from 'lodash'
+import { get } from 'lodash'
 import ContractsAddress from '@gooddollar/goodcontracts/releases/deployment.json'
-import networks from './networks'
+import getNetworks from './networks'
 
 require('dotenv').config()
 const convict = require('convict')
@@ -80,7 +80,7 @@ const conf = convict({
     websocketWeb3Provider: 'wss://kovan.infura.io/ws',
     web3Transport: 'HttpProvider',
   },
-  ethereumMainNet: {
+  ethereumMainnet: {
     network_id: 3,
     httpWeb3Provider: "https://rpc.fuse.io/",
     websocketWeb3Provider: "wss://rpc.fuse.io/ws",
@@ -102,6 +102,11 @@ const conf = convict({
     ],
     default: 'develop',
     env: 'NETWORK',
+  },
+  networkMainnet: {
+    doc: 'The blockchain mainnet network to connect to',
+    format: String,
+    default: '',
   },
   mongodb: {
     uri: {
@@ -125,14 +130,18 @@ const conf = convict({
   },
 })
 
-// Load environment dependent configuration
+// network options
+const networks = getNetworks()
 const network = conf.get('network')
-const mainNetNetwork = `${network}-mainnet`
 
-// get the network_id by provided network name
-const getNetworkId = (_network: string) => _.get(networks, `[${_.get(ContractsAddress, `[${_network}].networkId`)}]`)
+// @ts-ignore
+const networkId: any = ContractsAddress[network].networkId
+const mainNetworkId = get(ContractsAddress, `${network}-mainnet.networkId`, networkId)
 
-conf.set('ethereum', getNetworkId(network))
-conf.set('ethereumMainNet', getNetworkId(mainNetNetwork))
+// @ts-ignore
+conf.set('ethereumMainnet', networks[mainNetworkId])
+// @ts-ignore
+conf.set('ethereum', networks[networkId])
+conf.set('networkMainnet', `${network}-mainnet`)
 
 export default conf.getProperties()
