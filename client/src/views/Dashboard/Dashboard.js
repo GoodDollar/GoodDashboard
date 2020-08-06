@@ -280,7 +280,7 @@ export default function Dashboard() {
         <GridItem xs={12} lg={12} xl={6}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Google Data Studio</h4>
+              <h4 className={classes.cardTitleWhite}>G$ Claims Distribution Per Country</h4>
             </CardHeader>
             <CardBody className={classes.googleMapCardBody}>
               <iframe
@@ -298,11 +298,6 @@ export default function Dashboard() {
                 allowFullScreen
               />
             </CardBody>
-            <CardFooter stats>
-              <div className={classes.stats}>
-                Google Data Studio
-              </div>
-            </CardFooter>
           </Card>
         </GridItem>
         <GridItem xs={12} lg={12} xl={6}>
