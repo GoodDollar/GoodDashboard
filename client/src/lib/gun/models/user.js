@@ -1,5 +1,7 @@
+import { sha3 } from "web3-utils";
 import gunDB from "../gundb";
 import { delay } from "../../../utils/async";
+
 class User {
   constructor() {
     this.gun = gunDB;
@@ -10,12 +12,12 @@ class User {
   async getByAddress(address) {
     let result = {
       fullName: undefined,
-      avatar: undefined,
+      avatar: undefined
     };
     try {
       const profileToShow = this.gun
         .get("users/bywalletAddress")
-        .get(address.toLowerCase())
+        .get(sha3(address.toLowerCase()))
         .get("profile");
       const profile = await profileToShow.onThen();
       if (profile === undefined) return result;
@@ -29,7 +31,7 @@ class User {
           profileToShow
             .get("fullName")
             .get("display")
-            .onThen(),
+            .onThen()
       ]);
       const [avatar, fullName] = await avatarAndNameP;
       result.avatar = avatar;
