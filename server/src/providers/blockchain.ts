@@ -10,7 +10,6 @@ import conf from '../config'
 import logger from '../helpers/pino-logger'
 import get from 'lodash/get'
 import _invert from 'lodash/invert'
-import propertyProvider from './property'
 import walletsProvider from './wallets'
 import surveyProvider from './survey'
 import surveyDB from '../gun/models/survey'
@@ -69,7 +68,7 @@ export class blockchain {
     this.networkId = conf.ethereum.network_id
     this.networkIdMainnet = conf.ethereumMainnet.network_id
     this.ready = this.init()
-    let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
+    let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`)).concat(Object.values(get(ContractsModelAddress, `${this.network}`)))
       .filter(_ => typeof _ === 'string')
       .concat(conf.systemAccounts, ['0x0000000000000000000000000000000000000000'])
       .map(x => (x as string).toLowerCase())
@@ -123,13 +122,25 @@ export class blockchain {
    * Initializing web3 instances and all required contracts
    */
   async init () {
-    log.debug('Config/Status:', await propertyProvider.getAll())
+    const props = await PropertyProvider.getAll()
+    log.debug('Config/Status:', props)
+    if(conf.reset != props.lastVersion)
+    {
+      log.info("reseting database", {version: conf.reset, lastVersion: props.lastVersion })
+      await Promise.all([PropertyProvider.model.deleteMany({}),
+      walletsProvider.model.deleteMany({}),
+      AboutClaimTransactionProvider.model.deleteMany({}),
+      AboutTransactionProvider.model.deleteMany({}),
+      AddressesClaimedProvider.model.deleteMany({})])
+      PropertyProvider.set("lastVersion", conf.reset)
+    }
+
     log.debug('Initializing blockchain:', {
       ethereum: conf.ethereum,
       mainnet: conf.ethereumMainnet,
     })
 
-    this.lastBlock = await propertyProvider
+    this.lastBlock = await PropertyProvider
       .get('lastBlock')
       .then(_ => +_)
       .catch(_ => 0)
@@ -180,7 +191,7 @@ export class blockchain {
     await this.updateEvents()
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`)
     const inEscrow = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call()
-    await propertyProvider.set('inEscrow', +inEscrow)
+    await PropertyProvider.set('inEscrow', +inEscrow)
   }
 
   async updateEvents () {
@@ -194,7 +205,7 @@ export class blockchain {
       this.updateOTPLEvents(blockNumber).catch(e => log.error('otpl events failed', e.message, e)),
       this.updateSupplyAmount().catch(e => log.error('supply amount update failed', e.message, e)),
     ])
-    await propertyProvider.set('lastBlock', +blockNumber)
+    await PropertyProvider.set('lastBlock', +blockNumber)
     this.lastBlock = +blockNumber
     await this.amplitude.sendBatch()
   }
@@ -403,7 +414,7 @@ export class blockchain {
   async updateSurvey () {
     let timestamp = moment.unix(conf.startTimeTransaction)
     let startDate = timestamp.format('YYYY-MM-DD')
-    let lastDate = await propertyProvider
+    let lastDate = await PropertyProvider
       .get('lastSurveyDate')
       .then(date => {
         if (!date) {
@@ -424,7 +435,7 @@ export class blockchain {
     }
 
     let lastSurveyDate: string = moment(to).format('YYYY-MM-DD')
-    await propertyProvider.set('lastSurveyDate', lastSurveyDate)
+    await PropertyProvider.set('lastSurveyDate', lastSurveyDate)
   }
   /**
    * Update list wallets and transactions info
