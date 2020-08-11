@@ -1,5 +1,5 @@
-import Gun from "gun";
-import SEA from "gun/sea";
+import Gun from "@gooddollar/gun";
+import SEA from "@gooddollar/gun/sea";
 import Config from "../../config";
 import { delay } from "../../utils/async";
 let gunDb;
@@ -7,7 +7,7 @@ let gunDb;
 Gun.chain.onThen = function(cb, timeout = 5000) {
   var gun = this,
     p = new Promise(function(res, rej) {
-      delay(5000).then((_) => res());
+      delay(5000).then(_ => res());
       gun.on(function(v, k, at, event) {
         event.off();
         res(v);
@@ -27,7 +27,7 @@ const initGunDB = () => {
   if (!gunDb) {
     global.gun = gunDb = Gun({
       localStorage: true,
-      peers: [Config.gunUrl],
+      peers: [Config.gunUrl]
     });
   }
 
