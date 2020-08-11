@@ -124,7 +124,7 @@ export class blockchain {
   async init () {
     const props = await PropertyProvider.getAll()
     log.debug('Config/Status:', props)
-    if(conf.reset != props.lastVersion)
+    if(conf.reset && conf.reset != props.lastVersion)
     {
       log.info("reseting database", {version: conf.reset, lastVersion: props.lastVersion })
       await Promise.all([PropertyProvider.model.deleteMany({}),

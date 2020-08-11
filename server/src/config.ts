@@ -128,6 +128,11 @@ const conf = convict({
     env: 'FUSE_API',
     default: null,
   },
+  reset: {
+    doc: "reset the database if value > last reset value"
+    env: 'RESET'
+    default: null
+  }
 })
 
 // network options
