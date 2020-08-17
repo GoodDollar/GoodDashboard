@@ -20,6 +20,7 @@ import PropertyProvider from './property'
 import Amplitude from './amplitude'
 
 import * as web3Utils from 'web3-utils'
+import {time} from "cron";
 const log = logger.child({ from: 'Blockchain' })
 
 /**
@@ -204,10 +205,44 @@ export class blockchain {
       this.updateClaimEvents(blockNumber).catch(e => log.error('claim events failed', e.message, e)),
       this.updateOTPLEvents(blockNumber).catch(e => log.error('otpl events failed', e.message, e)),
       this.updateSupplyAmount().catch(e => log.error('supply amount update failed', e.message, e)),
+      this.updateUBIQuota(blockNumber).catch(e => log.error('UBI calculations update failed', e.message, e)),
     ])
     await PropertyProvider.set('lastBlock', +blockNumber)
     this.lastBlock = +blockNumber
     await this.amplitude.sendBatch()
+  }
+
+  async updateUBIQuota(toBlock: number) {
+    // Check if the hole history of 'UBICalculated' event is uploaded
+    // if not - then set from block to 0 value (beginning)
+    const isInitialUBICalcFetched = (await PropertyProvider.get('isInitialUBICalcFetched')) === 'true'
+    const lastBlock = isInitialUBICalcFetched ? +this.lastBlock : 0
+    const allEvents = await this.ubiContract.getPastEvents('UBICalculated', {
+      fromBlock: lastBlock > 0 ? lastBlock : 0,
+      toBlock,
+    })
+    const preparedToSave: any = {}
+
+    log.debug('got UBI calculations', allEvents)
+
+    for (let index in allEvents) {
+      const event = allEvents[index]
+      const timestamp = (await this.web3.eth.getBlock(event.blockNumber)).timestamp
+      const date = moment.unix(timestamp).format('YYYY-MM-DD')
+      const ubiQuotaHex =  get(event, 'returnValues.dailyUbi')
+      const ubi_quota =  web3Utils.hexToNumber(ubiQuotaHex)
+
+      preparedToSave[date] = {
+        date,
+        ubi_quota,
+      }
+    }
+
+    await AboutClaimTransactionProvider.updateOrSet(preparedToSave)
+
+    if (!isInitialUBICalcFetched) {
+      await PropertyProvider.set('isInitialUBICalcFetched', 'true')
+    }
   }
 
   async updateWalletsBalance () {

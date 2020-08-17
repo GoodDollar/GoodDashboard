@@ -9,6 +9,7 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
     const result = data.map((rec: any) => ({
       total_amount_txs: rec.total_amount_txs || 0,
       count_txs: rec.count_txs || 0,
+      ubi_quota: rec.ubi_quota || 0,
       date: rec.date,
     }));
 

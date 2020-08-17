@@ -5,6 +5,7 @@ export const aboutClaimTransactionSchema = new mongoose.Schema({
   count_txs: Number,
   total_amount_txs: Number,
   supply_amount: Number,
+  ubi_quota: Number,
   date: {
     type: String,
     index: { unique: true }
