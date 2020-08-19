@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { pick } from 'lodash'
 import AboutClaimTransactionProvider from "../providers/about-claim-transactions";
 import reqLimit from "../helpers/reqLimit";
 
@@ -6,11 +7,7 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await AboutClaimTransactionProvider.getAll(...reqLimit(req));
 
-    const result = data.map((rec: any) => ({
-      total_amount_txs: rec.total_amount_txs || 0,
-      count_txs: rec.count_txs || 0,
-      date: rec.date,
-    }));
+    const result = data.map((rec: any) => pick(rec, 'total_amount_txs', 'count_txs', 'ubi_quota', 'date'))
 
     return res.status(200).json({
       responseCode: 200,
@@ -31,7 +28,7 @@ const getSupplyAmountPerDay = async (req: Request, res: Response, next: NextFunc
     const result = data.map(
       (el: any) => ({
         x: el.date,
-        y: el.supply_amount || 0,
+        y: el.supply_amount,
       })
     );
 

@@ -121,6 +121,8 @@ export default function Dashboard() {
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])
   const [transactionCountPerDayData, setTransactionCountPerDayData] = useState([])
   const [claimPerDayData, setClaimPerDayData] = useState([])
+  const [dailyUniqClaimersData, setDailyUniqClaimersData] = useState([])
+  const [dailyUBIQuotaData, setDailyUBIQuotaData] = useState([])
 
   useEffect(() => {
     if (supplyAmountPerDay.length > 0) {
@@ -166,22 +168,30 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (claimPerDay.length > 0) {
+      setDailyUBIQuotaData([{
+        id: 'Total UBI Quota',
+        data: claimPerDay.map(v=>({
+          x: v.date,
+          y: v.ubi_quota/100,
+        })),
+      }])
+
+      setDailyUniqClaimersData([{
+        id: 'Total unique claimers',
+        data: claimPerDay.map(v=>({
+          x: v.date,
+          y: v.count_txs
+        })),
+      }])
+
       setClaimPerDayData([
         {
-          id: 'Transactions',
-          data: claimPerDay.map(v=>({
-            x: v.date,
-            y: v.count_txs
-          })),
-        },
-        {
-          id: 'Total amount',
+          id: 'Total G$ Claimed',
           data: claimPerDay.map(v=>({
             x: v.date,
             y: v.total_amount_txs/100
           })),
         },
-
       ])
     }
   }, [claimPerDay])
@@ -205,18 +215,7 @@ export default function Dashboard() {
     setTransactionSortDirection(direction)
   }
 
-  const claimPerDayFormatter = useSeriesSpecificValueFormatter(
-    claimPerDayData, (value, seriesId) => {
-      switch (seriesId) {
-        case 'Transactions':
-          return value
-        case 'Total amount':
-          return `G$ ${priceFormat(value)}`
-        default:
-          throw new Error(`Unknown series '${seriesId}'`)
-      }
-    }
-  )
+  const G$Formatter = value => `G$ ${priceFormat(value)}`
 
   return (
     <div>
@@ -326,14 +325,89 @@ export default function Dashboard() {
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
-                  yFormat={claimPerDayFormatter}
+                  yFormat={G$Formatter}
                   {...mobileLineChartProps}
                 />
               )}
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                Chart shows total volume and number of claim transactions per day
+                Chart shows total volume of claim transactions per day
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} lg={12} xl={6}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Daily Unique Claimers</h4>
+            </CardHeader>
+            <CardBody>
+              {(claimPerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!claimPerDayLoading && (
+                <Line
+                  data={dailyUniqClaimersData}
+                  height={400}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  {...mobileLineChartProps}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows total number of unique claimers per day
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} lg={12} xl={6}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Daily UBI Quota</h4>
+            </CardHeader>
+            <CardBody>
+              {(claimPerDayLoading) && (
+                <GridItem container xs={12} justify="center">
+                  <CircularProgress/>
+                </GridItem>
+              )}
+              {!claimPerDayLoading && (
+                <Line
+                  data={dailyUBIQuotaData}
+                  height={400}
+                  xScale={{
+                    type: 'time',
+                    format: '%Y-%m-%d',
+                    precision: 'day',
+                  }}
+                  axisBottom={{
+                    format: '%b %d',
+                    tickValues: 'every 5 days',
+                    legendOffset: -12,
+                  }}
+                  xFormat="time:%Y-%m-%d"
+                  yFormat={G$Formatter}
+                  {...mobileLineChartProps}
+                />
+              )}
+            </CardBody>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                Chart shows total value of UBI quota per day
               </div>
             </CardFooter>
           </Card>
