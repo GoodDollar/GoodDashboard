@@ -20,7 +20,6 @@ import PropertyProvider from './property'
 import Amplitude from './amplitude'
 
 import * as web3Utils from 'web3-utils'
-import {time} from "cron";
 const log = logger.child({ from: 'Blockchain' })
 
 /**

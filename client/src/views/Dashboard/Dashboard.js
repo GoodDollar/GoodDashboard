@@ -217,19 +217,6 @@ export default function Dashboard() {
 
   const G$Formatter = value => `G$ ${priceFormat(value)}`
 
-  /*const claimPerDayFormatter = useSeriesSpecificValueFormatter(
-    claimPerDayData, (value, seriesId) => {
-      switch (seriesId) {
-        case 'Transactions':
-          return value
-        case 'Total amount':
-          return `G$ ${priceFormat(value)}`
-        default:
-          throw new Error(`Unknown series '${seriesId}'`)
-      }
-    }
-  )*/
-
   return (
     <div>
       <GridContainer>
