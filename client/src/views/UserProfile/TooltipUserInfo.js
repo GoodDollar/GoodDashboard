@@ -26,6 +26,10 @@ const styles = {
   titleBlock: {
     fontSize: 13,
   },
+  label: {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+  },
 };
 
 const deviceWidth = window.innerWidth
@@ -36,6 +40,7 @@ if (isMobile) {
   const mobileStyles = {
     display: 'block',
     overflow: 'hidden',
+    whiteSpace: 'nowrap',
     width: smallDevice ? 60 : 100,
   }
 
@@ -65,6 +70,7 @@ export default function TooltipUserInfo({ hash }) {
       loadUser();
     }
   };
+
   return (
     <HtmlTooltip
       disableTouchListener
@@ -87,6 +93,9 @@ export default function TooltipUserInfo({ hash }) {
         onTouchStart={handleHover}
         onMouseEnter={handleHover}
         className={classes.titleBlock}
+        classes={{
+          label: classes.label,
+        }}
       >
         {hash}
       </Button>
