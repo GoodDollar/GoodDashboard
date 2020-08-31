@@ -3,6 +3,7 @@ import { withStyles, makeStyles } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Tooltip from "@material-ui/core/Tooltip";
 import Button from "@material-ui/core/Button";
+import { assign } from 'lodash'
 import userModel from "../../lib/gun/models/user";
 import GridContainer from "components/Grid/GridContainer.js";
 import Card from "components/Card/Card.js";
@@ -26,6 +27,21 @@ const styles = {
     fontSize: 13,
   },
 };
+
+const deviceWidth = window.innerWidth
+const isMobile = deviceWidth <= 640
+const smallDevice = deviceWidth <= 320
+
+if (isMobile) {
+  const mobileStyles = {
+    display: 'block',
+    overflow: 'hidden',
+    width: smallDevice ? 60 : 100,
+  }
+
+  assign(styles.titleBlock, mobileStyles)
+}
+
 const useStyles = makeStyles(styles);
 /**
  * @return {null}
