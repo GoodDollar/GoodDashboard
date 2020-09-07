@@ -5,6 +5,8 @@ import wallets from './wallets'
 import transactions from './transactions/index'
 import gd from './gd/index'
 import events from './events'
+import stats from './stats'
+
 // import transactions from '../controllers/transactions'
 const router = Router()
 
@@ -17,7 +19,7 @@ router.use('/wallets', wallets)
 router.use('/transactions', transactions)
 router.use('/gd', gd)
 router.use('/events', events)
-
+router.use('/stats', stats)
 router.use(logErrors)
 router.use(clientErrorHandler)
 router.use(badRequest)

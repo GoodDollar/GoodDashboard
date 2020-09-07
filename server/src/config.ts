@@ -82,9 +82,9 @@ const conf = convict({
   },
   ethereumMainnet: {
     network_id: 3,
-    httpWeb3Provider: "https://rpc.fuse.io/",
-    websocketWeb3Provider: "wss://rpc.fuse.io/ws",
-    web3Transport: "WebSocket"
+    httpWeb3Provider: 'https://rpc.fuse.io/',
+    websocketWeb3Provider: 'wss://rpc.fuse.io/ws',
+    web3Transport: 'WebSocket',
   },
   network: {
     doc: 'The blockchain network to connect to',
@@ -129,10 +129,15 @@ const conf = convict({
     default: null,
   },
   reset: {
-    doc: "reset the database if value > last reset value"
-    env: 'RESET'
-    default: null
-  }
+    doc: 'reset the database if value > last reset value',
+    env: 'RESET',
+    default: null,
+  },
+  defipulseKey: {
+    doc: ' api key for fetching rates',
+    env: 'DEFIPULSE_KEY',
+    default: null,
+  },
 })
 
 // network options
