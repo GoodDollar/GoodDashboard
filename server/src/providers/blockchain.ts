@@ -425,9 +425,15 @@ export class blockchain {
       amount = await this.mainNetTokenContract.methods
         .totalSupply()
         .call()
-        .then((n: any) => n.toNumber())
+        .then((n: any) => n && n.toNumber())
     } catch (e) {
       logger.error('Fetch total supply amount failed', e.message, e)
+    }
+
+    // in case totalSupply method fail - the amount will be 0
+    // do not update the db record if amount value is 0
+    if (Number(amount) <= 0) {
+      return
     }
 
     log.info('got amount of G$ supply:', {
