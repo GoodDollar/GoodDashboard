@@ -18,7 +18,7 @@ const getInterestRates = throttle(async () => {
         Accept: '*/*',
       },
     }).then((_) => _.json())
-    return pick(get(rates, 'rates', {}), ['Maker', 'Compound'])
+    return get(rates, 'rates', {})
   } catch (e) {
     log.error('failed fetching interest rates:', { e, message: e.message })
     return { success: false, error: e.message }
