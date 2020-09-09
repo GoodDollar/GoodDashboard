@@ -198,16 +198,16 @@ class Wallets {
       let key = `${ceilFunc(minStep+1)}-${maxStep}`
 
       const filter = {
-        [field]:{ $gt: minStep, $lte: maxStep }
+        [field]:{ $gte: minStep, $lte: maxStep }
       }
       if (j===0) {
-        filter[field] = { $gt: 0, $lte: maxStep }
-        key = `${ceilFunc(min+1)}-${maxStep}`
+        filter[field] = { $gte: 0, $lte: maxStep }
+        key = `${ceilFunc(min)}-${maxStep}`
       } else if (j>=step-1) {
-        filter[field] = { $gt: minStep, $lte: max }
+        filter[field] = { $gte: minStep, $lte: max }
         key = `${ceilFunc(minStep+1)}-${max}`
       }
-
+      console.log('qqq', filter)
       result[key] = await this.model.count(filter)
     }
 
