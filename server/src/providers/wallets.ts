@@ -207,7 +207,6 @@ class Wallets {
         filter[field] = { $gte: minStep, $lte: max }
         key = `${ceilFunc(minStep+1)}-${max}`
       }
-      console.log('qqq', filter)
       result[key] = await this.model.count(filter)
     }
 
