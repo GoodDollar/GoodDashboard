@@ -425,14 +425,15 @@ export class blockchain {
       amount = await this.mainNetTokenContract.methods
         .totalSupply()
         .call()
-        .then((n: any) => n && n.toNumber())
+        .then((totals: any) => {
+          if (!web3Utils.isBigNumber(totals)) {
+            throw new Error('Contract method returned invalid value')
+          }
+
+          return totals.toNumber()
+        })
     } catch (e) {
       logger.error('Fetch total supply amount failed', e.message, e)
-    }
-
-    // in case totalSupply method fail - the amount will be 0
-    // do not update the db record if amount value is 0
-    if (Number(amount) <= 0) {
       return
     }
 
