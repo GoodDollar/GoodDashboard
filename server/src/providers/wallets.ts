@@ -206,7 +206,7 @@ class Wallets {
         key = `${ceilFunc(min)}-${maxStep}`
       } else if (j>=step-1) {
         filter[field] = { $gt: minStep, $lte: max }
-        key = `${ceilFunc(minStep)}-${max}`
+        key = `${ceilFunc(minStep + 1)}-${max}`
       }
 
       result[key] = await this.model.count(filter)
