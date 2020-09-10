@@ -4,7 +4,7 @@ import HttpAdapter from './httpAdapter';
 import Config from '../config';
 
 const api = new ApiClient(new HttpAdapter(axios.create({
-  baseURL: 'http://localhost:3022/api'//Config.apiUrl,
+  baseURL: Config.apiUrl,
 })));
 
 export default api;
