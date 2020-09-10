@@ -425,9 +425,16 @@ export class blockchain {
       amount = await this.mainNetTokenContract.methods
         .totalSupply()
         .call()
-        .then((n: any) => n.toNumber())
+        .then((totals: any) => {
+          if (!web3Utils.isBigNumber(totals)) {
+            throw new Error('Contract method returned invalid value')
+          }
+
+          return totals.toNumber()
+        })
     } catch (e) {
       logger.error('Fetch total supply amount failed', e.message, e)
+      return
     }
 
     log.info('got amount of G$ supply:', {
