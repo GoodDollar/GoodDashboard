@@ -197,15 +197,15 @@ class Wallets {
       let maxStep: number = stepAmount * j + stepAmount + minMaxForStepCeil
       let key = `${ceilFunc(minStep+1)}-${maxStep}`
 
-      const filter = {
-        [field]:{ $gte: minStep, $lte: maxStep }
+      const filter: any = {
+        [field]:{ $gt: minStep, $lte: maxStep }
       }
 
       if (j===0) {
         filter[field] = { $gte: 0, $lte: maxStep }
         key = `${ceilFunc(min)}-${maxStep}`
       } else if (j>=step-1) {
-        filter[field] = { $gte: minStep, $lte: max }
+        filter[field] = { $gt: minStep, $lte: max }
         key = `${ceilFunc(minStep)}-${max}`
       }
 
