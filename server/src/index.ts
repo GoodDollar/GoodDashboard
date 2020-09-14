@@ -14,10 +14,7 @@ const server = Blockchain.updateData().then((_) =>
 
       cron.stop()
 
-      Promise.all([
-        new Promise((resolve) => server.close(resolve)),
-        new Promise((resolve) => mongoose.connection.close(false, resolve)),
-      ]).then(() => process.exit(0))
+      Promise.all([new Promise((resolve) => mongoose.connection.close(false, resolve))]).then(() => process.exit(0))
     }
 
     console.log('  App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'))
