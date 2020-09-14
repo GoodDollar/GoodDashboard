@@ -129,7 +129,7 @@ const conf = convict({
     default: null,
   },
   reset: {
-    doc: 'reset the database if value > last reset value',
+    doc: 'Number. Eeset the database if value > last reset (lastVersion) value',
     env: 'RESET',
     default: null,
   },
