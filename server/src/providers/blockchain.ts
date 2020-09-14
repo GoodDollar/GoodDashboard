@@ -62,17 +62,18 @@ export class blockchain {
 
   amplitude: Amplitude
 
-  constructor () {
+  constructor() {
     this.lastBlock = 0
     this.network = conf.network
     this.networkMainnet = conf.networkMainnet
     this.networkId = conf.ethereum.network_id
     this.networkIdMainnet = conf.ethereumMainnet.network_id
     this.ready = this.init()
-    let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`)).concat(Object.values(get(ContractsModelAddress, `${this.network}`)))
-      .filter(_ => typeof _ === 'string')
+    let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
+      .concat(Object.values(get(ContractsModelAddress, `${this.network}`)))
+      .filter((_) => typeof _ === 'string')
       .concat(conf.systemAccounts, ['0x0000000000000000000000000000000000000000'])
-      .map(x => (x as string).toLowerCase())
+      .map((x) => (x as string).toLowerCase())
     this.listPrivateAddress = _invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
@@ -91,7 +92,7 @@ export class blockchain {
    *
    * @param {boolean} mainnet - determines whether to get regular or mainnet transport provider
    */
-  getWeb3TransportProvider (mainnet?: boolean): any {
+  getWeb3TransportProvider(mainnet?: boolean): any {
     const confKey = mainnet ? 'ethereumMainnet' : 'ethereum'
     const transport = get(conf, `[${confKey}].web3Transport`)
     let provider: string
@@ -122,7 +123,7 @@ export class blockchain {
   /**
    * Initializing web3 instances and all required contracts
    */
-  async init () {
+  async init() {
     const { reset } = conf
     const lastVersion = await PropertyProvider.get<number>('lastVersion', 0)
 
@@ -131,18 +132,18 @@ export class blockchain {
       reset,
     })
 
-    if (reset > 0 && (reset != lastVersion)) {
-      log.info("reseting database", { version: reset, lastVersion })
+    if (reset > 0 && reset != lastVersion) {
+      log.info('reseting database', { version: reset, lastVersion })
 
       await Promise.all([
         PropertyProvider.model.deleteMany({}),
         walletsProvider.model.deleteMany({}),
         AboutClaimTransactionProvider.model.deleteMany({}),
         AboutTransactionProvider.model.deleteMany({}),
-        AddressesClaimedProvider.model.deleteMany({})
+        AddressesClaimedProvider.model.deleteMany({}),
       ])
 
-      await PropertyProvider.set("lastVersion", reset)
+      await PropertyProvider.set('lastVersion', reset)
     }
 
     log.debug('Initializing blockchain:', {
@@ -150,10 +151,10 @@ export class blockchain {
       mainnet: conf.ethereumMainnet,
     })
 
-    this.lastBlock = await PropertyProvider.get<number>('lastBlock', 0).catch(() => 0)
+    this.lastBlock = await PropertyProvider.get<number>('lastBlock', 0).catch(() => 5000000)
 
     log.debug('Fetched last block:', {
-      lastBlock: this.lastBlock
+      lastBlock: this.lastBlock,
     })
 
     this.web3 = new Web3(this.getWeb3TransportProvider())
@@ -182,7 +183,7 @@ export class blockchain {
    * Get true if not private wallet
    * @param wallet
    */
-  isClientWallet (wallet: string) {
+  isClientWallet(wallet: string) {
     return this.listPrivateAddress[wallet.toLowerCase()] === undefined
   }
 
@@ -190,14 +191,14 @@ export class blockchain {
    * Get true if wallet is paymentlink contracts
    * @param wallet
    */
-  isPaymentlinkContracts (wallet: string) {
+  isPaymentlinkContracts(wallet: string) {
     return this.web3.utils.toChecksumAddress(this.paymentLinkContracts) === this.web3.utils.toChecksumAddress(wallet)
   }
 
   /**
    * Update all date BChain
    */
-  async updateData () {
+  async updateData() {
     await this.ready
     await this.updateEvents()
 
@@ -207,17 +208,19 @@ export class blockchain {
     await PropertyProvider.set('inEscrow', +inEscrow)
   }
 
-  async updateEvents () {
+  async updateEvents() {
     const blockNumber = await this.web3.eth.getBlockNumber().then(Number)
 
     log.info('updateEvents starting:', { from: this.lastBlock, to: blockNumber })
 
     await Promise.all([
-      this.updateListWalletsAndTransactions(blockNumber).catch(e => log.error('transfer events failed', e.message, e)),
-      this.updateClaimEvents(blockNumber).catch(e => log.error('claim events failed', e.message, e)),
-      this.updateOTPLEvents(blockNumber).catch(e => log.error('otpl events failed', e.message, e)),
-      this.updateSupplyAmount().catch(e => log.error('supply amount update failed', e.message, e)),
-      this.updateUBIQuota(blockNumber).catch(e => log.error('UBI calculations update failed', e.message, e)),
+      this.updateListWalletsAndTransactions(blockNumber).catch((e) =>
+        log.error('transfer events failed', e.message, e)
+      ),
+      this.updateClaimEvents(blockNumber).catch((e) => log.error('claim events failed', e.message, e)),
+      this.updateOTPLEvents(blockNumber).catch((e) => log.error('otpl events failed', e.message, e)),
+      this.updateSupplyAmount().catch((e) => log.error('supply amount update failed', e.message, e)),
+      this.updateUBIQuota(blockNumber).catch((e) => log.error('UBI calculations update failed', e.message, e)),
     ])
 
     this.lastBlock = blockNumber
@@ -242,8 +245,8 @@ export class blockchain {
       const event = allEvents[index]
       const timestamp = (await this.web3.eth.getBlock(event.blockNumber)).timestamp
       const date = moment.unix(timestamp).format('YYYY-MM-DD')
-      const ubiQuotaHex =  get(event, 'returnValues.dailyUbi')
-      const ubi_quota =  web3Utils.hexToNumber(ubiQuotaHex)
+      const ubiQuotaHex = get(event, 'returnValues.dailyUbi')
+      const ubi_quota = web3Utils.hexToNumber(ubiQuotaHex)
 
       preparedToSave[date] = {
         date,
@@ -258,10 +261,8 @@ export class blockchain {
     }
   }
 
-  async updateWalletsBalance (customWallets: any) {
-    const wallets = customWallets && customWallets.length
-      ? customWallets
-      : await walletsProvider.getAll()
+  async updateWalletsBalance(customWallets: any) {
+    const wallets = customWallets && customWallets.length ? customWallets : await walletsProvider.getAll()
     let newBalanceWallets: any = {}
 
     for (let i in wallets) {
@@ -278,7 +279,7 @@ export class blockchain {
     log.info('Update balances finished', wallets.length)
   }
 
-  async updateBonusEvents (toBlock: number) {
+  async updateBonusEvents(toBlock: number) {
     const allEvents = await this.bonusContract.getPastEvents('BonusClaimed', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
@@ -319,7 +320,7 @@ export class blockchain {
    *
    * @return {Promise<void>}
    */
-  async checkAddressesClaimed (arrayOfAddresses: string[]): Promise<void> {
+  async checkAddressesClaimed(arrayOfAddresses: string[]): Promise<void> {
     // check multiple addresses exists and create new records in case if not exist by one db query
     const { nonExistedCount } = await AddressesClaimedProvider.checkIfExistsMultiple(arrayOfAddresses)
 
@@ -329,7 +330,7 @@ export class blockchain {
     }
   }
 
-  async updateClaimEvents (toBlock: number) {
+  async updateClaimEvents(toBlock: number) {
     const allEvents = await this.ubiContract.getPastEvents('UBIClaimed', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
@@ -400,7 +401,7 @@ export class blockchain {
     }
   }
 
-  async updateOTPLEvents (toBlock: number) {
+  async updateOTPLEvents(toBlock: number) {
     const allEvents = await this.otplContract.getPastEvents('allEvents', {
       fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
       toBlock,
@@ -436,7 +437,7 @@ export class blockchain {
     }
   }
 
-  async updateSupplyAmount () {
+  async updateSupplyAmount() {
     const date = moment().format('YYYY-MM-DD')
     let amount = 0
 
@@ -471,19 +472,18 @@ export class blockchain {
     await AboutClaimTransactionProvider.updateOrSet(listOfTransactionsData)
   }
 
-  async updateSurvey () {
+  async updateSurvey() {
     let timestamp = moment.unix(conf.startTimeTransaction)
     let startDate = timestamp.format('YYYY-MM-DD')
-    let lastDate = await PropertyProvider
-      .get('lastSurveyDate')
-      .then(date => {
+    let lastDate = await PropertyProvider.get('lastSurveyDate')
+      .then((date) => {
         if (!date) {
           return startDate
         } else {
           return date
         }
       })
-      .catch(_ => startDate)
+      .catch((_) => startDate)
 
     let from = new Date(lastDate)
     let to = new Date()
@@ -500,7 +500,7 @@ export class blockchain {
   /**
    * Update list wallets and transactions info
    */
-  async updateListWalletsAndTransactions (toBlock: number) {
+  async updateListWalletsAndTransactions(toBlock: number) {
     let wallets: any = {}
     let aboutTXs: any = {}
     let lastBlock = this.lastBlock
@@ -607,7 +607,7 @@ export class blockchain {
    *  Get GD balance by address
    * @param {string} address
    */
-  async getAddressBalance (address: string): Promise<number> {
+  async getAddressBalance(address: string): Promise<number> {
     const gdbalance = await this.tokenContract.methods.balanceOf(address).call()
 
     return gdbalance ? web3Utils.hexToNumber(gdbalance) : 0
