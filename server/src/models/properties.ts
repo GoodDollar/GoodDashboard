@@ -1,3 +1,4 @@
+import { forIn } from 'lodash'
 import mongoose, { Schema, Types } from '../mongo-db.js'
 import { MODEL_PROPERTIES } from './constants'
 
@@ -13,20 +14,24 @@ export const propertiesSchema = new Schema({
 
 const PropertiesModel = mongoose.model(MODEL_PROPERTIES, propertiesSchema)
 
-const numericProperties = [
-  'inEscrow',
-  'lastBlock',
-  'lastVersion',
-  'totalUniqueClaimers',
-  'totalUBIDistributed',
-  'totalGDVolume'
-]
+const PropertiesTypes = {
+  inEscrow: Number,
+  lastBlock: Number,
+  lastVersion: Number,
+  totalUniqueClaimers: Number,
+  totalUBIDistributed: Number,
+  totalGDVolume: Number,
+  isInitialUBICalcFetched: Boolean,
+  lastSurveyDate: String,
+  ipfsMultiHash: String,
+  ipfsID: String,
+}
 
-numericProperties.forEach(property => PropertiesModel.discriminator(
+forIn(PropertiesTypes, (type, property) => PropertiesModel.discriminator(
   property,
   new Schema(
     {
-      value: Number
+      value: type
     },
     schemaOptions
   )

@@ -123,7 +123,7 @@ export class blockchain {
    */
   async init () {
     const { reset } = conf
-    const lastVersion = await PropertyProvider.get<number>('lastVersion')
+    const lastVersion = await PropertyProvider.get<number>('lastVersion', 0)
 
     log.debug('LastVersion value:', {
       lastVersion,
@@ -149,7 +149,7 @@ export class blockchain {
       mainnet: conf.ethereumMainnet,
     })
 
-    this.lastBlock = await PropertyProvider.get<number>('lastBlock').catch(() => 0)
+    this.lastBlock = await PropertyProvider.get<number>('lastBlock', 0).catch(() => 0)
 
     log.debug('Fetched last block:', {
       lastBlock: this.lastBlock
@@ -227,7 +227,7 @@ export class blockchain {
   async updateUBIQuota(toBlock: number) {
     // Check if the hole history of 'UBICalculated' event is uploaded
     // if not - then set from block to 0 value (beginning)
-    const isInitialUBICalcFetched = (await PropertyProvider.get('isInitialUBICalcFetched')) === 'true'
+    const isInitialUBICalcFetched = await PropertyProvider.get<boolean>('isInitialUBICalcFetched', false)
     const lastBlock = isInitialUBICalcFetched ? this.lastBlock : 0
     const allEvents = await this.ubiContract.getPastEvents('UBICalculated', {
       fromBlock: lastBlock > 0 ? lastBlock : 0,
@@ -253,7 +253,7 @@ export class blockchain {
     await AboutClaimTransactionProvider.updateOrSet(preparedToSave)
 
     if (!isInitialUBICalcFetched) {
-      await PropertyProvider.set('isInitialUBICalcFetched', 'true')
+      await PropertyProvider.set('isInitialUBICalcFetched', true)
     }
   }
 
