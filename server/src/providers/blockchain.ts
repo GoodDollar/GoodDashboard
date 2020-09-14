@@ -1,5 +1,6 @@
 import Web3 from 'web3'
 import moment from 'moment'
+import { uniqBy, toLower } from 'lodash'
 import GoodDollarABI from '@gooddollar/goodcontracts/build/contracts/GoodDollar.json'
 import OneTimePaymentsABI from '@gooddollar/goodcontracts/build/contracts/OneTimePayments.min.json'
 import UBIABI from '@gooddollar/goodcontracts/stakingModel/build/contracts/UBIScheme.min.json'
@@ -122,10 +123,11 @@ export class blockchain {
    * Initializing web3 instances and all required contracts
    */
   async init () {
-    const props = await PropertyProvider.getAll()
+    const props: any = await PropertyProvider.getAll()
+
     log.debug('Config/Status:', props)
-    if(conf.reset && conf.reset != props.lastVersion)
-    {
+
+    if (conf.reset && conf.reset != props.lastVersion) {
       log.info("reseting database", {version: conf.reset, lastVersion: props.lastVersion })
       await Promise.all([PropertyProvider.model.deleteMany({}),
       walletsProvider.model.deleteMany({}),
@@ -244,9 +246,12 @@ export class blockchain {
     }
   }
 
-  async updateWalletsBalance () {
+  async updateWalletsBalance (customWallets: any) {
+    const wallets = customWallets && customWallets.length
+      ? customWallets
+      : await walletsProvider.getAll()
     let newBalanceWallets: any = {}
-    const wallets = await walletsProvider.getAll()
+
     for (let i in wallets) {
       // @ts-ignore
       const address = wallets[i].address
@@ -255,8 +260,10 @@ export class blockchain {
         balance: await this.getAddressBalance(address),
       }
     }
+
     await walletsProvider.updateOrSet(newBalanceWallets)
-    console.log('Finish update wallets balance')
+
+    log.info('Update balances finished', wallets.length)
   }
 
   async updateBonusEvents (toBlock: number) {
@@ -301,12 +308,8 @@ export class blockchain {
    * @return {Promise<void>}
    */
   async checkAddressesClaimed (arrayOfAddresses: string[]): Promise<void> {
-    // there could be duplicates, so need to get unique values
-    // new Set([...]) -> will return unique values from received array
-    const uniqueAddresses = [...new Set(arrayOfAddresses)]
-
     // check multiple addresses exists and create new records in case if not exist by one db query
-    const { nonExistedCount } = await AddressesClaimedProvider.checkIfExistsMultiple(uniqueAddresses)
+    const { nonExistedCount } = await AddressesClaimedProvider.checkIfExistsMultiple(arrayOfAddresses)
 
     // if there is some not existed addresses then increment total unique claimers
     if (nonExistedCount) {
@@ -373,7 +376,11 @@ export class blockchain {
     }
 
     if (allAddresses.length) {
-      await this.checkAddressesClaimed(allAddresses)
+      // there could be duplicates, so need to get unique values
+      const uniqueAddresses = uniqBy(allAddresses, toLower)
+
+      await this.checkAddressesClaimed(uniqueAddresses)
+      await this.updateWalletsBalance(uniqueAddresses.map((address: string) => ({ address })))
     }
 
     if (Object.keys(aboutClaimTXs).length) {
