@@ -40,9 +40,9 @@ const getInEscrow = async (req: Request, res: Response, next: NextFunction) => {
 
 const totalImpactStatistic = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const totalUniqueClaimers = (await propertyProvider.get('totalUniqueClaimers')) || 0
-    const totalUBIDistributed = (await propertyProvider.get('totalUBIDistributed')) || 0
-    const totalGDVolume = (await propertyProvider.get('totalGDVolume')) || 0
+    const totalUniqueClaimers = await propertyProvider.get<number>('totalUniqueClaimers', 0)
+    const totalUBIDistributed = await propertyProvider.get<number>('totalUBIDistributed', 0)
+    const totalGDVolume = await propertyProvider.get<number>('totalGDVolume', 0)
 
     return res.status(200).json({
       responseCode: 200,

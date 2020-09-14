@@ -1,4 +1,4 @@
-import { get } from 'lodash'
+import { get, isUndefined } from 'lodash'
 
 import PropertiesModel from '../models/properties'
 import logger from '../helpers/pino-logger'
@@ -44,12 +44,14 @@ class Property {
    *
    * @returns {string || null}
    */
-  async get<T = string>(property: string): Promise<T> {
+  async get<T = string>(property: string, defaultValue?: T): Promise<T> {
     const result = await this.model
       .findOne({ property })
       .lean()
 
-    return get(result, 'value', '') as T
+    const defValue = isUndefined(defaultValue) ? '' : defaultValue
+
+    return get(result, 'value', defValue) as T
   }
 
   /**

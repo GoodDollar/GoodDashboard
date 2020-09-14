@@ -131,7 +131,7 @@ export class blockchain {
     })
 
     if (reset > 0 && (reset != lastVersion)) {
-      log.info("reseting database", {version: reset, lastVersion })
+      log.info("reseting database", { version: reset, lastVersion })
 
       await Promise.all([
         PropertyProvider.model.deleteMany({}),
@@ -209,7 +209,7 @@ export class blockchain {
   async updateEvents () {
     const blockNumber = await this.web3.eth.getBlockNumber().then(Number)
 
-    log.info('updateEvents starting:', { blockNumber })
+    log.info('updateEvents starting:', { from: this.lastBlock, to: blockNumber })
 
     await Promise.all([
       this.updateListWalletsAndTransactions(blockNumber).catch(e => log.error('transfer events failed', e.message, e)),
