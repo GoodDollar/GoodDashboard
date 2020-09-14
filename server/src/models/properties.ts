@@ -14,6 +14,8 @@ export const propertiesSchema = new Schema({
 const PropertiesModel = mongoose.model(MODEL_PROPERTIES, propertiesSchema)
 
 const numericProperties = [
+  'inEscrow',
+  'lastBlock',
   'lastVersion',
   'totalUniqueClaimers',
   'totalUBIDistributed',

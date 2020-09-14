@@ -22,7 +22,7 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
 
 const getInEscrow = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const inEscrow = await propertyProvider.get('inEscrow')
+    const inEscrow = await propertyProvider.get<number>('inEscrow')
 
     return res.status(200).json({
       responseCode: 200,
