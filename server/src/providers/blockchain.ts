@@ -1,6 +1,6 @@
 import Web3 from 'web3'
 import moment from 'moment'
-import { uniq } from 'lodash'
+import { uniqBy, toLower } from 'lodash'
 import GoodDollarABI from '@gooddollar/goodcontracts/build/contracts/GoodDollar.json'
 import OneTimePaymentsABI from '@gooddollar/goodcontracts/build/contracts/OneTimePayments.min.json'
 import UBIABI from '@gooddollar/goodcontracts/stakingModel/build/contracts/UBIScheme.min.json'
@@ -356,7 +356,7 @@ export class blockchain {
       }
 
       let toAddr = event.returnValues.claimer
-      allAddresses.push(toAddr.toLowerCase())
+      allAddresses.push(toAddr)
 
       this.amplitude.logEvent({
         user_id: toAddr,
@@ -377,7 +377,7 @@ export class blockchain {
 
     if (allAddresses.length) {
       // there could be duplicates, so need to get unique values
-      const uniqueAddresses = uniq(allAddresses)
+      const uniqueAddresses = uniqBy(allAddresses, toLower)
 
       await this.checkAddressesClaimed(uniqueAddresses)
       await this.updateWalletsBalance(uniqueAddresses.map((address: string) => ({ address })))
