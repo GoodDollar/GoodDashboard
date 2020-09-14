@@ -122,15 +122,16 @@ export class blockchain {
    * Initializing web3 instances and all required contracts
    */
   async init () {
-    const lastVersion = await PropertyProvider.get('lastVersion')
+    const { reset } = conf
+    const lastVersion = await PropertyProvider.get<number>('lastVersion')
 
     log.debug('LastVersion value:', {
       lastVersion,
-      reset: conf.reset,
+      reset,
     })
 
-    if(conf.reset && Number(conf.reset) != Number(lastVersion)) {
-      log.info("reseting database", {version: conf.reset, lastVersion })
+    if (reset > 0 && (reset != lastVersion)) {
+      log.info("reseting database", {version: reset, lastVersion })
 
       await Promise.all([
         PropertyProvider.model.deleteMany({}),
@@ -140,7 +141,7 @@ export class blockchain {
         AddressesClaimedProvider.model.deleteMany({})
       ])
 
-      await PropertyProvider.set("lastVersion", conf.reset)
+      await PropertyProvider.set("lastVersion", reset)
     }
 
     log.debug('Initializing blockchain:', {
