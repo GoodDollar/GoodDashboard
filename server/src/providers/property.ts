@@ -25,7 +25,7 @@ class Property {
 
     try {
       await model.deleteOne({ property })
-      await model.create({ property, value })
+      await model.create({ property, value }) // Model.update + upsert doesn't supports discriminators
 
       return true
     } catch (exception) {
