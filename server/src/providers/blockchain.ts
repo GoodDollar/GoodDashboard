@@ -68,7 +68,6 @@ export class blockchain {
     this.networkMainnet = conf.networkMainnet
     this.networkId = conf.ethereum.network_id
     this.networkIdMainnet = conf.ethereumMainnet.network_id
-    this.ready = this.init()
     let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
       .concat(Object.values(get(ContractsModelAddress, `${this.network}`)))
       .filter((_) => typeof _ === 'string')
@@ -77,7 +76,7 @@ export class blockchain {
     this.listPrivateAddress = _invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
-
+    this.ready = this.init()
     log.info('Starting blockchain reader:', {
       network: this.network,
       mainNetwork: this.networkMainnet,
@@ -151,11 +150,11 @@ export class blockchain {
       mainnet: conf.ethereumMainnet,
     })
 
-    this.lastBlock = await PropertyProvider.get<number>('lastBlock', 0).catch(() => 5000000)
-
-    log.debug('Fetched last block:', {
-      lastBlock: this.lastBlock,
-    })
+    this.lastBlock = await PropertyProvider.get<number>('lastBlock', 0).catch(() => 0)
+    ;(this.lastBlock = this.lastBlock > 0 ? this.lastBlock : 5000000), //TODO:temp fix
+      log.debug('Fetched last block:', {
+        lastBlock: this.lastBlock,
+      })
 
     this.web3 = new Web3(this.getWeb3TransportProvider())
     this.mainNetWeb3 = new Web3(this.getWeb3TransportProvider(true))
