@@ -1,12 +1,40 @@
-import mongoose from '../mongo-db.js'
+import { forIn } from 'lodash'
+import mongoose, { Schema, Types } from '../mongo-db.js'
 import { MODEL_PROPERTIES } from './constants'
 
-export const propertiesSchema = new mongoose.Schema({
+const schemaOptions = { discriminatorKey: 'property' }
+
+export const propertiesSchema = new Schema({
   property: {
     type: String,
     index: { unique: true }
   },
   value: String,
-})
+}, schemaOptions)
 
-export default mongoose.model(MODEL_PROPERTIES, propertiesSchema)
+const PropertiesModel = mongoose.model(MODEL_PROPERTIES, propertiesSchema)
+
+const PropertiesTypes = {
+  inEscrow: Number,
+  lastBlock: Number,
+  lastVersion: Number,
+  totalUniqueClaimers: Number,
+  totalUBIDistributed: Number,
+  totalGDVolume: Number,
+  isInitialUBICalcFetched: Boolean,
+  lastSurveyDate: String,
+  ipfsMultiHash: String,
+  ipfsID: String,
+}
+
+forIn(PropertiesTypes, (type, property) => PropertiesModel.discriminator(
+  property,
+  new Schema(
+    {
+      value: type
+    },
+    schemaOptions
+  )
+))
+
+export default PropertiesModel

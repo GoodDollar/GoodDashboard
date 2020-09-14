@@ -9,10 +9,10 @@ declare var process: any
 
 class Cron {
   private static readonly MUTEX_ID = 'updateData'
-  private static readonly EXIT_EVENTS =  ['SIGINT', 'SIGTERM', 'exit']
 
   readonly schedule: string
   readonly timeZome: string
+  private job: any
 
   constructor(
     config: any,
@@ -28,11 +28,15 @@ class Cron {
   }
 
   public start(): void {
-    const { EXIT_EVENTS } = Cron
     const { jobFactory, timeZome, schedule } = this
-    const job = new jobFactory(schedule, () => this.execute(), null, true, timeZome, null, true)
 
-    EXIT_EVENTS.forEach((event: string) => process.on(event, () => job.stop()))
+    this.job = new jobFactory(schedule, () => this.execute(), null, true, timeZome, null, true)
+  }
+
+  public stop(): void {
+    const { job } = this
+
+    job.stop()
   }
 
   private async execute(): Promise<void> {

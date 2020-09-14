@@ -129,12 +129,14 @@ const conf = convict({
     default: null,
   },
   reset: {
-    doc: 'reset the database if value > last reset value',
+    doc: 'Number. Reset the database if value > last reset (lastVersion) value',
+    format: Number,
     env: 'RESET',
-    default: null,
+    default: 0,
   },
   defipulseKey: {
     doc: ' api key for fetching rates',
+    format: String,
     env: 'DEFIPULSE_KEY',
     default: null,
   },

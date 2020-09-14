@@ -123,18 +123,26 @@ export class blockchain {
    * Initializing web3 instances and all required contracts
    */
   async init () {
-    const props: any = await PropertyProvider.getAll()
+    const { reset } = conf
+    const lastVersion = await PropertyProvider.get<number>('lastVersion', 0)
 
-    log.debug('Config/Status:', props)
+    log.debug('LastVersion value:', {
+      lastVersion,
+      reset,
+    })
 
-    if (conf.reset && conf.reset != props.lastVersion) {
-      log.info("reseting database", {version: conf.reset, lastVersion: props.lastVersion })
-      await Promise.all([PropertyProvider.model.deleteMany({}),
-      walletsProvider.model.deleteMany({}),
-      AboutClaimTransactionProvider.model.deleteMany({}),
-      AboutTransactionProvider.model.deleteMany({}),
-      AddressesClaimedProvider.model.deleteMany({})])
-      PropertyProvider.set("lastVersion", conf.reset)
+    if (reset > 0 && (reset != lastVersion)) {
+      log.info("reseting database", { version: reset, lastVersion })
+
+      await Promise.all([
+        PropertyProvider.model.deleteMany({}),
+        walletsProvider.model.deleteMany({}),
+        AboutClaimTransactionProvider.model.deleteMany({}),
+        AboutTransactionProvider.model.deleteMany({}),
+        AddressesClaimedProvider.model.deleteMany({})
+      ])
+
+      await PropertyProvider.set("lastVersion", reset)
     }
 
     log.debug('Initializing blockchain:', {
@@ -142,10 +150,11 @@ export class blockchain {
       mainnet: conf.ethereumMainnet,
     })
 
-    this.lastBlock = await PropertyProvider
-      .get('lastBlock')
-      .then(_ => +_)
-      .catch(_ => 0)
+    this.lastBlock = await PropertyProvider.get<number>('lastBlock', 0).catch(() => 0)
+
+    log.debug('Fetched last block:', {
+      lastBlock: this.lastBlock
+    })
 
     this.web3 = new Web3(this.getWeb3TransportProvider())
     this.mainNetWeb3 = new Web3(this.getWeb3TransportProvider(true))
@@ -191,33 +200,36 @@ export class blockchain {
   async updateData () {
     await this.ready
     await this.updateEvents()
+
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`)
     const inEscrow = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call()
+
     await PropertyProvider.set('inEscrow', +inEscrow)
   }
 
   async updateEvents () {
-    const blockNumber = await this.web3.eth.getBlockNumber()
-    log.info('updateEvents starting:', { blockNumber })
+    const blockNumber = await this.web3.eth.getBlockNumber().then(Number)
+
+    log.info('updateEvents starting:', { from: this.lastBlock, to: blockNumber })
+
     await Promise.all([
       this.updateListWalletsAndTransactions(blockNumber).catch(e => log.error('transfer events failed', e.message, e)),
-      // this.updateSurvey(),
-      // this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),
       this.updateClaimEvents(blockNumber).catch(e => log.error('claim events failed', e.message, e)),
       this.updateOTPLEvents(blockNumber).catch(e => log.error('otpl events failed', e.message, e)),
       this.updateSupplyAmount().catch(e => log.error('supply amount update failed', e.message, e)),
       this.updateUBIQuota(blockNumber).catch(e => log.error('UBI calculations update failed', e.message, e)),
     ])
-    await PropertyProvider.set('lastBlock', +blockNumber)
-    this.lastBlock = +blockNumber
+
+    this.lastBlock = blockNumber
+    await PropertyProvider.set('lastBlock', blockNumber)
     await this.amplitude.sendBatch()
   }
 
   async updateUBIQuota(toBlock: number) {
     // Check if the hole history of 'UBICalculated' event is uploaded
     // if not - then set from block to 0 value (beginning)
-    const isInitialUBICalcFetched = (await PropertyProvider.get('isInitialUBICalcFetched')) === 'true'
-    const lastBlock = isInitialUBICalcFetched ? +this.lastBlock : 0
+    const isInitialUBICalcFetched = await PropertyProvider.get<boolean>('isInitialUBICalcFetched', false)
+    const lastBlock = isInitialUBICalcFetched ? this.lastBlock : 0
     const allEvents = await this.ubiContract.getPastEvents('UBICalculated', {
       fromBlock: lastBlock > 0 ? lastBlock : 0,
       toBlock,
@@ -242,7 +254,7 @@ export class blockchain {
     await AboutClaimTransactionProvider.updateOrSet(preparedToSave)
 
     if (!isInitialUBICalcFetched) {
-      await PropertyProvider.set('isInitialUBICalcFetched', 'true')
+      await PropertyProvider.set('isInitialUBICalcFetched', true)
     }
   }
 

@@ -1,11 +1,12 @@
+import { get, isUndefined } from 'lodash'
+
 import PropertiesModel from '../models/properties'
 import logger from '../helpers/pino-logger'
 
 const log = logger.child({ from: 'PropertiesModel' })
 
 class Property {
-
-  model:any
+  model: typeof PropertiesModel
 
   constructor() {
     this.model = PropertiesModel
@@ -20,11 +21,17 @@ class Property {
    * @returns {Promise<void>}
    */
   async set(property: string, value: any): Promise<boolean> {
+    const { model } = this
+
     try {
-      await this.model.updateOne({ property }, { $set: {property, value} }, { upsert: true })
+      await model.deleteOne({ property })
+      await model.create({ property, value }) // Model.update + upsert doesn't supports discriminators
+
       return true
-    } catch (ex) {
-      log.error('Update property failed [mongo actions]:', { message: ex.message, property, value })
+    } catch (exception) {
+      const { message } = exception
+
+      log.error('Update property failed [mongo actions]:', { message, property, value })
     }
 
     return false
@@ -37,12 +44,14 @@ class Property {
    *
    * @returns {string || null}
    */
-  async get(property: string): Promise<string> {
+  async get<T = string>(property: string, defaultValue?: T): Promise<T> {
     const result = await this.model
       .findOne({ property })
       .lean()
 
-    return result ? result['value'] : ''
+    const defValue = isUndefined(defaultValue) ? '' : defaultValue
+
+    return get(result, 'value', defValue) as T
   }
 
   /**
@@ -51,7 +60,13 @@ class Property {
    * @returns {Promise<*>}
    */
   async getAll(): Promise<object> {
-    return await this.model.find().lean()
+    const properties = await this.model.find().lean()
+
+    return properties.reduce((allProps, { property, value }) => {
+      allProps[property] = value
+
+      return allProps
+    }, {})
   }
 
   /*
@@ -63,14 +78,12 @@ class Property {
   * @return {Promise<boolean>}
   */
   async increment(property: string, by: number = 1): Promise<boolean> {
-    const value = await this.get(property) || 0
-    const newValue = Number(value) + by
+    const value = await this.get<number>(property) || 0
 
-    await this.set(property, newValue)
+    await this.set(property, value + by)
 
     return true
   }
-
 }
 
 export default new Property()
