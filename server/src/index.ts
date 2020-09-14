@@ -1,33 +1,30 @@
 import app from './app'
 import cron from './cron'
 import mongoose from './mongo-db'
-import Blockchain from './providers/blockchain'
 /**
  * Start Express server.
  */
-const server = Blockchain.updateData().then((_) =>
-  app.listen(app.get('port'), () => {
-    const EXIT_EVENTS: any[] = ['SIGINT', 'SIGTERM', 'SIGQUIT']
+const server = app.listen(app.get('port'), () => {
+  const EXIT_EVENTS: any[] = ['SIGINT', 'SIGTERM', 'SIGQUIT']
 
-    const handleExit = (signal: any) => {
-      console.log(`Received ${signal}. Close my server properly.`)
+  const handleExit = (signal: any) => {
+    console.log(`Received ${signal}. Close my server properly.`)
 
-      cron.stop()
+    cron.stop()
 
-      Promise.all([new Promise((resolve) => mongoose.connection.close(false, resolve))]).then(() => process.exit(0))
-    }
+    Promise.all([new Promise((resolve) => mongoose.connection.close(false, resolve))]).then(() => process.exit(0))
+  }
 
-    console.log('  App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'))
+  console.log('  App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'))
 
-    cron.start()
+  cron.start()
 
-    console.log(' Cron job started with schedule %s', cron.schedule)
+  console.log(' Cron job started with schedule %s', cron.schedule)
 
-    console.log('  HealthCheck: http://localhost:%d/api/health-check\n', app.get('port'))
-    console.log('  Press CTRL-C to stop\n')
+  console.log('  HealthCheck: http://localhost:%d/api/health-check\n', app.get('port'))
+  console.log('  Press CTRL-C to stop\n')
 
-    EXIT_EVENTS.forEach((event) => process.on(event, handleExit))
-  })
-)
+  EXIT_EVENTS.forEach((event) => process.on(event, handleExit))
+})
 
 export default server
