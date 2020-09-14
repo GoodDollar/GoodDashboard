@@ -58,7 +58,13 @@ class Property {
    * @returns {Promise<*>}
    */
   async getAll(): Promise<object> {
-    return await this.model.find().lean()
+    const properties = await this.model.find().lean()
+
+    return properties.reduce((allProps, { property, value }) => {
+      allProps[property] = value
+
+      return allProps
+    }, {})
   }
 
   /*
