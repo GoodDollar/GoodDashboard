@@ -151,10 +151,10 @@ export class blockchain {
     })
 
     this.lastBlock = await PropertyProvider.get<number>('lastBlock', 0).catch(() => 0)
-    ;(this.lastBlock = this.lastBlock > 0 ? this.lastBlock : 5000000), //TODO:temp fix
-      log.debug('Fetched last block:', {
-        lastBlock: this.lastBlock,
-      })
+    this.lastBlock = this.lastBlock > 0 ? this.lastBlock : 5000000 //TODO:temp fix
+    log.debug('Fetched last block:', {
+      lastBlock: this.lastBlock,
+    })
 
     this.web3 = new Web3(this.getWeb3TransportProvider())
     this.mainNetWeb3 = new Web3(this.getWeb3TransportProvider(true))
