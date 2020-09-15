@@ -11,6 +11,7 @@ import conf from '../config'
 import logger from '../helpers/pino-logger'
 import get from 'lodash/get'
 import _invert from 'lodash/invert'
+import { memoize } from 'lodash'
 import walletsProvider from './wallets'
 import surveyProvider from './survey'
 import surveyDB from '../gun/models/survey'
@@ -114,10 +115,12 @@ export class blockchain {
         break
     }
 
-    log.debug({ transport, provider })
+    log.info({ transport, provider })
 
     return web3Provider
   }
+
+  getBlock = memoize((blockNumber) => this.web3.eth.getBlock(blockNumber))
 
   /**
    * Initializing web3 instances and all required contracts
@@ -126,7 +129,7 @@ export class blockchain {
     const { reset } = conf
     const lastVersion = await PropertyProvider.get<number>('lastVersion', 0)
 
-    log.debug('LastVersion value:', {
+    log.info('LastVersion value:', {
       lastVersion,
       reset,
     })
@@ -134,25 +137,25 @@ export class blockchain {
     if (reset > 0 && reset != lastVersion) {
       log.info('reseting database', { version: reset, lastVersion })
 
-      await Promise.all([
-        PropertyProvider.model.deleteMany({}),
-        walletsProvider.model.deleteMany({}),
-        AboutClaimTransactionProvider.model.deleteMany({}),
-        AboutTransactionProvider.model.deleteMany({}),
-        AddressesClaimedProvider.model.deleteMany({}),
-      ])
+    await Promise.all([
+      PropertyProvider.model.deleteMany({}),
+      walletsProvider.model.deleteMany({}),
+      AboutClaimTransactionProvider.model.deleteMany({}),
+      AboutTransactionProvider.model.deleteMany({}),
+      AddressesClaimedProvider.model.deleteMany({}),
+    ])
 
-      await PropertyProvider.set('lastVersion', reset)
+    await PropertyProvider.set('lastVersion', reset)
     }
 
-    log.debug('Initializing blockchain:', {
+    log.info('Initializing blockchain:', {
       ethereum: conf.ethereum,
       mainnet: conf.ethereumMainnet,
     })
 
     this.lastBlock = await PropertyProvider.get<number>('lastBlock', 0).catch(() => 0)
     this.lastBlock = this.lastBlock > 0 ? this.lastBlock : 5000000 //TODO:temp fix
-    log.debug('Fetched last block:', {
+    log.info('Fetched last block:', {
       lastBlock: this.lastBlock,
     })
 
@@ -170,7 +173,7 @@ export class blockchain {
       get(ContractsAddress, `${this.network}.OneTimePayments`)
     )
 
-    log.debug('blockchain Ready:', {
+    log.info('blockchain Ready:', {
       networkId: this.networkId,
       networkIdMainNet: this.networkIdMainnet,
     })
@@ -240,9 +243,24 @@ export class blockchain {
 
     log.debug('got UBI calculations', allEvents)
 
+    log.info("updateUBIQuota:", {events: allEvents.length})
+    
+    let firstBlockDate
     for (let index in allEvents) {
       const event = allEvents[index]
-      const timestamp = (await this.web3.eth.getBlock(event.blockNumber)).timestamp
+      const blockNumber = event.blockNumber
+
+      if(firstBlockDate === undefined)
+      {
+        const txTime = (await this.getBlock(blockNumber)).timestamp
+        firstBlockDate = {
+          blockNumber
+          txTime
+        }
+      }
+      //hack for quicker time getting of block
+      let timestamp = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
+
       const date = moment.unix(timestamp).format('YYYY-MM-DD')
       const ubiQuotaHex = get(event, 'returnValues.dailyUbi')
       const ubi_quota = web3Utils.hexToNumber(ubiQuotaHex)
@@ -274,8 +292,8 @@ export class blockchain {
     }
 
     await walletsProvider.updateOrSet(newBalanceWallets)
-
-    log.info('Update balances finished', wallets.length)
+    log.debug('updateWalletsBalance:', { newBalanceWallets })
+    log.info('updateWalletsBalance finished', wallets.length)
   }
 
   async updateBonusEvents(toBlock: number) {
@@ -286,11 +304,23 @@ export class blockchain {
 
     log.info('got Bonus events:', allEvents.length)
 
+    let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
       let toAddr = event.returnValues.account
       let blockNumber = event.blockNumber
-      const txTime = (await this.web3.eth.getBlock(blockNumber)).timestamp
+
+      if(firstBlockDate === undefined)
+      {
+        const txTime = (await this.getBlock(blockNumber)).timestamp
+        firstBlockDate = {
+          blockNumber
+          txTime
+        }
+      }
+      //hack for quicker time getting of block
+      let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
+
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
@@ -322,7 +352,7 @@ export class blockchain {
   async checkAddressesClaimed(arrayOfAddresses: string[]): Promise<void> {
     // check multiple addresses exists and create new records in case if not exist by one db query
     const { nonExistedCount } = await AddressesClaimedProvider.checkIfExistsMultiple(arrayOfAddresses)
-
+    log.info('new claimers:', { nonExistedCount, outof: arrayOfAddresses.length })
     // if there is some not existed addresses then increment total unique claimers
     if (nonExistedCount) {
       await PropertyProvider.increment('totalUniqueClaimers', nonExistedCount)
@@ -339,12 +369,24 @@ export class blockchain {
     const allAddresses: string[] = []
     let totalUBIDistributed: number = 0
 
-    log.info('got Claim events:', allEvents.length)
+    log.info('updateClaimEvents got Claim events:', { toBlock, fromBlock: this.lastBlock, events: allEvents.length })
 
+    let firstBlockDate
     for (let index in allEvents) {
+      if (index % 100 === 0) log.debug('updateClaimEvents processed:', { index })
       let event = allEvents[index]
       let blockNumber = event.blockNumber
-      const txTime = (await this.web3.eth.getBlock(blockNumber)).timestamp
+
+      if(firstBlockDate === undefined)
+      {
+        const txTime = (await this.getBlock(blockNumber)).timestamp
+        firstBlockDate = {
+          blockNumber
+          txTime
+        }
+      }
+      //hack for quicker time getting of block
+      let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
       if (+txTime < +conf.startTimeTransaction) {
         continue
@@ -383,6 +425,7 @@ export class blockchain {
       })
     }
 
+    log.info('updateClaimEvents', { totalUBIDistributed, aboutClaimTXs })
     if (totalUBIDistributed) {
       await PropertyProvider.increment('totalUBIDistributed', totalUBIDistributed)
     }
@@ -407,13 +450,24 @@ export class blockchain {
     })
 
     log.info('got OTPL events:', allEvents.length)
-
+    let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
       let fromAddr = event.returnValues.from
       let toAddr = event.returnValues.to
       let blockNumber = event.blockNumber
-      const txTime = (await this.web3.eth.getBlock(blockNumber)).timestamp
+
+      if(firstBlockDate === undefined)
+      {
+        const txTime = (await this.getBlock(blockNumber)).timestamp
+        firstBlockDate = {
+          blockNumber
+          txTime
+        }
+      }
+      //hack for quicker time getting of block
+      let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
+
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
@@ -514,12 +568,23 @@ export class blockchain {
 
     log.info('updateListWalletsAndTransactions - got Transfer events:', allEvents.length)
 
+    let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
       let fromAddr = event.returnValues.from
       let toAddr = event.returnValues.to
       let blockNumber = event.blockNumber
-      const txTime = (await this.web3.eth.getBlock(blockNumber)).timestamp
+      
+      if(firstBlockDate === undefined)
+      {
+        const txTime = (await this.getBlock(blockNumber)).timestamp
+        firstBlockDate = {
+          blockNumber
+          txTime
+        }
+      }
+      //hack for quicker time getting of block
+      let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
       if (+txTime < +conf.startTimeTransaction) {
         continue
@@ -547,7 +612,7 @@ export class blockchain {
       if (this.isClientWallet(fromAddr)) {
         let timestamp = moment.unix(txTime)
         let date = timestamp.format('YYYY-MM-DD')
-        log.debug('Client Event:', { date, fromAddr, toAddr })
+        // log.debug('Client Event:', { date, fromAddr, toAddr })
 
         if (aboutTXs.hasOwnProperty(date)) {
           aboutTXs[date].amount_txs += amountTX
