@@ -137,15 +137,15 @@ export class blockchain {
     if (reset > 0 && reset != lastVersion) {
       log.info('reseting database', { version: reset, lastVersion })
 
-    await Promise.all([
-      PropertyProvider.model.deleteMany({}),
-      walletsProvider.model.deleteMany({}),
-      AboutClaimTransactionProvider.model.deleteMany({}),
-      AboutTransactionProvider.model.deleteMany({}),
-      AddressesClaimedProvider.model.deleteMany({}),
-    ])
+      await Promise.all([
+        PropertyProvider.model.deleteMany({}),
+        walletsProvider.model.deleteMany({}),
+        AboutClaimTransactionProvider.model.deleteMany({}),
+        AboutTransactionProvider.model.deleteMany({}),
+        AddressesClaimedProvider.model.deleteMany({}),
+      ])
 
-    await PropertyProvider.set('lastVersion', reset)
+      await PropertyProvider.set('lastVersion', reset)
     }
 
     log.info('Initializing blockchain:', {
@@ -243,19 +243,18 @@ export class blockchain {
 
     log.debug('got UBI calculations', allEvents)
 
-    log.info("updateUBIQuota:", {events: allEvents.length})
-    
+    log.info('updateUBIQuota:', { events: allEvents.length })
+
     let firstBlockDate
     for (let index in allEvents) {
       const event = allEvents[index]
       const blockNumber = event.blockNumber
 
-      if(firstBlockDate === undefined)
-      {
+      if (firstBlockDate === undefined) {
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
-          blockNumber
-          txTime
+          blockNumber,
+          txTime,
         }
       }
       //hack for quicker time getting of block
@@ -310,12 +309,11 @@ export class blockchain {
       let toAddr = event.returnValues.account
       let blockNumber = event.blockNumber
 
-      if(firstBlockDate === undefined)
-      {
+      if (firstBlockDate === undefined) {
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
-          blockNumber
-          txTime
+          blockNumber,
+          txTime,
         }
       }
       //hack for quicker time getting of block
@@ -377,12 +375,11 @@ export class blockchain {
       let event = allEvents[index]
       let blockNumber = event.blockNumber
 
-      if(firstBlockDate === undefined)
-      {
+      if (firstBlockDate === undefined) {
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
-          blockNumber
-          txTime
+          blockNumber,
+          txTime,
         }
       }
       //hack for quicker time getting of block
@@ -457,12 +454,11 @@ export class blockchain {
       let toAddr = event.returnValues.to
       let blockNumber = event.blockNumber
 
-      if(firstBlockDate === undefined)
-      {
+      if (firstBlockDate === undefined) {
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
-          blockNumber
-          txTime
+          blockNumber,
+          txTime,
         }
       }
       //hack for quicker time getting of block
@@ -574,13 +570,12 @@ export class blockchain {
       let fromAddr = event.returnValues.from
       let toAddr = event.returnValues.to
       let blockNumber = event.blockNumber
-      
-      if(firstBlockDate === undefined)
-      {
+
+      if (firstBlockDate === undefined) {
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
-          blockNumber
-          txTime
+          blockNumber,
+          txTime,
         }
       }
       //hack for quicker time getting of block
