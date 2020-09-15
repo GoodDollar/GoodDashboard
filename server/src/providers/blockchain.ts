@@ -371,7 +371,7 @@ export class blockchain {
 
     let firstBlockDate
     for (let index in allEvents) {
-      if (index % 100 === 0) log.debug('updateClaimEvents processed:', { index })
+      if (+index % 100 === 0) log.debug('updateClaimEvents processed:', { index })
       let event = allEvents[index]
       let blockNumber = event.blockNumber
 
