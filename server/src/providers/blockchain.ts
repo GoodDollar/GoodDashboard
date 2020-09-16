@@ -250,7 +250,7 @@ export class blockchain {
       const event = allEvents[index]
       const blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined) {
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
@@ -309,7 +309,7 @@ export class blockchain {
       let toAddr = event.returnValues.account
       let blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined) {
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
@@ -375,7 +375,7 @@ export class blockchain {
       let event = allEvents[index]
       let blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined) {
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
@@ -454,13 +454,14 @@ export class blockchain {
       let toAddr = event.returnValues.to
       let blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined) {
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
           txTime,
         }
       }
+
       //hack for quicker time getting of block
       let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
@@ -571,7 +572,7 @@ export class blockchain {
       let toAddr = event.returnValues.to
       let blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined) {
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
