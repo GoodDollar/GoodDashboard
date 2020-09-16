@@ -1,5 +1,5 @@
 import { CronJob } from 'cron'
-import AsyncLock from 'async-lock'
+import Mutex from 'await-mutex'
 
 import Config from './config'
 import Blockchain from './providers/blockchain'
@@ -8,8 +8,6 @@ import logger from './helpers/pino-logger'
 declare var process: any
 
 class Cron {
-  private static readonly MUTEX_ID = 'updateData'
-
   readonly schedule: string
   readonly timeZome: string
   private job: any
@@ -40,22 +38,20 @@ class Cron {
   }
 
   private async execute(): Promise<void> {
-    const { MUTEX_ID } = Cron
     const { mutex, logger, provider } = this
+    const release = await mutex.lock()
 
     try {
-      await mutex.acquire(MUTEX_ID, async () => {
-        logger.info('******** Start update blockchain data **************')
-        await provider.updateData()
-      })
-
+      logger.info('******** Start update blockchain data **************')
+      await provider.updateData()
       logger.info('Blockchain data updated successfully')
     } catch (exception) {
       logger.warn('Blockchain data update failed', exception.message, exception)
     } finally {
+      release()
       logger.info('******** End update blockchain data **************')
     }
   }
 }
 
-export default new Cron(Config, Blockchain, new AsyncLock(), CronJob, logger)
+export default new Cron(Config, Blockchain, new Mutex(), CronJob, logger)
