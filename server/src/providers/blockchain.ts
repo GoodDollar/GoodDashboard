@@ -213,7 +213,7 @@ export class blockchain {
   async updateEvents() {
     const blockNumber = await this.web3.eth.getBlockNumber().then(Number)
 
-    log.info('updateEvents starting:', { from: this.lastBlock, to: blockNumber })
+    log.debug('Update events starting:', { from: this.lastBlock, to: blockNumber })
 
     await Promise.all([
       this.updateListWalletsAndTransactions(blockNumber).catch((e) =>
@@ -225,8 +225,13 @@ export class blockchain {
       this.updateUBIQuota(blockNumber).catch((e) => log.error('UBI calculations update failed', e.message, e)),
     ])
 
+    log.debug('Update events finished')
+
     this.lastBlock = blockNumber
     await PropertyProvider.set('lastBlock', blockNumber)
+
+    log.debug('lastBlock updated:', blockNumber)
+
     await this.amplitude.sendBatch()
   }
 
@@ -241,9 +246,10 @@ export class blockchain {
     })
     const preparedToSave: any = {}
 
-    log.debug('got UBI calculations', allEvents)
-
-    log.info('updateUBIQuota:', { events: allEvents.length })
+    log.debug('updateUBIQuota started:', {
+      events: allEvents.length,
+      isInitialUBICalcFetched,
+    })
 
     let firstBlockDate
     for (let index in allEvents) {
@@ -270,16 +276,24 @@ export class blockchain {
       }
     }
 
+    log.debug('updateUBIQuota - events data parsed:', {
+      preparedToSave,
+    })
+
     await AboutClaimTransactionProvider.updateOrSet(preparedToSave)
 
     if (!isInitialUBICalcFetched) {
       await PropertyProvider.set('isInitialUBICalcFetched', true)
     }
+
+    log.debug('updateUBIQuota finished')
   }
 
   async updateWalletsBalance(customWallets: any) {
     const wallets = customWallets && customWallets.length ? customWallets : await walletsProvider.getAll()
     let newBalanceWallets: any = {}
+
+    log.debug('updateWalletsBalance started', { wallets: wallets.length })
 
     for (let i in wallets) {
       // @ts-ignore
@@ -291,8 +305,8 @@ export class blockchain {
     }
 
     await walletsProvider.updateOrSet(newBalanceWallets)
-    log.debug('updateWalletsBalance:', { newBalanceWallets })
-    log.info('updateWalletsBalance finished', wallets.length)
+
+    log.debug('updateWalletsBalance finished')
   }
 
   async updateBonusEvents(toBlock: number) {
@@ -422,7 +436,12 @@ export class blockchain {
       })
     }
 
-    log.info('updateClaimEvents', { totalUBIDistributed, aboutClaimTXs })
+    log.debug('updateClaimEvents - events data parsed', {
+      totalUBIDistributed,
+      aboutClaimTXs,
+      addresses: allAddresses.length,
+    })
+
     if (totalUBIDistributed) {
       await PropertyProvider.increment('totalUBIDistributed', totalUBIDistributed)
     }
@@ -438,6 +457,8 @@ export class blockchain {
     if (Object.keys(aboutClaimTXs).length) {
       await AboutClaimTransactionProvider.updateOrSetInc(aboutClaimTXs)
     }
+
+    log.debug('updateClaimEvents finished')
   }
 
   async updateOTPLEvents(toBlock: number) {
@@ -446,7 +467,8 @@ export class blockchain {
       toBlock,
     })
 
-    log.info('got OTPL events:', allEvents.length)
+    log.debug('updateOTPLEvents - got OTPL events:', allEvents.length)
+
     let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
@@ -485,6 +507,8 @@ export class blockchain {
         },
       })
     }
+
+    log.debug('updateOTPLEvents finished')
   }
 
   async updateSupplyAmount() {
@@ -507,7 +531,7 @@ export class blockchain {
       return
     }
 
-    log.info('got amount of G$ supply:', {
+    log.info('updateSupplyAmount - got amount of G$ supply:', {
       amount,
       date,
     })
@@ -520,6 +544,8 @@ export class blockchain {
     }
 
     await AboutClaimTransactionProvider.updateOrSet(listOfTransactionsData)
+
+    log.debug('updateSupplyAmount finished')
   }
 
   async updateSurvey() {
@@ -556,7 +582,7 @@ export class blockchain {
     let lastBlock = this.lastBlock
     let totalGDVolume: number = 0
 
-    log.info('updateListWalletsAndTransactions - last Block', lastBlock)
+    log.debug('updateListWalletsAndTransactions started:', lastBlock)
 
     const allEvents = await this.tokenContract.getPastEvents('Transfer', {
       fromBlock: +lastBlock > 0 ? +lastBlock : 0,
@@ -655,12 +681,20 @@ export class blockchain {
       }
     }
 
+    log.debug('updateListWalletsAndTransactions - events data parsed:', {
+      totalGDVolume,
+      wallets,
+      aboutTXs,
+    })
+
     if (totalGDVolume) {
       await PropertyProvider.increment('totalGDVolume', totalGDVolume)
     }
 
     await walletsProvider.updateOrSet(wallets)
     await AboutTransactionProvider.updateOrSet(aboutTXs)
+
+    log.debug('updateListWalletsAndTransactions finished')
   }
 
   /**
