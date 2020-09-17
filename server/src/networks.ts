@@ -1,7 +1,7 @@
 import { once } from 'lodash'
 
 export default once(() => {
-  const { ALCHEMY_API, INFURA_API } = process.env
+  const { ALCHEMY_API, INFURA_API, FUSE_RPC } = process.env
 
   return {
     1: {
@@ -35,7 +35,7 @@ export default once(() => {
       // fuse, staging, production
       network_id: 122,
       web3Transport: 'HttpProvider',
-      httpWeb3Provider: 'https://rpc.fuse.io/',
+      httpWeb3Provider: FUSE_RPC || 'https://fuse.gooddollar.org/',
       websocketWeb3Provider: 'wss://rpc.fuse.io/ws',
     },
   }
