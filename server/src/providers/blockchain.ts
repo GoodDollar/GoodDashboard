@@ -207,7 +207,11 @@ export class blockchain {
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`)
     const inEscrow = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call()
 
+    log.debug('update property inEscrow with:', inEscrow)
+
     await PropertyProvider.set('inEscrow', +inEscrow)
+
+    log.debug('updateData finished')
   }
 
   async updateEvents() {
@@ -233,6 +237,8 @@ export class blockchain {
     log.debug('lastBlock updated:', blockNumber)
 
     await this.amplitude.sendBatch()
+
+    logger.debug('updateEvents finished')
   }
 
   async updateUBIQuota(toBlock: number) {
