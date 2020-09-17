@@ -139,7 +139,7 @@ export default function Dashboard() {
     if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0) {
       setTransactionAmountPerDayData([
         {
-          id: 'Average amount',
+          id: 'Average amount of TX',
           data: transactionAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
         },
         {
@@ -154,11 +154,11 @@ export default function Dashboard() {
     if (transactionCountPerDay.length > 0 && transactionUniquePerDay.length > 0) {
       setTransactionCountPerDayData([
         {
-          id: 'Unique users',
+          id: 'By unique users',
           data: transactionUniquePerDay,
         },
         {
-          id: 'Total claimers',
+          id: 'Total transactions',
           data: transactionCountPerDay,
         },
 
