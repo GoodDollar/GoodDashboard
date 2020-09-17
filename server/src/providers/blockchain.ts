@@ -22,6 +22,7 @@ import PropertyProvider from './property'
 import Amplitude from './amplitude'
 
 import * as web3Utils from 'web3-utils'
+import {time} from "cron";
 const log = logger.child({ from: 'Blockchain' })
 
 /**
@@ -229,7 +230,7 @@ export class blockchain {
       this.updateUBIQuota(blockNumber).catch((e) => log.error('UBI calculations update failed', e.message, e)),
     ])
 
-    log.debug('Update events finished')
+    log.debug('all promises resolved')
 
     this.lastBlock = blockNumber
     await PropertyProvider.set('lastBlock', blockNumber)
@@ -283,7 +284,7 @@ export class blockchain {
     }
 
     log.debug('updateUBIQuota - events data parsed:', {
-      preparedToSave,
+      preparedToSave: Object.keys(preparedToSave).length,
     })
 
     await AboutClaimTransactionProvider.updateOrSet(preparedToSave)
@@ -391,7 +392,6 @@ export class blockchain {
 
     let firstBlockDate
     for (let index in allEvents) {
-      if (+index % 100 === 0) log.debug('updateClaimEvents processed:', { index })
       let event = allEvents[index]
       let blockNumber = event.blockNumber
 
@@ -429,7 +429,7 @@ export class blockchain {
       let toAddr = event.returnValues.claimer
       allAddresses.push(toAddr)
 
-      this.amplitude.logEvent({
+      const logPayload = {
         user_id: toAddr,
         insert_id: event.transactionHash + '_' + event.logIndex,
         event_type: 'FUSE_CLAIM',
@@ -439,7 +439,11 @@ export class blockchain {
           value: amountTX / 100,
           isToSystem: this.isClientWallet(toAddr) === false,
         },
-      })
+      }
+
+      log.debug('Claim Event:', index, logPayload)
+
+      this.amplitude.logEvent(logPayload)
     }
 
     log.debug('updateClaimEvents - events data parsed', {
