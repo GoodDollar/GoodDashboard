@@ -5,6 +5,8 @@ import Config from './config'
 import Blockchain from './providers/blockchain'
 import logger from './helpers/pino-logger'
 
+const log = logger.child({ from: 'Cron' })
+
 declare var process: any
 
 class Cron {
@@ -42,14 +44,14 @@ class Cron {
     const release = await mutex.lock()
 
     try {
-      logger.info('******** Start update blockchain data **************')
+      log.info('******** Start update blockchain data **************')
       await provider.updateData()
-      logger.info('Blockchain data updated successfully')
+      log.info('Blockchain data updated successfully')
     } catch (exception) {
-      logger.warn('Blockchain data update failed', exception.message, exception)
+      log.warn('Blockchain data update failed', exception.message, exception)
     } finally {
       release()
-      logger.info('******** End update blockchain data **************')
+      log.info('******** End update blockchain data **************')
     }
   }
 }

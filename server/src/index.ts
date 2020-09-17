@@ -7,12 +7,13 @@ import mongoose from './mongo-db'
 const server = app.listen(app.get('port'), () => {
   const EXIT_EVENTS: any[] = ['SIGINT', 'SIGTERM', 'SIGQUIT']
 
-  const handleExit = (signal: any) => {
-    console.log(`Received ${signal}. Close my server properly.`)
+  const handleExit = (signal: any): void => {
+    const http = <any>server
+
+    console.log(`Received ${signal}. Closing server properly.`)
 
     cron.stop()
-
-    Promise.all([new Promise((resolve) => mongoose.connection.close(false, resolve))]).then(() => process.exit(0))
+    http.close(() => mongoose.connection.close(false, () => process.exit(0)))
   }
 
   console.log('  App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'))
