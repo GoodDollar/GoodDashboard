@@ -20,7 +20,7 @@ import AboutClaimTransactionProvider from './about-claim-transactions'
 import AddressesClaimedProvider from './addresses-claimed'
 import PropertyProvider from './property'
 import Amplitude from './amplitude'
-import {  retryTimeout } from '../helpers/retry'
+import { retryTimeout } from '../helpers/async'
 
 import * as web3Utils from 'web3-utils'
 const log = logger.child({ from: 'Blockchain' })
@@ -206,7 +206,7 @@ export class blockchain {
     await this.updateEvents()
 
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`)
-    const inEscrow = await retryTimeout(this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call)
+    const inEscrow = await retryTimeout(() => this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call())
 
     log.debug('update property inEscrow with:', inEscrow)
 
@@ -534,13 +534,13 @@ export class blockchain {
     let amount = 0
 
     try {
-      const totals = await retryTimeout(this.mainNetTokenContract.methods.totalSupply().call)
-
-      if (!web3Utils.isBigNumber(totals)) {
-        throw new Error('Contract method returned invalid value')
-      }
-
-      amount = totals.toNumber()
+      amount = await retryTimeout(() => this.mainNetTokenContract.methods.totalSupply().call())
+        .then((totals: any) => {
+          if (!web3Utils.isBigNumber(totals)) {
+            throw new Error('Contract method returned invalid value')
+          }
+          return totals.toNumber()
+        })
     } catch (e) {
       logger.error('Fetch total supply amount failed', e.message, e)
       return
@@ -719,7 +719,7 @@ export class blockchain {
    * @param {string} address
    */
   async getAddressBalance(address: string): Promise<number> {
-    const gdbalance = await retryTimeout(this.tokenContract.methods.balanceOf(address).call)
+    const gdbalance = await retryTimeout(() => this.tokenContract.methods.balanceOf(address).call())
 
     return gdbalance ? web3Utils.hexToNumber(gdbalance) : 0
   }

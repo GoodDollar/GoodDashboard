@@ -30,7 +30,7 @@ export const retry = async (
     .toPromise()
 }
 
-export const retryTimeout = async (asyncFn: () => Promise<any>, timeoutMs = 10000): Promise<any> =>
+export const retryTimeout = async (asyncFn: () => Promise<any>, timeoutMs = 15000): Promise<any> =>
   retry(
     defer(() => fromPromise(asyncFn())).pipe(timeout(timeoutMs)), null, 0,
     (error: any) => isError(error) && error.name === 'TimeoutError'
