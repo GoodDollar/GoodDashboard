@@ -20,6 +20,7 @@ import AboutClaimTransactionProvider from './about-claim-transactions'
 import AddressesClaimedProvider from './addresses-claimed'
 import PropertyProvider from './property'
 import Amplitude from './amplitude'
+import { retryTimeout } from '../helpers/async'
 
 import * as web3Utils from 'web3-utils'
 const log = logger.child({ from: 'Blockchain' })
@@ -205,7 +206,7 @@ export class blockchain {
     await this.updateEvents()
 
     const oneTimePaymentLinksAddress: any = get(ContractsAddress, `${this.network}.OneTimePayments`)
-    const inEscrow = await this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call()
+    const inEscrow = await retryTimeout(() => this.tokenContract.methods.balanceOf(oneTimePaymentLinksAddress).call())
 
     log.debug('update property inEscrow with:', inEscrow)
 
@@ -246,10 +247,12 @@ export class blockchain {
     // if not - then set from block to 0 value (beginning)
     const isInitialUBICalcFetched = await PropertyProvider.get<boolean>('isInitialUBICalcFetched', false)
     const lastBlock = isInitialUBICalcFetched ? this.lastBlock : 0
-    const allEvents = await this.ubiContract.getPastEvents('UBICalculated', {
-      fromBlock: lastBlock > 0 ? lastBlock : 0,
-      toBlock,
-    })
+    const allEvents = await retryTimeout(
+      () => this.ubiContract.getPastEvents('UBICalculated', {
+        fromBlock: lastBlock > 0 ? lastBlock : 0,
+        toBlock,
+      })
+    )
     const preparedToSave: any = {}
 
     log.debug('updateUBIQuota started:', {
@@ -316,10 +319,12 @@ export class blockchain {
   }
 
   async updateBonusEvents(toBlock: number) {
-    const allEvents = await this.bonusContract.getPastEvents('BonusClaimed', {
-      fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
-      toBlock,
-    })
+    const allEvents = await retryTimeout(
+      () => this.bonusContract.getPastEvents('BonusClaimed', {
+        fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
+        toBlock,
+      })
+    )
 
     log.info('got Bonus events:', allEvents.length)
 
@@ -378,10 +383,12 @@ export class blockchain {
   }
 
   async updateClaimEvents(toBlock: number) {
-    const allEvents = await this.ubiContract.getPastEvents('UBIClaimed', {
-      fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
-      toBlock,
-    })
+    const allEvents = await retryTimeout(
+      () => this.ubiContract.getPastEvents('UBIClaimed', {
+        fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
+        toBlock,
+      })
+    )
 
     const aboutClaimTXs: any = {}
     const allAddresses: string[] = []
@@ -471,10 +478,12 @@ export class blockchain {
   }
 
   async updateOTPLEvents(toBlock: number) {
-    const allEvents = await this.otplContract.getPastEvents('allEvents', {
-      fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
-      toBlock,
-    })
+    const allEvents = await retryTimeout(
+      () => this.otplContract.getPastEvents('allEvents', {
+        fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
+        toBlock,
+      })
+    )
 
     log.debug('updateOTPLEvents - got OTPL events:', allEvents.length)
 
@@ -525,9 +534,7 @@ export class blockchain {
     let amount = 0
 
     try {
-      amount = await this.mainNetTokenContract.methods
-        .totalSupply()
-        .call()
+      amount = await retryTimeout(() => this.mainNetTokenContract.methods.totalSupply().call())
         .then((totals: any) => {
           if (!web3Utils.isBigNumber(totals)) {
             throw new Error('Contract method returned invalid value')
@@ -593,10 +600,12 @@ export class blockchain {
 
     log.debug('updateListWalletsAndTransactions started:', lastBlock)
 
-    const allEvents = await this.tokenContract.getPastEvents('Transfer', {
-      fromBlock: +lastBlock > 0 ? +lastBlock : 0,
-      toBlock,
-    })
+    const allEvents = await retryTimeout(
+      () => this.tokenContract.getPastEvents('Transfer', {
+        fromBlock: +lastBlock > 0 ? +lastBlock : 0,
+        toBlock,
+      })
+    )
 
     log.info('updateListWalletsAndTransactions - got Transfer events:', allEvents.length)
 
@@ -711,7 +720,7 @@ export class blockchain {
    * @param {string} address
    */
   async getAddressBalance(address: string): Promise<number> {
-    const gdbalance = await this.tokenContract.methods.balanceOf(address).call()
+    const gdbalance = await retryTimeout(() => this.tokenContract.methods.balanceOf(address).call())
 
     return gdbalance ? web3Utils.hexToNumber(gdbalance) : 0
   }
