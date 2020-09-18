@@ -539,6 +539,7 @@ export class blockchain {
           if (!web3Utils.isBigNumber(totals)) {
             throw new Error('Contract method returned invalid value')
           }
+
           return totals.toNumber()
         })
     } catch (e) {

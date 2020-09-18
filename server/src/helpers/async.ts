@@ -10,6 +10,7 @@ export const retry = async (
 ): Promise<any> => {
   const observable: Observable<any> = isFunction(source)
     ? defer(() => fromPromise(source())) : source
+
   return observable.pipe(
     retryWhen(attempts =>
       attempts.pipe(
