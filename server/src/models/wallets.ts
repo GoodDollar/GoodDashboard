@@ -6,10 +6,10 @@ export const walletsSchema = new mongoose.Schema({
     type: String,
     index: { unique: true }
   },
-  balance: Number,
+  balance: : { type: Number, index: true},
   outTXs: Number,
   inTXs: Number,
-  countTx: Number,
+  countTx: {type: Number, index: true }
 })
 
 export default mongoose.model(MODEL_WALLETS, walletsSchema)
