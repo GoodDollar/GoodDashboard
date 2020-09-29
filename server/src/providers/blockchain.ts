@@ -247,8 +247,8 @@ export class blockchain {
     // if not - then set from block to 0 value (beginning)
     const isInitialUBICalcFetched = await PropertyProvider.get<boolean>('isInitialUBICalcFetched', false)
     const lastBlock = isInitialUBICalcFetched ? this.lastBlock : 0
-    const allEvents = await retryTimeout(
-      () => this.ubiContract.getPastEvents('UBICalculated', {
+    const allEvents = await retryTimeout(() =>
+      this.ubiContract.getPastEvents('UBICalculated', {
         fromBlock: lastBlock > 0 ? lastBlock : 0,
         toBlock,
       })
@@ -265,7 +265,8 @@ export class blockchain {
       const event = allEvents[index]
       const blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
+        //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
@@ -319,8 +320,8 @@ export class blockchain {
   }
 
   async updateBonusEvents(toBlock: number) {
-    const allEvents = await retryTimeout(
-      () => this.bonusContract.getPastEvents('BonusClaimed', {
+    const allEvents = await retryTimeout(() =>
+      this.bonusContract.getPastEvents('BonusClaimed', {
         fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
         toBlock,
       })
@@ -334,7 +335,8 @@ export class blockchain {
       let toAddr = event.returnValues.account
       let blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
+        //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
@@ -383,8 +385,8 @@ export class blockchain {
   }
 
   async updateClaimEvents(toBlock: number) {
-    const allEvents = await retryTimeout(
-      () => this.ubiContract.getPastEvents('UBIClaimed', {
+    const allEvents = await retryTimeout(() =>
+      this.ubiContract.getPastEvents('UBIClaimed', {
         fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
         toBlock,
       })
@@ -401,7 +403,8 @@ export class blockchain {
       let event = allEvents[index]
       let blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
+        //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
@@ -415,10 +418,13 @@ export class blockchain {
         continue
       }
 
+      const ubiEpoch = moment.unix(txTime).utc().set({ hour: 11, minute: 44 }).startOf('minute')
+
       const amountTX = web3Utils.hexToNumber(event.returnValues.amount)
       totalUBIDistributed += amountTX
 
       let timestamp = moment.unix(txTime)
+      if (timestamp.isBefore(ubiEpoch)) timestamp.subtract(1, 'day')
       let date = timestamp.format('YYYY-MM-DD')
 
       if (aboutClaimTXs.hasOwnProperty(date)) {
@@ -478,8 +484,8 @@ export class blockchain {
   }
 
   async updateOTPLEvents(toBlock: number) {
-    const allEvents = await retryTimeout(
-      () => this.otplContract.getPastEvents('allEvents', {
+    const allEvents = await retryTimeout(() =>
+      this.otplContract.getPastEvents('allEvents', {
         fromBlock: +this.lastBlock > 0 ? +this.lastBlock : 0,
         toBlock,
       })
@@ -494,7 +500,8 @@ export class blockchain {
       let toAddr = event.returnValues.to
       let blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
+        //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
@@ -534,14 +541,13 @@ export class blockchain {
     let amount = 0
 
     try {
-      amount = await retryTimeout(() => this.mainNetTokenContract.methods.totalSupply().call())
-        .then((totals: any) => {
-          if (!web3Utils.isBigNumber(totals)) {
-            throw new Error('Contract method returned invalid value')
-          }
+      amount = await retryTimeout(() => this.mainNetTokenContract.methods.totalSupply().call()).then((totals: any) => {
+        if (!web3Utils.isBigNumber(totals)) {
+          throw new Error('Contract method returned invalid value')
+        }
 
-          return totals.toNumber()
-        })
+        return totals.toNumber()
+      })
     } catch (e) {
       logger.error('Fetch total supply amount failed', e.message, e)
       return
@@ -600,8 +606,8 @@ export class blockchain {
 
     log.debug('updateListWalletsAndTransactions started:', lastBlock)
 
-    const allEvents = await retryTimeout(
-      () => this.tokenContract.getPastEvents('Transfer', {
+    const allEvents = await retryTimeout(() =>
+      this.tokenContract.getPastEvents('Transfer', {
         fromBlock: +lastBlock > 0 ? +lastBlock : 0,
         toBlock,
       })
@@ -616,7 +622,8 @@ export class blockchain {
       let toAddr = event.returnValues.to
       let blockNumber = event.blockNumber
 
-      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) { //estimate block time to save slow network calls
+      if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
+        //estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
         firstBlockDate = {
           blockNumber,
