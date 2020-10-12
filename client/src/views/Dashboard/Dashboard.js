@@ -321,7 +321,7 @@ export default function Dashboard() {
                   }}
                   axisBottom={{
                     format: '%b %d',
-                    tickValues: 'every 5 days',
+                    // tickValues: 'every 5 days',
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
