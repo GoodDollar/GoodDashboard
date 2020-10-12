@@ -60,4 +60,4 @@ class Cron {
   }
 }
 
-export default new Cron(Config, Blockchain, new AsyncLock(), CronJob, logger)
+export default new Cron(Config, Blockchain, new AsyncLock({ timeout: 60000 * 10 }), CronJob, logger)
