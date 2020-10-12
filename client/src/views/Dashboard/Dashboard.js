@@ -112,7 +112,7 @@ export default function Dashboard() {
   const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([], lineChartDataLimiter)
   const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay([], lineChartDataLimiter)
 
-  const [claimPerDay = [], claimPerDayLoading] = useGetClaimPerDay([], 20)
+  const [claimPerDay = [], claimPerDayLoading] = useGetClaimPerDay([])
   const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], lineChartDataLimiter)
   const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], lineChartDataLimiter)
   const [supplyAmountPerDay = [], supplyAmountPerDayLoading] = useGetSupplyAmountPerDay([], lineChartDataLimiter)
