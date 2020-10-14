@@ -26,14 +26,12 @@ import {
   // useGetGDInEscrow,
   // useGetGDTotal,
   useGetTotalImpactStatistics,
-  useGetTransactionAmountPerDay,
   useGetTransactionCountPerDay,
   useGetTransactionDailyAverage,
   useGetTransactionSumAmountPerDay,
   useGetSupplyAmountPerDay,
   useGetTransactionTotal,
   useGetTransactionTotalAmount,
-  useGetTransactionUniquePerDay,
   useTransactionDistributionHistogram,
   useTransactionTopAccounts,
   useTransactionTopMedianLow,
@@ -66,7 +64,7 @@ const prepareHistogramTransactionData = histogram => Object.keys(histogram).map(
 }))
 
 // chart configs for mobile devices
-const lineChartDataLimiter = isMobileOnly ? 10 : 20
+const lineChartDataLimiter = isMobileOnly ? 0 : 0
 const lineChartTickRotation = isMobileOnly ? -90 : 0
 const mobilePieChartProps = !isMobileOnly ? {} : {
   width: 500,
@@ -110,10 +108,8 @@ export default function Dashboard() {
 
   // per day
   const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([], lineChartDataLimiter)
-  const [transactionUniquePerDay = [], transactionUniquePerDayLoading] = useGetTransactionUniquePerDay([], lineChartDataLimiter)
 
   const [claimPerDay = [], claimPerDayLoading] = useGetClaimPerDay([])
-  const [transactionAmountPerDay = [], transactionAmountPerDayLoading] = useGetTransactionAmountPerDay([], lineChartDataLimiter)
   const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], lineChartDataLimiter)
   const [supplyAmountPerDay = [], supplyAmountPerDayLoading] = useGetSupplyAmountPerDay([], lineChartDataLimiter)
 
@@ -136,27 +132,19 @@ export default function Dashboard() {
   }, [supplyAmountPerDay])
 
   useEffect(() => {
-    if (transactionAmountPerDay.length > 0 && transactionSumAmountPerDay.length > 0) {
+    if (transactionSumAmountPerDay.length > 0) {
       setTransactionAmountPerDayData([
-        {
-          id: 'Average amount of TX',
-          data: transactionAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
-        },
         {
           id: 'Total amount',
           data: transactionSumAmountPerDay.map(t => ({ ...t, y: t.y / 100 })),
         },
       ])
     }
-  }, [transactionAmountPerDay, transactionSumAmountPerDay])
+  }, [transactionSumAmountPerDay])
 
   useEffect(() => {
-    if (transactionCountPerDay.length > 0 && transactionUniquePerDay.length > 0) {
+    if (transactionCountPerDay.length > 0) {
       setTransactionCountPerDayData([
-        {
-          id: 'By unique users',
-          data: transactionUniquePerDay,
-        },
         {
           id: 'Total transactions',
           data: transactionCountPerDay,
@@ -164,7 +152,7 @@ export default function Dashboard() {
 
       ])
     }
-  }, [transactionCountPerDay, transactionUniquePerDay])
+  }, [transactionCountPerDay])
 
   useEffect(() => {
     if (claimPerDay.length > 0) {
@@ -262,14 +250,14 @@ export default function Dashboard() {
               <CardIcon color="success">
                 <EqualizerIcon/>
               </CardIcon>
-              <p className={classes.cardCategory}>Total G$ Volume</p>
+              <p className={classes.cardCategory}>Total G$ Transactions</p>
               <Success>
                 Value: {!totalImpactStatisticsLoading && <Balance amount={totalGDVolume} fromCents />}
               </Success>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
-                Total G$ Volume
+              * Transactions on Fuse blockchain (excludes Ethereum mainnet)
               </div>
             </CardFooter>
           </Card>
@@ -302,7 +290,7 @@ export default function Dashboard() {
         <GridItem xs={12} lg={12} xl={6}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Daily G$ Claim</h4>
+              <h4 className={classes.cardTitleWhite}>Total G$ Distributed Daily</h4>
             </CardHeader>
             <CardBody>
               {(claimPerDayLoading) && (
@@ -332,7 +320,7 @@ export default function Dashboard() {
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                Chart shows total volume of claim transactions per day
+                Chart shows the total G$ distributed per day
               </div>
             </CardFooter>
           </Card>
@@ -377,7 +365,7 @@ export default function Dashboard() {
         <GridItem xs={12} lg={12} xl={6}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Daily UBI Quota</h4>
+              <h4 className={classes.cardTitleWhite}>G$ Per Claimer</h4>
             </CardHeader>
             <CardBody>
               {(claimPerDayLoading) && (
@@ -407,7 +395,6 @@ export default function Dashboard() {
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                Chart shows total value of UBI quota per day
               </div>
             </CardFooter>
           </Card>
@@ -453,15 +440,15 @@ export default function Dashboard() {
         <GridItem xs={12} lg={6} xl={4}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Daily G$ Usage</h4>
+              <h4 className={classes.cardTitleWhite}>Daily Value of Transactions</h4>
             </CardHeader>
             <CardBody>
-              {(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
+              {(transactionSumAmountPerDayLoading) && (
                 <GridItem container xs={12} justify="center">
                   <CircularProgress/>
                 </GridItem>
               )}
-              {!(transactionAmountPerDayLoading || transactionSumAmountPerDayLoading) && (
+              {!(transactionSumAmountPerDayLoading) && (
                 <Line
                   data={transactionAmountPerDayData}
                   height={400}
@@ -484,7 +471,7 @@ export default function Dashboard() {
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                Chart shows total volume and average amount of transactions per day
+              * Transactions on Fuse blockchain (excludes Ethereum mainnet)
               </div>
             </CardFooter>
           </Card>
@@ -495,12 +482,12 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>Daily Count Of Transactions</h4>
             </CardHeader>
             <CardBody>
-              {(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
+              {(transactionCountPerDayLoading) && (
                 <GridItem container xs={12} justify="center">
                   <CircularProgress/>
                 </GridItem>
               )}
-              {!(transactionCountPerDayLoading || transactionUniquePerDayLoading) && (
+              {!(transactionCountPerDayLoading) && (
                 <Line
                   data={transactionCountPerDayData}
                   height={400}
@@ -522,7 +509,7 @@ export default function Dashboard() {
             </CardBody>
             <CardFooter stats>
               <div className={classes.stats}>
-                Chart shows number of transactions and number of unique users per day
+              * Transactions on Fuse blockchain (excludes Ethereum mainnet)
               </div>
             </CardFooter>
           </Card>
