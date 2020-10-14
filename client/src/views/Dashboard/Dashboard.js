@@ -395,7 +395,7 @@ export default function Dashboard() {
               )}
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}></div>
+              <div className={classes.stats}>Chart shows total value of UBI quota per day</div>
             </CardFooter>
           </Card>
         </GridItem>
