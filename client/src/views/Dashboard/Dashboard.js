@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState} from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
@@ -38,54 +38,63 @@ import {
   useWalletDistributionHistogram,
   useWalletTopAccounts,
   useWalletTopMedianLow,
-  useGetClaimPerDay
+  useGetClaimPerDay,
 } from 'hooks/api'
 import priceFormat from '../../utils/priceFormat'
 import isMobileOnly from '../../utils/isMobile'
 import TooltipUserInfo from '../UserProfile/TooltipUserInfo'
 import { useSeriesSpecificValueFormatter } from '../../hooks/nivo'
-import config from "../../config";
+import config from '../../config'
 
 const useStyles = makeStyles(styles)
 
-const prepareHistogramBalanceData = histogram => Object.keys(histogram).map((key) => {
-  const label = `${key.split('-').map(v => priceFormat(v / 100,0)).join('-')} G$`
-  return ({
-    id: label,
-    label,
-    value: histogram[key],
+const prepareHistogramBalanceData = histogram =>
+  Object.keys(histogram).map(key => {
+    const label = `${key
+      .split('-')
+      .map(v => priceFormat(v / 100, 0))
+      .join('-')} G$`
+    return {
+      id: label,
+      label,
+      value: histogram[key],
+    }
   })
-})
 
-const prepareHistogramTransactionData = histogram => Object.keys(histogram).map((key) => ({
-  id: key,
-  label: key,
-  value: histogram[key],
-}))
+const prepareHistogramTransactionData = histogram =>
+  Object.keys(histogram).map(key => ({
+    id: key,
+    label: key,
+    value: histogram[key],
+  }))
 
 // chart configs for mobile devices
 const lineChartDataLimiter = isMobileOnly ? 0 : 0
 const lineChartTickRotation = isMobileOnly ? -90 : 0
-const mobilePieChartProps = !isMobileOnly ? {} : {
-  width: 500,
-  height: 275,
-  radialLabelsLinkDiagonalLength: 7,
-  radialLabelsLinkHorizontalLength: 10,
-  radialLabelsTextXOffset: 4,
-}
-const mobileLineChartProps = !isMobileOnly ? {} : {
-  lineWidth: 1.5,
-  pointSize: 8,
-  theme: {
-    axis: {
-      ticks: {
-        text: {
-          fontSize: 10,
+const mobilePieChartProps = !isMobileOnly
+  ? {}
+  : {
+      width: 500,
+      height: 275,
+      radialLabelsLinkDiagonalLength: 7,
+      radialLabelsLinkHorizontalLength: 10,
+      radialLabelsTextXOffset: 4,
+    }
+const mobileLineChartProps = !isMobileOnly
+  ? {}
+  : {
+      lineWidth: 1.5,
+      pointSize: 8,
+      theme: {
+        axis: {
+          ticks: {
+            text: {
+              fontSize: 10,
+            },
+          },
         },
       },
-    },
-  }
-}
+    }
 
 export default function Dashboard() {
   // wallet
@@ -98,19 +107,28 @@ export default function Dashboard() {
   // transactions
   const [transactionTopAccounts = [], transactionTopAccountsLoading] = useTransactionTopAccounts(
     [transactionSort, transactionSortDirection],
-    {transactionSort, transactionSortDirection}
+    { transactionSort, transactionSortDirection }
   )
   const [transactionTopMedianLow = {}, transactionTopMedianLowLoading] = useTransactionTopMedianLow()
-  const [transactionDistributionHistogram = {}, transactionDistributionHistogramLoading] = useTransactionDistributionHistogram()
+  const [
+    transactionDistributionHistogram = {},
+    transactionDistributionHistogramLoading,
+  ] = useTransactionDistributionHistogram()
   const [transactionTotal, transactionTotalLoading] = useGetTransactionTotal()
   const [transactionTotalAmount, transactionTotalAmountLoading] = useGetTransactionTotalAmount()
   const [transactionDailyAverage, transactionDailyAverageLoading] = useGetTransactionDailyAverage()
 
   // per day
-  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay([], lineChartDataLimiter)
+  const [transactionCountPerDay = [], transactionCountPerDayLoading] = useGetTransactionCountPerDay(
+    [],
+    lineChartDataLimiter
+  )
 
   const [claimPerDay = [], claimPerDayLoading] = useGetClaimPerDay([])
-  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay([], lineChartDataLimiter)
+  const [transactionSumAmountPerDay = [], transactionSumAmountPerDayLoading] = useGetTransactionSumAmountPerDay(
+    [],
+    lineChartDataLimiter
+  )
   const [supplyAmountPerDay = [], supplyAmountPerDayLoading] = useGetSupplyAmountPerDay([], lineChartDataLimiter)
 
   const [supplyAmountPerDayData, setSupplyAmountPerDayData] = useState([])
@@ -149,35 +167,38 @@ export default function Dashboard() {
           id: 'Total transactions',
           data: transactionCountPerDay,
         },
-
       ])
     }
   }, [transactionCountPerDay])
 
   useEffect(() => {
     if (claimPerDay.length > 0) {
-      setDailyUBIQuotaData([{
-        id: 'Total UBI Quota',
-        data: claimPerDay.map(v=>({
-          x: v.date,
-          y: v.ubi_quota/100,
-        })),
-      }])
+      setDailyUBIQuotaData([
+        {
+          id: 'Total UBI Quota',
+          data: claimPerDay.map(v => ({
+            x: v.date,
+            y: v.ubi_quota / 100,
+          })),
+        },
+      ])
 
-      setDailyUniqClaimersData([{
-        id: 'Total unique claimers',
-        data: claimPerDay.map(v=>({
-          x: v.date,
-          y: v.count_txs
-        })),
-      }])
+      setDailyUniqClaimersData([
+        {
+          id: 'Total unique claimers',
+          data: claimPerDay.map(v => ({
+            x: v.date,
+            y: v.count_txs,
+          })),
+        },
+      ])
 
       setClaimPerDayData([
         {
           id: 'Total G$ Claimed',
-          data: claimPerDay.map(v=>({
+          data: claimPerDay.map(v => ({
             x: v.date,
-            y: v.total_amount_txs/100
+            y: v.total_amount_txs / 100,
           })),
         },
       ])
@@ -188,11 +209,7 @@ export default function Dashboard() {
   // const [GDTotal] = useGetGDTotal()
   // const [GDInEscrow] = useGetGDInEscrow()
   const [
-    {
-      totalUniqueClaimers,
-      totalUBIDistributed,
-      totalGDVolume,
-    } = {},
+    { totalUniqueClaimers, totalUBIDistributed, totalGDVolume } = {},
     totalImpactStatisticsLoading,
   ] = useGetTotalImpactStatistics()
 
@@ -212,17 +229,13 @@ export default function Dashboard() {
           <Card>
             <CardHeader color="warning" stats icon>
               <CardIcon color="warning">
-                <AccountBalanceWalletIcon/>
+                <AccountBalanceWalletIcon />
               </CardIcon>
               <p className={classes.cardCategory}>Total Unique Claimers</p>
-              <Warning>
-                Value: {!totalImpactStatisticsLoading && totalUniqueClaimers}
-              </Warning>
+              <Warning>Value: {!totalImpactStatisticsLoading && totalUniqueClaimers}</Warning>
             </CardHeader>
             <CardFooter stats>
-              <div className={classes.stats}>
-                Total Unique Claimers
-              </div>
+              <div className={classes.stats}>Total Unique Claimers</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -230,17 +243,13 @@ export default function Dashboard() {
           <Card>
             <CardHeader color="info" stats icon className={classes.cardHeader}>
               <CardIcon color="info">
-                <ReceiptIcon/>
+                <ReceiptIcon />
               </CardIcon>
               <p className={classes.cardCategory}>Total UBI Distributed</p>
-              <Info>
-                Value: {!totalImpactStatisticsLoading && <Balance amount={totalUBIDistributed} fromCents />}
-              </Info>
+              <Info>Value: {!totalImpactStatisticsLoading && <Balance amount={totalUBIDistributed} fromCents />}</Info>
             </CardHeader>
             <CardFooter stats>
-              <div className={classes.stats}>
-                Total UBI Distributed
-              </div>
+              <div className={classes.stats}>Total UBI Distributed</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -248,17 +257,13 @@ export default function Dashboard() {
           <Card>
             <CardHeader color="success" stats icon>
               <CardIcon color="success">
-                <EqualizerIcon/>
+                <EqualizerIcon />
               </CardIcon>
               <p className={classes.cardCategory}>Total G$ Transactions</p>
-              <Success>
-                Value: {!totalImpactStatisticsLoading && <Balance amount={totalGDVolume} fromCents />}
-              </Success>
+              <Success>Value: {!totalImpactStatisticsLoading && <Balance amount={totalGDVolume} fromCents />}</Success>
             </CardHeader>
             <CardFooter stats>
-              <div className={classes.stats}>
-              * Transactions on Fuse blockchain (excludes Ethereum mainnet)
-              </div>
+              <div className={classes.stats}>* Transactions on Fuse blockchain (excludes Ethereum mainnet)</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -293,9 +298,9 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>Total G$ Distributed Daily</h4>
             </CardHeader>
             <CardBody>
-              {(claimPerDayLoading) && (
+              {claimPerDayLoading && (
                 <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
+                  <CircularProgress />
                 </GridItem>
               )}
               {!claimPerDayLoading && (
@@ -319,9 +324,7 @@ export default function Dashboard() {
               )}
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-                Chart shows the total G$ distributed per day
-              </div>
+              <div className={classes.stats}>Chart shows the total G$ distributed per day</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -331,9 +334,9 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>Daily Unique Claimers</h4>
             </CardHeader>
             <CardBody>
-              {(claimPerDayLoading) && (
+              {claimPerDayLoading && (
                 <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
+                  <CircularProgress />
                 </GridItem>
               )}
               {!claimPerDayLoading && (
@@ -356,9 +359,7 @@ export default function Dashboard() {
               )}
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-                Chart shows total number of unique claimers per day
-              </div>
+              <div className={classes.stats}>Chart shows total number of unique claimers per day</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -368,9 +369,9 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>G$ Per Claimer</h4>
             </CardHeader>
             <CardBody>
-              {(claimPerDayLoading) && (
+              {claimPerDayLoading && (
                 <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
+                  <CircularProgress />
                 </GridItem>
               )}
               {!claimPerDayLoading && (
@@ -394,8 +395,7 @@ export default function Dashboard() {
               )}
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-              </div>
+              <div className={classes.stats}></div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -405,9 +405,9 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>Total G$ supply</h4>
             </CardHeader>
             <CardBody>
-              {(supplyAmountPerDayLoading) && (
+              {supplyAmountPerDayLoading && (
                 <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
+                  <CircularProgress />
                 </GridItem>
               )}
               {!supplyAmountPerDayLoading && (
@@ -431,9 +431,7 @@ export default function Dashboard() {
               )}
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-                Chart shows total G$ supply per day
-              </div>
+              <div className={classes.stats}>Chart shows total G$ supply per day</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -443,12 +441,12 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>Daily Value of Transactions</h4>
             </CardHeader>
             <CardBody>
-              {(transactionSumAmountPerDayLoading) && (
+              {transactionSumAmountPerDayLoading && (
                 <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
+                  <CircularProgress />
                 </GridItem>
               )}
-              {!(transactionSumAmountPerDayLoading) && (
+              {!transactionSumAmountPerDayLoading && (
                 <Line
                   data={transactionAmountPerDayData}
                   height={400}
@@ -470,9 +468,7 @@ export default function Dashboard() {
               )}
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-              * Transactions on Fuse blockchain (excludes Ethereum mainnet)
-              </div>
+              <div className={classes.stats}>* Transactions on Fuse blockchain (excludes Ethereum mainnet)</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -482,12 +478,12 @@ export default function Dashboard() {
               <h4 className={classes.cardTitleWhite}>Daily Count Of Transactions</h4>
             </CardHeader>
             <CardBody>
-              {(transactionCountPerDayLoading) && (
+              {transactionCountPerDayLoading && (
                 <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
+                  <CircularProgress />
                 </GridItem>
               )}
-              {!(transactionCountPerDayLoading) && (
+              {!transactionCountPerDayLoading && (
                 <Line
                   data={transactionCountPerDayData}
                   height={400}
@@ -508,9 +504,7 @@ export default function Dashboard() {
               )}
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-              * Transactions on Fuse blockchain (excludes Ethereum mainnet)
-              </div>
+              <div className={classes.stats}>* Transactions on Fuse blockchain (excludes Ethereum mainnet)</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -541,34 +535,24 @@ export default function Dashboard() {
           <Card>
             <CardHeader color="warning" stats icon>
               <CardIcon color="warning">
-                <AccountBalanceWalletIcon/>
+                <AccountBalanceWalletIcon />
               </CardIcon>
               <p className={classes.cardCategory}>User Accounts Balance</p>
               <Warning>
-                Top: {!walletTopMedianLowLoading && (
-                <Balance amount={walletTopMedianLow.top} fromCents/>
-              )}
+                Top: {!walletTopMedianLowLoading && <Balance amount={walletTopMedianLow.top} fromCents />}
               </Warning>
               <Warning>
-                Median: {!walletTopMedianLowLoading && (
-                <Balance amount={walletTopMedianLow.median} fromCents/>
-              )}
+                Median: {!walletTopMedianLowLoading && <Balance amount={walletTopMedianLow.median} fromCents />}
               </Warning>
               <Warning>
-                Average: {!walletTopMedianLowLoading && (
-                <Balance amount={walletTopMedianLow.avg} fromCents/>
-              )}
+                Average: {!walletTopMedianLowLoading && <Balance amount={walletTopMedianLow.avg} fromCents />}
               </Warning>
               <Warning>
-                Low: {!walletTopMedianLowLoading && (
-                <Balance amount={walletTopMedianLow.low} fromCents/>
-              )}
+                Low: {!walletTopMedianLowLoading && <Balance amount={walletTopMedianLow.low} fromCents />}
               </Warning>
             </CardHeader>
             <CardFooter stats>
-              <div className={classes.stats}>
-                User Accounts Balance (top, median, average, low)
-              </div>
+              <div className={classes.stats}>User Accounts Balance (top, median, average, low)</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -576,26 +560,16 @@ export default function Dashboard() {
           <Card>
             <CardHeader color="info" stats icon className={classes.cardHeader}>
               <CardIcon color="info">
-                <ReceiptIcon/>
+                <ReceiptIcon />
               </CardIcon>
               <p className={classes.cardCategory}>User Transactions</p>
-              <Info>
-                Top: {!transactionTopMedianLowLoading && transactionTopMedianLow.top}
-              </Info>
-              <Info>
-                Median: {!transactionTopMedianLowLoading && transactionTopMedianLow.median}
-              </Info>
-              <Info>
-                Average: {!transactionTopMedianLowLoading && priceFormat(transactionTopMedianLow.avg)}
-              </Info>
-              <Info>
-                Low: {!transactionTopMedianLowLoading && transactionTopMedianLow.low}
-              </Info>
+              <Info>Top: {!transactionTopMedianLowLoading && transactionTopMedianLow.top}</Info>
+              <Info>Median: {!transactionTopMedianLowLoading && transactionTopMedianLow.median}</Info>
+              <Info>Average: {!transactionTopMedianLowLoading && priceFormat(transactionTopMedianLow.avg)}</Info>
+              <Info>Low: {!transactionTopMedianLowLoading && transactionTopMedianLow.low}</Info>
             </CardHeader>
             <CardFooter stats>
-              <div className={classes.stats}>
-                User Transactions (top, median, average, low)
-              </div>
+              <div className={classes.stats}>User Transactions (top, median, average, low)</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -603,28 +577,24 @@ export default function Dashboard() {
           <Card>
             <CardHeader color="success" stats icon>
               <CardIcon color="success">
-                <EqualizerIcon/>
+                <EqualizerIcon />
               </CardIcon>
               <p className={classes.cardCategory}>Transactions</p>
+              <Success>Total: {!transactionTotalLoading && transactionTotal}</Success>
               <Success>
-                Total: {!transactionTotalLoading && transactionTotal}
+                Total Amount:{' '}
+                {!transactionTotalAmountLoading && transactionTotalAmount && (
+                  <Balance amount={transactionTotalAmount} fromCents />
+                )}
               </Success>
               <Success>
-                Total Amount: {!transactionTotalAmountLoading && transactionTotalAmount &&
-              <Balance amount={transactionTotalAmount} fromCents/>}
+                Average Daily TXs:{' '}
+                {!transactionDailyAverageLoading && transactionDailyAverage && priceFormat(transactionDailyAverage)}
               </Success>
-              <Success>
-                Average Daily TXs: {!transactionDailyAverageLoading && transactionDailyAverage &&
-              priceFormat(transactionDailyAverage)}
-              </Success>
-              <Success>
-                &nbsp;
-              </Success>
+              <Success>&nbsp;</Success>
             </CardHeader>
             <CardFooter stats>
-              <div className={classes.stats}>
-                Transactions (total, total amount, Average Daily TXs)
-              </div>
+              <div className={classes.stats}>Transactions (total, total amount, Average Daily TXs)</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -637,21 +607,14 @@ export default function Dashboard() {
             </CardHeader>
             <CardBody>
               <GridItem container xs={12} justify="center">
-                {walletDistributionHistogramLoading && (
-                  <CircularProgress/>
-                )}
+                {walletDistributionHistogramLoading && <CircularProgress />}
                 {!walletDistributionHistogramLoading && (
-                  <Pie
-                    data={prepareHistogramBalanceData(walletDistributionHistogram)}
-                    {...mobilePieChartProps}
-                  />
+                  <Pie data={prepareHistogramBalanceData(walletDistributionHistogram)} {...mobilePieChartProps} />
                 )}
               </GridItem>
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-                The diagram shows how many users have a specific range of balance
-              </div>
+              <div className={classes.stats}>The diagram shows how many users have a specific range of balance</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -662,9 +625,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardBody>
               <GridItem container xs={12} justify="center">
-                {transactionDistributionHistogramLoading && (
-                  <CircularProgress/>
-                )}
+                {transactionDistributionHistogramLoading && <CircularProgress />}
                 {!transactionDistributionHistogramLoading && (
                   <Pie
                     data={prepareHistogramTransactionData(transactionDistributionHistogram)}
@@ -674,9 +635,7 @@ export default function Dashboard() {
               </GridItem>
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-                The diagram shows how many users did a specific range of transactions
-              </div>
+              <div className={classes.stats}>The diagram shows how many users did a specific range of transactions</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -690,7 +649,7 @@ export default function Dashboard() {
             <CardBody>
               {walletTopAccountsLoading && (
                 <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
+                  <CircularProgress />
                 </GridItem>
               )}
               {!walletTopAccountsLoading && walletTopAccounts && (
@@ -698,15 +657,16 @@ export default function Dashboard() {
                   tableHeaderColor="primary"
                   tableHead={['#', 'Address', 'Balance']}
                   lastColumnClass={'tableCellRight'}
-                  tableData={walletTopAccounts.map(
-                    (d, index) => [String(index + 1), (<TooltipUserInfo hash={d.address}/>), `${priceFormat(d.balance / 100)} G$`])}
+                  tableData={walletTopAccounts.map((d, index) => [
+                    String(index + 1),
+                    <TooltipUserInfo hash={d.address} />,
+                    `${priceFormat(d.balance / 100)} G$`,
+                  ])}
                 />
               )}
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-                Top 10 User accounts by balances
-              </div>
+              <div className={classes.stats}>Top 10 User accounts by balances</div>
             </CardFooter>
           </Card>
         </GridItem>
@@ -718,7 +678,7 @@ export default function Dashboard() {
             <CardBody>
               {transactionTopAccountsLoading && (
                 <GridItem container xs={12} justify="center">
-                  <CircularProgress/>
+                  <CircularProgress />
                 </GridItem>
               )}
               {!transactionTopAccountsLoading && transactionTopAccounts && (
@@ -727,23 +687,41 @@ export default function Dashboard() {
                   tableHead={[
                     '#',
                     'Address',
-                    (<SortTitle title={"In"} onPress={handleSortTransaction}
-                                sortFieldNow={transactionSort} direction={transactionSortDirection} field={"inTXs"} />),
-                    (<SortTitle title={"Out"} onPress={handleSortTransaction}
-                                sortFieldNow={transactionSort} direction={transactionSortDirection} field={"outTXs"} />),
-                    (<SortTitle title={"Count"} onPress={handleSortTransaction}
-                                sortFieldNow={transactionSort} direction={transactionSortDirection} field={"countTx"} />)]
-                  }
+                    <SortTitle
+                      title={'In'}
+                      onPress={handleSortTransaction}
+                      sortFieldNow={transactionSort}
+                      direction={transactionSortDirection}
+                      field={'inTXs'}
+                    />,
+                    <SortTitle
+                      title={'Out'}
+                      onPress={handleSortTransaction}
+                      sortFieldNow={transactionSort}
+                      direction={transactionSortDirection}
+                      field={'outTXs'}
+                    />,
+                    <SortTitle
+                      title={'Count'}
+                      onPress={handleSortTransaction}
+                      sortFieldNow={transactionSort}
+                      direction={transactionSortDirection}
+                      field={'countTx'}
+                    />,
+                  ]}
                   lastColumnClass={'tableCellRight'}
-                  tableData={transactionTopAccounts.map(
-                    (d, index) => [String(index + 1), (<TooltipUserInfo hash={d.address}/>), d.inTXs ? String(d.inTXs) : 0, d.outTXs ? String(d.outTXs) : 0, String(d.countTx)])}
+                  tableData={transactionTopAccounts.map((d, index) => [
+                    String(index + 1),
+                    <TooltipUserInfo hash={d.address} />,
+                    d.inTXs ? String(d.inTXs) : 0,
+                    d.outTXs ? String(d.outTXs) : 0,
+                    String(d.countTx),
+                  ])}
                 />
               )}
             </CardBody>
             <CardFooter stats>
-              <div className={classes.stats}>
-                Top 10 User accounts by number of transactions
-              </div>
+              <div className={classes.stats}>Top 10 User accounts by number of transactions</div>
             </CardFooter>
           </Card>
         </GridItem>
