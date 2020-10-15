@@ -231,8 +231,8 @@ export default function Dashboard() {
               <CardIcon color="warning">
                 <AccountBalanceWalletIcon />
               </CardIcon>
-              <p className={classes.cardCategory}>Total Unique Claimers</p>
-              <Warning>Value: {!totalImpactStatisticsLoading && totalUniqueClaimers}</Warning>
+              <p className={`${classes.cardCategory} ${classes.xlargeFont}`}>Total Unique Claimers</p>
+              <Warning className={classes.xlargeFont}>{!totalImpactStatisticsLoading && totalUniqueClaimers}</Warning>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>Total Unique Claimers</div>
@@ -245,8 +245,10 @@ export default function Dashboard() {
               <CardIcon color="info">
                 <ReceiptIcon />
               </CardIcon>
-              <p className={classes.cardCategory}>Total UBI Distributed</p>
-              <Info>Value: {!totalImpactStatisticsLoading && <Balance amount={totalUBIDistributed} fromCents />}</Info>
+              <p className={`${classes.cardCategory} ${classes.xlargeFont}`}>Total UBI Distributed</p>
+              <Info className={classes.xlargeFont}>
+                {!totalImpactStatisticsLoading && <Balance amount={totalUBIDistributed} fromCents />}
+              </Info>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>Total UBI Distributed</div>
@@ -259,8 +261,10 @@ export default function Dashboard() {
               <CardIcon color="success">
                 <EqualizerIcon />
               </CardIcon>
-              <p className={classes.cardCategory}>Total G$ Transactions</p>
-              <Success>Value: {!totalImpactStatisticsLoading && <Balance amount={totalGDVolume} fromCents />}</Success>
+              <p className={`${classes.cardCategory} ${classes.xlargeFont}`}>Total G$ Transactions</p>
+              <Success className={classes.xlargeFont}>
+                {!totalImpactStatisticsLoading && <Balance amount={transactionTotal} fromCents />}
+              </Success>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>* Transactions on Fuse blockchain (excludes Ethereum mainnet)</div>
