@@ -267,7 +267,7 @@ export default function Dashboard() {
               </CardIcon>
               <p className={`${classes.cardCategory} ${classes.xlargeFont}`}>Total G$ Transactions</p>
               <Success>
-                <div className={classes.xlargeFont}>{!totalImpactStatisticsLoading && transactionTotal}}</div>
+                <div className={classes.xlargeFont}>{!totalImpactStatisticsLoading && transactionTotal}</div>
               </Success>
             </CardHeader>
             <CardFooter stats>
