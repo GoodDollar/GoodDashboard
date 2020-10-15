@@ -315,6 +315,7 @@ export default function Dashboard() {
                   axisBottom={{
                     format: '%b %d',
                     // tickValues: 'every 5 days',
+                    tickRotation: lineChartTickRotation,
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
@@ -351,6 +352,7 @@ export default function Dashboard() {
                   axisBottom={{
                     format: '%b %d',
                     // tickValues: 'every 5 days',
+                    tickRotation: lineChartTickRotation,
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
@@ -386,6 +388,7 @@ export default function Dashboard() {
                   axisBottom={{
                     format: '%b %d',
                     // tickValues: 'every 5 days',
+                    tickRotation: lineChartTickRotation,
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
@@ -422,6 +425,7 @@ export default function Dashboard() {
                   axisBottom={{
                     format: '%b %d',
                     // tickValues: 'every 5 days',
+                    tickRotation: lineChartTickRotation,
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
