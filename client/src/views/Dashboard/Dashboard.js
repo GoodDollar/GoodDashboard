@@ -232,7 +232,9 @@ export default function Dashboard() {
                 <AccountBalanceWalletIcon />
               </CardIcon>
               <p className={`${classes.cardCategory} ${classes.xlargeFont}`}>Total Unique Claimers</p>
-              <Warning className={classes.xlargeFont}>{!totalImpactStatisticsLoading && totalUniqueClaimers}</Warning>
+              <Warning>
+                <div className={classes.xlargeFont}>{!totalImpactStatisticsLoading && totalUniqueClaimers}</div>
+              </Warning>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>Total Unique Claimers</div>
@@ -246,8 +248,10 @@ export default function Dashboard() {
                 <ReceiptIcon />
               </CardIcon>
               <p className={`${classes.cardCategory} ${classes.xlargeFont}`}>Total UBI Distributed</p>
-              <Info className={classes.xlargeFont}>
-                {!totalImpactStatisticsLoading && <Balance amount={totalUBIDistributed} fromCents />}
+              <Info>
+                <div className={classes.xlargeFont}>
+                  {!totalImpactStatisticsLoading && <Balance amount={totalUBIDistributed} fromCents />}
+                </div>
               </Info>
             </CardHeader>
             <CardFooter stats>
@@ -262,8 +266,8 @@ export default function Dashboard() {
                 <EqualizerIcon />
               </CardIcon>
               <p className={`${classes.cardCategory} ${classes.xlargeFont}`}>Total G$ Transactions</p>
-              <Success className={classes.xlargeFont}>
-                {!totalImpactStatisticsLoading && <Balance amount={transactionTotal} fromCents />}
+              <Success>
+                <div className={classes.xlargeFont}>{!totalImpactStatisticsLoading && transactionTotal}}</div>
               </Success>
             </CardHeader>
             <CardFooter stats>
