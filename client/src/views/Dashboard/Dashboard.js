@@ -84,7 +84,7 @@ const mobileLineChartProps = !isMobileOnly
   ? {}
   : {
       lineWidth: 1.5,
-      pointSize: 8,
+      pointSize: 2,
       theme: {
         axis: {
           ticks: {

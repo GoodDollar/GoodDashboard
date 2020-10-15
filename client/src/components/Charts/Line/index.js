@@ -2,7 +2,7 @@ import React from 'react'
 import { ResponsiveLine } from '@nivo/line'
 import { COLORS } from '../../../constants'
 
-export default ({ legendX='',legendY='', height = 300 ,...props}) => (
+export default ({ legendX = '', legendY = '', height = 300, ...props }) => (
   <div style={{ height }}>
     <ResponsiveLine
       margin={{ top: 50, right: 50, bottom: 50, left: 60 }}
@@ -28,7 +28,7 @@ export default ({ legendX='',legendY='', height = 300 ,...props}) => (
         legendOffset: -40,
         legendPosition: 'middle',
       }}
-      pointSize={10}
+      pointSize={2}
       pointColor={{ theme: 'background' }}
       pointBorderWidth={2}
       pointBorderColor={{ from: 'serieColor' }}
