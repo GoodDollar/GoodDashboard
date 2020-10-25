@@ -175,7 +175,7 @@ export default function Dashboard() {
     if (claimPerDay.length > 0) {
       setDailyUBIQuotaData([
         {
-          id: 'Total UBI Quota',
+          id: 'Daily UBI Quota',
           data: claimPerDay.map(v => ({
             x: v.date,
             y: v.ubi_quota / 100,
