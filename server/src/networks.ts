@@ -35,7 +35,7 @@ export default once(() => {
       // fuse, staging, production
       network_id: 122,
       web3Transport: 'HttpProvider',
-      httpWeb3Provider: FUSE_RPC || 'https://fuse.gooddollar.org/',
+      httpWeb3Provider: FUSE_RPC || 'https://rpc.fuse.io/',
       websocketWeb3Provider: 'wss://rpc.fuse.io/ws',
     },
   }
