@@ -153,7 +153,6 @@ export class blockchain {
         PropertyProvider.set('lastBlock', 6000000),
         PropertyProvider.get('lastBlockMainnet', 10591792),
       ])
-      await PropertyProvider.set('lastVersion', conf.reset)
     }
 
     this.lastBlock = await PropertyProvider.get('lastBlock')
@@ -228,29 +227,43 @@ export class blockchain {
     const blockNumber = await this.web3.eth.getBlockNumber().then(parseInt)
     const blockNumberMainnet = await this.mainNetWeb3.eth.getBlockNumber().then(parseInt)
 
-    log.info('updateEvents starting:', { blockNumber })
-    await Promise.all([
-      this.updateListWalletsAndTransactions(blockNumber).catch((e) =>
-        log.error('transfer events failed', e.message, e)
-      ),
+    log.info('updateEvents starting', { from: this.lastBlock, to: blockNumber })
 
-      /*this.updateSurvey(),
+    const steps = range(this.lastBlock, blockNumber, 10000)
+    steps.shift()
+    steps.push(blockNumber)
+    for (let step of steps) {
+      log.info('updateEvents starting step:', { step })
+
+      await Promise.all([
+        this.updateListWalletsAndTransactions(step).catch((e) => log.error('transfer events failed', e.message, e)),
+
+        /*this.updateSurvey(),
        this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),*/
 
-      this.updateClaimEvents(blockNumber).catch((e) => log.error('claim events failed', e.message, e)),
-      this.updateOTPLEvents(blockNumber).catch((e) => log.error('otpl events failed', e.message, e)),
-      // this.updateSupplyAmount().catch((e) => log.error('supply amount update failed', e.message, e)),
-      this.updateUBIQuota(blockNumber).catch((e) => log.error('UBI calculations update failed', e.message, e)),
-      this.updateTokenSupply(blockNumberMainnet).catch((e) => log.error('supply amount update failed', e.message, e)),
-    ])
-    await PropertyProvider.set('lastBlock', +blockNumber)
-    await PropertyProvider.set('lastBlockMainnet', +blockNumberMainnet)
+        this.updateClaimEvents(step).catch((e) => log.error('claim events failed', e.message, e)),
+        this.updateOTPLEvents(step).catch((e) => log.error('otpl events failed', e.message, e)),
+        // this.updateSupplyAmount().catch((e) => log.error('supply amount update failed', e.message, e)),
+        this.updateUBIQuota(step).catch((e) => log.error('UBI calculations update failed', e.message, e)),
+      ])
+      await PropertyProvider.set('lastBlock', +step)
 
-    this.lastBlock = +blockNumber
+      this.lastBlock = +step
+
+      await this.amplitude.sendBatch()
+      logger.debug('updateEvents step finished', { step })
+    }
+    log.info('updateEvents finished', { from: this.lastBlock, to: blockNumber })
+
+    logger.debug('updateEvents mainnet starting', { from: this.lastBlockMainnet, to: blockNumberMainnet })
+    await this.updateTokenSupply(blockNumberMainnet).catch((e) =>
+      log.error('supply amount update failed', e.message, e)
+    )
     this.lastBlockMainnet = +blockNumberMainnet
-    await this.amplitude.sendBatch()
+    await PropertyProvider.set('lastBlockMainnet', +blockNumberMainnet)
+    logger.debug('updateEvents mainnet finished', { from: this.lastBlockMainnet, to: blockNumberMainnet })
 
-    logger.debug('updateEvents finished')
+    await PropertyProvider.set('lastVersion', conf.reset)
   }
 
   async updateUBIQuota(toBlock: number) {
