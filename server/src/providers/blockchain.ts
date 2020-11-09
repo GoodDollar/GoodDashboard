@@ -481,7 +481,7 @@ export class blockchain {
         },
       }
 
-      log.debug('Claim Event:', index, logPayload)
+      // log.debug('Claim Event:', index, logPayload)
 
       this.amplitude.logEvent(logPayload)
     }
