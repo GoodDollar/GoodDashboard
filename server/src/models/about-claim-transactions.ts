@@ -1,5 +1,5 @@
-import mongoose from "../mongo-db.js";
-import { MODEL_ABOUT_CLAIM_TRANSACTION } from "./constants";
+import mongoose from '../mongo-db.js'
+import { MODEL_ABOUT_CLAIM_TRANSACTION } from './constants'
 
 export const aboutClaimTransactionSchema = new mongoose.Schema({
   count_txs: {
@@ -14,14 +14,18 @@ export const aboutClaimTransactionSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  start_supply_amount: {
+    type: Number,
+    default: 0,
+  },
   ubi_quota: {
     type: Number,
     default: 0,
   },
   date: {
     type: String,
-    index: { unique: true }
-  }
-});
+    index: { unique: true },
+  },
+})
 
-export default mongoose.model(MODEL_ABOUT_CLAIM_TRANSACTION, aboutClaimTransactionSchema);
+export default mongoose.model(MODEL_ABOUT_CLAIM_TRANSACTION, aboutClaimTransactionSchema)

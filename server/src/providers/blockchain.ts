@@ -9,7 +9,8 @@ import ContractsModelAddress from '@gooddollar/goodcontracts/stakingModel/releas
 
 import conf from '../config'
 import logger from '../helpers/pino-logger'
-import get from 'lodash/get'
+import { fromPairs, get, range } from 'lodash'
+
 import _invert from 'lodash/invert'
 import { memoize } from 'lodash'
 import walletsProvider from './wallets'
@@ -50,6 +51,8 @@ export class blockchain {
 
   lastBlock: number
 
+  lastBlockMainnet: number
+
   listPrivateAddress: any
 
   paymentLinkContracts: any
@@ -66,10 +69,12 @@ export class blockchain {
 
   constructor() {
     this.lastBlock = 0
+    this.lastBlockMainnet = 0
     this.network = conf.network
     this.networkMainnet = conf.networkMainnet
     this.networkId = conf.ethereum.network_id
     this.networkIdMainnet = conf.ethereumMainnet.network_id
+    this.ready = this.init()
     let systemAccounts = Object.values(get(ContractsAddress, `${this.network}`))
       .concat(Object.values(get(ContractsModelAddress, `${this.network}`)))
       .filter((_) => typeof _ === 'string')
@@ -78,7 +83,6 @@ export class blockchain {
     this.listPrivateAddress = _invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
-    this.ready = this.init()
     log.info('Starting blockchain reader:', {
       network: this.network,
       mainNetwork: this.networkMainnet,
@@ -123,6 +127,8 @@ export class blockchain {
 
   getBlock = memoize((blockNumber) => this.web3.eth.getBlock(blockNumber))
 
+  getBlockMainnet = memoize((blockNumber) => this.mainNetWeb3.eth.getBlock(blockNumber))
+
   /**
    * Initializing web3 instances and all required contracts
    */
@@ -144,22 +150,25 @@ export class blockchain {
         AboutClaimTransactionProvider.model.deleteMany({}),
         AboutTransactionProvider.model.deleteMany({}),
         AddressesClaimedProvider.model.deleteMany({}),
+        PropertyProvider.set('lastBlock', 6000000),
+        PropertyProvider.get('lastBlockMainnet', 10591792),
       ])
-
-      await PropertyProvider.set('lastVersion', reset)
+      await PropertyProvider.set('lastVersion', conf.reset)
     }
 
-    log.info('Initializing blockchain:', {
+    this.lastBlock = await PropertyProvider.get('lastBlock')
+      .then((_) => +_)
+      .catch((_) => 6000000)
+
+    this.lastBlockMainnet = await PropertyProvider.get('lastBlockMainnet')
+      .then((_) => +_)
+      .catch((_) => 10591792) //hard coded roughly launch time
+
+    log.debug('Initializing blockchain:', {
       ethereum: conf.ethereum,
       mainnet: conf.ethereumMainnet,
-    })
-
-    this.lastBlock = await PropertyProvider.get<number>('lastBlock', 0).catch(() => 0)
-    this.lastBlock = this.lastBlock > 0 ? this.lastBlock : 5000000 //TODO:temp fix
-    log.info('Fetched last block:', {
       lastBlock: this.lastBlock,
     })
-
     this.web3 = new Web3(this.getWeb3TransportProvider())
     this.mainNetWeb3 = new Web3(this.getWeb3TransportProvider(true))
 
@@ -216,27 +225,29 @@ export class blockchain {
   }
 
   async updateEvents() {
-    const blockNumber = await this.web3.eth.getBlockNumber().then(Number)
+    const blockNumber = await this.web3.eth.getBlockNumber().then(parseInt)
+    const blockNumberMainnet = await this.mainNetWeb3.eth.getBlockNumber().then(parseInt)
 
-    log.debug('Update events starting:', { from: this.lastBlock, to: blockNumber })
-
+    log.info('updateEvents starting:', { blockNumber })
     await Promise.all([
       this.updateListWalletsAndTransactions(blockNumber).catch((e) =>
         log.error('transfer events failed', e.message, e)
       ),
+
+      /*this.updateSurvey(),
+       this.updateBonusEvents(blockNumber).catch((e) => log.error('bonus events failed', e.message, e)),*/
+
       this.updateClaimEvents(blockNumber).catch((e) => log.error('claim events failed', e.message, e)),
       this.updateOTPLEvents(blockNumber).catch((e) => log.error('otpl events failed', e.message, e)),
-      this.updateSupplyAmount().catch((e) => log.error('supply amount update failed', e.message, e)),
+      // this.updateSupplyAmount().catch((e) => log.error('supply amount update failed', e.message, e)),
       this.updateUBIQuota(blockNumber).catch((e) => log.error('UBI calculations update failed', e.message, e)),
+      this.updateTokenSupply(blockNumberMainnet).catch((e) => log.error('supply amount update failed', e.message, e)),
     ])
+    await PropertyProvider.set('lastBlock', +blockNumber)
+    await PropertyProvider.set('lastBlockMainnet', +blockNumberMainnet)
 
-    log.debug('all promises resolved')
-
-    this.lastBlock = blockNumber
-    await PropertyProvider.set('lastBlock', blockNumber)
-
-    log.debug('lastBlock updated:', blockNumber)
-
+    this.lastBlock = +blockNumber
+    this.lastBlockMainnet = +blockNumberMainnet
     await this.amplitude.sendBatch()
 
     logger.debug('updateEvents finished')
@@ -375,6 +386,10 @@ export class blockchain {
    * @return {Promise<void>}
    */
   async checkAddressesClaimed(arrayOfAddresses: string[]): Promise<void> {
+    // there could be duplicates, so need to get unique values
+    // new Set([...]) -> will return unique values from received array
+    const uniqueAddresses = [...new Set(arrayOfAddresses)]
+
     // check multiple addresses exists and create new records in case if not exist by one db query
     const { nonExistedCount } = await AddressesClaimedProvider.checkIfExistsMultiple(arrayOfAddresses)
     log.info('new claimers:', { nonExistedCount, outof: arrayOfAddresses.length })
@@ -534,6 +549,89 @@ export class blockchain {
     }
 
     log.debug('updateOTPLEvents finished')
+  }
+
+  async updateTokenSupply(toBlock: number) {
+    const lastSupplyRecords = await AboutClaimTransactionProvider.model.find({}).sort({ date: -1 }).limit(1).lean()
+    const lastSupplyRecord = lastSupplyRecords[0] || {}
+    //make sure we take at least the last 24 hours so we fully have last day events
+    //we will always overwrite last day
+    const daysSinceLastRecord = moment().diff(moment(lastSupplyRecord.date || 0), 'days') + 1
+    const startBlock = (await this.mainNetWeb3.eth.getBlockNumber()) - (daysSinceLastRecord * 60 * 60 * 24) / 15
+    const steps: Array<number> = range(toBlock, startBlock, -10000)
+    //TODO: make sure we  include toBlock and exclude lastblock
+    //TODO: make sure we start with correct numbers if steps is empty
+    let stepEnd: number = steps.shift() || toBlock
+    let dateSupplyChange: { [date: string]: number } = {}
+
+    log.info('updateTokenSupply', { steps: steps.length, daysSinceLastRecord, startBlock, toBlock, lastSupplyRecords })
+
+    let notFoundBatches = 0
+    let totalMintEvents = 0
+    let totalBurnEvents = 0
+    for (let k in steps) {
+      if (notFoundBatches >= 10) {
+        log.info('stopping updateTokenSupply after 10K blocks without events')
+        break
+      }
+      let start = steps[k]
+      log.info('fetching supply events', { start, stepEnd })
+      const mintEvents = await this.mainNetTokenContract.getPastEvents('Transfer', {
+        fromBlock: start,
+        toBlock: stepEnd,
+        filter: { from: '0x0000000000000000000000000000000000000000' },
+      })
+
+      log.info('updateTokenSupply - mint events:', mintEvents.length)
+      totalMintEvents += mintEvents.length
+      await Promise.all(
+        mintEvents.map(async (e: any) => {
+          const change = parseInt(e.returnValues.value)
+          const block = await this.getBlockMainnet(e.blockNumber)
+          const date = moment(block.timestamp * 1000).format('YYYY-MM-DD')
+          const cur = dateSupplyChange[date] || 0
+          dateSupplyChange[date] = cur + change
+        })
+      )
+
+      const burnEvents = await this.mainNetTokenContract.getPastEvents('Transfer', {
+        fromBlock: start,
+        toBlock: stepEnd,
+        filter: { to: '0x0000000000000000000000000000000000000000' },
+      })
+
+      totalBurnEvents += burnEvents.length
+      log.info('updateTokenSupply - got Burn events:', burnEvents.length, burnEvents)
+      await Promise.all(
+        burnEvents.map(async (e: any) => {
+          const block = await this.getBlockMainnet(e.blockNumber)
+          const date = moment(block.timestamp * 1000).format('YYYY-MM-DD')
+          const cur = dateSupplyChange[date] || 0
+          dateSupplyChange[date] = cur - parseInt(e.returnValues.value)
+        })
+      )
+      if (burnEvents.length === 0 && mintEvents.length === 0) notFoundBatches += 1
+      else notFoundBatches = 0
+      stepEnd = start
+    }
+
+    log.info('total events:', { totalMintEvents, totalBurnEvents })
+    const dates = Object.keys(dateSupplyChange)
+      .sort()
+      .filter((d) => moment(d).isSameOrAfter(moment(get(lastSupplyRecord, 'date', 0))))
+    let curSupply = get(lastSupplyRecord, 'start_supply_amount', 0)
+    log.info('updateTokenSupply: got starting supply of G$:', { lastSupplyRecord, dateSupplyChange })
+    const updates = fromPairs(
+      dates.map((date) => {
+        const startSupply = curSupply
+        curSupply += dateSupplyChange[date]
+        return [date, { date, supply_amount: curSupply, start_supply_amount: startSupply }]
+      })
+    )
+    log.info('updateTokenSupply: updating dates', { newSupply: curSupply, updates })
+    if (updates.length) {
+      await AboutClaimTransactionProvider.updateOrSet(updates)
+    }
   }
 
   async updateSupplyAmount() {
