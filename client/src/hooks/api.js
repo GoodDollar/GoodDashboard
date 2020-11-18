@@ -8,16 +8,12 @@ export const useApi = (apiFunc, deps, params = []) => {
   useEffect(() => {
     setLoading(true)
     apiFunc(...params)
-      .then((d) => setData(d && d.data))
-      .catch((e) => setError(e))
+      .then(d => setData(d && d.data))
+      .catch(e => setError(e))
       .then(() => setLoading(false))
     // eslint-disable-next-line
   }, deps)
-  return [
-    data,
-    loading,
-    error
-  ]
+  return [data, loading, error]
 }
 
 export const useApiHealthCheck = (deps = []) => useApi(api.getHealthCheck, deps)
@@ -36,18 +32,22 @@ export const useGetTransactionTotalAmount = (deps = []) => useApi(api.getTransac
 export const useGetTransactionDailyAverage = (deps = []) => useApi(api.getTransactionDailyAverage, deps)
 
 // per day
-export const useGetTransactionCountPerDay = (deps=[], ...params) => useApi(api.getTransactionCountPerDay, deps, params)
-export const useGetTransactionUniquePerDay = (deps=[], ...params) => useApi(api.getTransactionUniquePerDay, deps, params)
-export const useGetTransactionAmountPerDay = (deps=[], ...params) => useApi(api.getTransactionAmountPerDay, deps, params)
-export const useGetTransactionSumAmountPerDay = (deps=[], ...params) => useApi(api.getTransactionSumAmountPerDay, deps, params)
-export const useGetSupplyAmountPerDay = (deps=[], ...params) => useApi(api.getSupplyAmountPerDay, deps, params)
-export const useGetClaimPerDay = (deps=[], ...params) => useApi(api.getClaimPerDay, deps, params)
+export const useGetTransactionCountPerDay = (deps = [], ...params) =>
+  useApi(api.getTransactionCountPerDay, deps, params)
+export const useGetTransactionUniquePerDay = (deps = [], ...params) =>
+  useApi(api.getTransactionUniquePerDay, deps, params)
+export const useGetTransactionAmountPerDay = (deps = [], ...params) =>
+  useApi(api.getTransactionAmountPerDay, deps, params)
+export const useGetTransactionSumAmountPerDay = (deps = [], ...params) =>
+  useApi(api.getTransactionSumAmountPerDay, deps, params)
+export const useGetSupplyAmountPerDay = (deps = [], ...params) => useApi(api.getGraphQLTotalSupply, deps, params)
+export const useGetClaimPerDay = (deps = [], ...params) => useApi(api.getClaimPerDay, deps, params)
 
 // gd
-export const useGetGDTotal = (deps=[]) => useApi(api.getGDTotal, deps)
-export const useGetGDInEscrow = (deps=[]) => useApi(api.getGDInEscrow, deps)
+export const useGetGDTotal = (deps = []) => useApi(api.getGDTotal, deps)
+export const useGetGDInEscrow = (deps = []) => useApi(api.getGDInEscrow, deps)
 export const useGetTotalImpactStatistics = (deps = []) => useApi(api.getTotalImpactStatistics, deps)
 
 // survey
-export const useGetSurveyTable = (deps=[], params) => useApi(api.getSurveyTable, deps, params)
-export const useGetSurveySummaryTable = (deps=[], params) => useApi(api.getSurveySummaryTable, deps, params)
+export const useGetSurveyTable = (deps = [], params) => useApi(api.getSurveyTable, deps, params)
+export const useGetSurveySummaryTable = (deps = [], params) => useApi(api.getSurveySummaryTable, deps, params)

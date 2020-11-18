@@ -46,6 +46,8 @@ import TooltipUserInfo from '../UserProfile/TooltipUserInfo'
 import { useSeriesSpecificValueFormatter } from '../../hooks/nivo'
 import config from '../../config'
 
+const HISTORY_LIMIT = 360 //how many days back - currently used only for totalsupply
+
 const useStyles = makeStyles(styles)
 
 const prepareHistogramBalanceData = histogram =>
@@ -129,7 +131,7 @@ export default function Dashboard() {
     [],
     lineChartDataLimiter
   )
-  const [supplyAmountPerDay = [], supplyAmountPerDayLoading] = useGetSupplyAmountPerDay([], lineChartDataLimiter)
+  const [supplyAmountPerDay = [], supplyAmountPerDayLoading] = useGetSupplyAmountPerDay([], HISTORY_LIMIT)
 
   const [supplyAmountPerDayData, setSupplyAmountPerDayData] = useState([])
   const [transactionAmountPerDayData, setTransactionAmountPerDayData] = useState([])

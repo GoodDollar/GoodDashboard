@@ -5,7 +5,8 @@ export default class HttpAdapter {
     this.axiosInstance = axiosInstance
     this.axiosInstance.defaults.headers = {
       ...this.axiosInstance.defaults.headers,
-      'Cache-Control': 'no-cache, no-store'
+      //this break thegraph api
+      // 'Cache-Control': 'no-cache, no-store'
     }
   }
 
@@ -28,7 +29,7 @@ export default class HttpAdapter {
     } else {
       this.axiosInstance.defaults.headers = {
         ...this.axiosInstance.defaults.headers,
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       }
     }
   }
@@ -52,5 +53,4 @@ export default class HttpAdapter {
   put(path, data, config) {
     return this.processResponse(this.axios.put(path, data, config), path)
   }
-
 }

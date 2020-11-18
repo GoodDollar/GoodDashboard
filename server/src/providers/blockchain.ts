@@ -255,13 +255,13 @@ export class blockchain {
     }
     log.info('updateEvents finished', { from: this.lastBlock, to: blockNumber })
 
-    logger.debug('updateEvents mainnet starting', { from: this.lastBlockMainnet, to: blockNumberMainnet })
-    await this.updateTokenSupply(blockNumberMainnet).catch((e) =>
-      log.error('supply amount update failed', e.message, e)
-    )
-    this.lastBlockMainnet = +blockNumberMainnet
-    await PropertyProvider.set('lastBlockMainnet', +blockNumberMainnet)
-    logger.debug('updateEvents mainnet finished', { from: this.lastBlockMainnet, to: blockNumberMainnet })
+    // logger.debug('updateEvents mainnet starting', { from: this.lastBlockMainnet, to: blockNumberMainnet })
+    // await this.updateTokenSupply(blockNumberMainnet).catch((e) =>
+    //   log.error('supply amount update failed', e.message, e)
+    // )
+    // this.lastBlockMainnet = +blockNumberMainnet
+    // await PropertyProvider.set('lastBlockMainnet', +blockNumberMainnet)
+    // logger.debug('updateEvents mainnet finished', { from: this.lastBlockMainnet, to: blockNumberMainnet })
 
     await PropertyProvider.set('lastVersion', conf.reset)
   }
