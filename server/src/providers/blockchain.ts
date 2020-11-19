@@ -22,8 +22,9 @@ import AddressesClaimedProvider from './addresses-claimed'
 import PropertyProvider from './property'
 import Amplitude from './amplitude'
 import { retryTimeout } from '../helpers/async'
+import hexToNumber from '../helpers/hexToNumber'
 
-import { isBigNumber, hexToNumber } from 'web3-utils'
+import { isBigNumber } from 'web3-utils'
 const log = logger.child({ from: 'Blockchain' })
 
 /**
