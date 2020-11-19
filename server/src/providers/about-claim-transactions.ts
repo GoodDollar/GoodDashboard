@@ -3,6 +3,8 @@ import AboutClaimTransactionModel from "../models/about-claim-transactions";
 type aboutClaimTransactionsType = {
   count_txs: number;
   total_amount_txs: number;
+  ubi_quota: number;
+  daily_pool: number;
   date: string;
 };
 
