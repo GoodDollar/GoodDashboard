@@ -9,10 +9,8 @@ import ContractsModelAddress from '@gooddollar/goodcontracts/stakingModel/releas
 
 import conf from '../config'
 import logger from '../helpers/pino-logger'
-import { fromPairs, get, range } from 'lodash'
+import { fromPairs, get, range, memoize, result, invert } from 'lodash'
 
-import _invert from 'lodash/invert'
-import { memoize } from 'lodash'
 import walletsProvider from './wallets'
 import surveyProvider from './survey'
 import surveyDB from '../gun/models/survey'
@@ -22,7 +20,6 @@ import AddressesClaimedProvider from './addresses-claimed'
 import PropertyProvider from './property'
 import Amplitude from './amplitude'
 import { retryTimeout } from '../helpers/async'
-import hexToNumber from '../helpers/hexToNumber'
 
 import { isBigNumber } from 'web3-utils'
 const log = logger.child({ from: 'Blockchain' })
@@ -81,7 +78,7 @@ export class blockchain {
       .filter((_) => typeof _ === 'string')
       .concat(conf.systemAccounts, ['0x0000000000000000000000000000000000000000'])
       .map((x) => (x as string).toLowerCase())
-    this.listPrivateAddress = _invert(Object.assign(systemAccounts))
+    this.listPrivateAddress = invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
     log.info('Starting blockchain reader:', {
@@ -282,8 +279,11 @@ export class blockchain {
     )
 
     const dailyUBIHistory: any[] = await Promise.all(allEvents.map(async (event: any) => {
-      const dayHex = get(event, 'returnValues.day')
-      const day = hexToNumber(dayHex)
+      const day = result(event, 'returnValues.day.toNumber', 0)
+
+      if (!day) {
+        return
+      }
 
       return retryTimeout(() => ubiContract.methods.dailyUBIHistory(day).call(), 500)
     }))
@@ -313,9 +313,9 @@ export class blockchain {
       // hack for quicker time getting of block
       let timestamp = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
-      const ubiQuotaHex = get(returnValues, 'dailyUbi')
+      const ubi_quota = result(returnValues, 'dailyUbi.toNumber')
       const date = moment.unix(timestamp).format('YYYY-MM-DD')
-      const [ubi_quota, daily_pool] = [ubiQuotaHex, dailyPoolHex].map(hexToNumber)
+      const daily_pool = result(dailyPoolHex, 'toNumber')
 
       preparedToSave[date] = {
         date,
@@ -370,25 +370,27 @@ export class blockchain {
     let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
-      let toAddr = event.returnValues.account
-      let blockNumber = event.blockNumber
+      const { blockNumber, returnValues } = event
+      const { account: toAddr } = returnValues
 
       if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
-        //estimate block time to save slow network calls
+        // estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
+
         firstBlockDate = {
           blockNumber,
           txTime,
         }
       }
-      //hack for quicker time getting of block
+
+      // hack for quicker time getting of block
       let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
 
-      const amountTX = hexToNumber(event.returnValues.amount)
+      const amountTX = result(returnValues, 'amount.toNumber', 0)
 
       this.amplitude.logEvent({
         user_id: toAddr,
@@ -441,19 +443,22 @@ export class blockchain {
     log.info('updateClaimEvents got Claim events:', { toBlock, fromBlock: this.lastBlock, events: allEvents.length })
 
     let firstBlockDate
+
     for (let index in allEvents) {
       let event = allEvents[index]
-      let blockNumber = event.blockNumber
+      const { blockNumber, returnValues } = event
 
       if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
-        //estimate block time to save slow network calls
+        // estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
+
         firstBlockDate = {
           blockNumber,
           txTime,
         }
       }
-      //hack for quicker time getting of block
+
+      // hack for quicker time getting of block
       let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
       if (+txTime < +conf.startTimeTransaction) {
@@ -462,7 +467,7 @@ export class blockchain {
 
       const ubiEpoch = moment.unix(txTime).utc().set({ hour: 11, minute: 44 }).startOf('minute')
 
-      const amountTX = hexToNumber(event.returnValues.amount)
+      const amountTX = result(returnValues, 'amount.toNumber', 0)
       totalUBIDistributed += amountTX
 
       let timestamp = moment.unix(txTime)
@@ -538,27 +543,27 @@ export class blockchain {
     let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
-      let fromAddr = event.returnValues.from
-      let toAddr = event.returnValues.to
-      let blockNumber = event.blockNumber
+      const { returnValues, blockNumber } = event
+      const { from: fromAddr, to: toAddr } = returnValues
 
       if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
-        //estimate block time to save slow network calls
+        // estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
+
         firstBlockDate = {
           blockNumber,
           txTime,
         }
       }
 
-      //hack for quicker time getting of block
+      // hack for quicker time getting of block
       let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
 
-      const amountTX = hexToNumber(event.returnValues.amount)
+      const amountTX = result(returnValues, 'amount.toNumber', 0)
 
       this.amplitude.logEvent({
         user_id: toAddr ? toAddr : fromAddr,
@@ -743,9 +748,8 @@ export class blockchain {
     let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
-      let fromAddr = event.returnValues.from
-      let toAddr = event.returnValues.to
-      let blockNumber = event.blockNumber
+      const { returnValues, blockNumber } = event
+      const { from: fromAddr, to: toAddr } = returnValues
 
       if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
         //estimate block time to save slow network calls
@@ -762,7 +766,7 @@ export class blockchain {
         continue
       }
 
-      const amountTX = hexToNumber(event.returnValues.value)
+      const amountTX = result(returnValues, 'value.toNumber', 0)
       totalGDVolume += amountTX
 
       this.amplitude.logEvent({
@@ -854,7 +858,7 @@ export class blockchain {
   async getAddressBalance(address: string): Promise<number> {
     const gdbalance = await retryTimeout(() => this.tokenContract.methods.balanceOf(address).call())
 
-    return gdbalance ? hexToNumber(gdbalance) : 0
+    return result(gdbalance, 'toNumber', 0)
   }
 }
 
