@@ -1,6 +1,5 @@
 import { sha3 } from "web3-utils";
 import gunDB from "../gundb";
-import { delay } from "../../../utils/async";
 
 class User {
   constructor() {
