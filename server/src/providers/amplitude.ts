@@ -20,7 +20,7 @@ export default class Amplitude {
   async sendBatch(): Promise<any> {
     const events = [...this.events]
     this.events = []
-    if (conf.amplitudeKey == null) return
+    if (conf.amplitudeKey == null || events.length === 0) return
     const data = {
       api_key: conf.amplitudeKey,
       events,
