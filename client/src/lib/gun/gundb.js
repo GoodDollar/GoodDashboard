@@ -1,7 +1,9 @@
 import Gun from "@gooddollar/gun";
-import SEA from "@gooddollar/gun/sea";
+import "@gooddollar/gun/sea";
+
 import Config from "../../config";
 import { delay } from "../../utils/async";
+
 let gunDb;
 
 Gun.chain.onThen = function(cb, timeout = 5000) {

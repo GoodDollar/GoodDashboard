@@ -22,6 +22,10 @@ export const aboutClaimTransactionSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  daily_pool: {
+    type: Number,
+    default: 0,
+  },
   date: {
     type: String,
     index: { unique: true },

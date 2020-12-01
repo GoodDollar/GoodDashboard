@@ -9,10 +9,8 @@ import ContractsModelAddress from '@gooddollar/goodcontracts/stakingModel/releas
 
 import conf from '../config'
 import logger from '../helpers/pino-logger'
-import { fromPairs, get, range } from 'lodash'
+import { fromPairs, get, range, memoize, result, invert } from 'lodash'
 
-import _invert from 'lodash/invert'
-import { memoize } from 'lodash'
 import walletsProvider from './wallets'
 import surveyProvider from './survey'
 import surveyDB from '../gun/models/survey'
@@ -23,7 +21,7 @@ import PropertyProvider from './property'
 import Amplitude from './amplitude'
 import { retryTimeout } from '../helpers/async'
 
-import * as web3Utils from 'web3-utils'
+import { isBigNumber } from 'web3-utils'
 const log = logger.child({ from: 'Blockchain' })
 
 /**
@@ -80,7 +78,7 @@ export class blockchain {
       .filter((_) => typeof _ === 'string')
       .concat(conf.systemAccounts, ['0x0000000000000000000000000000000000000000'])
       .map((x) => (x as string).toLowerCase())
-    this.listPrivateAddress = _invert(Object.assign(systemAccounts))
+    this.listPrivateAddress = invert(Object.assign(systemAccounts))
     this.paymentLinkContracts = get(ContractsAddress, `${this.network}.OneTimePayments`)
     this.amplitude = new Amplitude()
     log.info('Starting blockchain reader:', {
@@ -267,16 +265,30 @@ export class blockchain {
   }
 
   async updateUBIQuota(toBlock: number) {
+    const { ubiContract } = this
     // Check if the hole history of 'UBICalculated' event is uploaded
     // if not - then set from block to 0 value (beginning)
     const isInitialUBICalcFetched = await PropertyProvider.get<boolean>('isInitialUBICalcFetched', false)
     const lastBlock = isInitialUBICalcFetched ? this.lastBlock : 0
-    const allEvents = await retryTimeout(() =>
-      this.ubiContract.getPastEvents('UBICalculated', {
+
+    const allEvents: any[] = await retryTimeout(() =>
+      ubiContract.getPastEvents('UBICalculated', {
         fromBlock: lastBlock > 0 ? lastBlock : 0,
         toBlock,
       })
     )
+
+    const dailyUBIHistory: any[] = await Promise.all(allEvents.map(async (event: any) => {
+      const day = result(event, 'returnValues.day.toNumber', 0)
+
+      if (!day) {
+        return
+      }
+
+      return retryTimeout(() => ubiContract.methods.dailyUBIHistory(day).call(), 500)
+    }))
+
+    let firstBlockDate
     const preparedToSave: any = {}
 
     log.debug('updateUBIQuota started:', {
@@ -284,29 +296,31 @@ export class blockchain {
       isInitialUBICalcFetched,
     })
 
-    let firstBlockDate
     for (let index in allEvents) {
-      const event = allEvents[index]
-      const blockNumber = event.blockNumber
+      const { blockNumber, returnValues } = allEvents[index]
+      const { openAmount: dailyPoolHex } = dailyUBIHistory[index]
 
       if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
-        //estimate block time to save slow network calls
+        // estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
+
         firstBlockDate = {
           blockNumber,
           txTime,
         }
       }
-      //hack for quicker time getting of block
+
+      // hack for quicker time getting of block
       let timestamp = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
+      const ubi_quota = result(returnValues, 'dailyUbi.toNumber')
       const date = moment.unix(timestamp).format('YYYY-MM-DD')
-      const ubiQuotaHex = get(event, 'returnValues.dailyUbi')
-      const ubi_quota = web3Utils.hexToNumber(ubiQuotaHex)
+      const daily_pool = result(dailyPoolHex, 'toNumber')
 
       preparedToSave[date] = {
         date,
         ubi_quota,
+        daily_pool,
       }
     }
 
@@ -356,25 +370,27 @@ export class blockchain {
     let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
-      let toAddr = event.returnValues.account
-      let blockNumber = event.blockNumber
+      const { blockNumber, returnValues } = event
+      const { account: toAddr } = returnValues
 
       if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
-        //estimate block time to save slow network calls
+        // estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
+
         firstBlockDate = {
           blockNumber,
           txTime,
         }
       }
-      //hack for quicker time getting of block
+
+      // hack for quicker time getting of block
       let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
 
-      const amountTX = web3Utils.hexToNumber(event.returnValues.amount)
+      const amountTX = result(returnValues, 'amount.toNumber', 0)
 
       this.amplitude.logEvent({
         user_id: toAddr,
@@ -427,19 +443,22 @@ export class blockchain {
     log.info('updateClaimEvents got Claim events:', { toBlock, fromBlock: this.lastBlock, events: allEvents.length })
 
     let firstBlockDate
+
     for (let index in allEvents) {
       let event = allEvents[index]
-      let blockNumber = event.blockNumber
+      const { blockNumber, returnValues } = event
 
       if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
-        //estimate block time to save slow network calls
+        // estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
+
         firstBlockDate = {
           blockNumber,
           txTime,
         }
       }
-      //hack for quicker time getting of block
+
+      // hack for quicker time getting of block
       let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
       if (+txTime < +conf.startTimeTransaction) {
@@ -448,7 +467,7 @@ export class blockchain {
 
       const ubiEpoch = moment.unix(txTime).utc().set({ hour: 11, minute: 44 }).startOf('minute')
 
-      const amountTX = web3Utils.hexToNumber(event.returnValues.amount)
+      const amountTX = result(returnValues, 'amount.toNumber', 0)
       totalUBIDistributed += amountTX
 
       let timestamp = moment.unix(txTime)
@@ -524,27 +543,27 @@ export class blockchain {
     let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
-      let fromAddr = event.returnValues.from
-      let toAddr = event.returnValues.to
-      let blockNumber = event.blockNumber
+      const { returnValues, blockNumber } = event
+      const { from: fromAddr, to: toAddr } = returnValues
 
       if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
-        //estimate block time to save slow network calls
+        // estimate block time to save slow network calls
         const txTime = (await this.getBlock(blockNumber)).timestamp
+
         firstBlockDate = {
           blockNumber,
           txTime,
         }
       }
 
-      //hack for quicker time getting of block
+      // hack for quicker time getting of block
       let txTime = firstBlockDate.txTime + (blockNumber - firstBlockDate.blockNumber) * 5
 
       if (+txTime < +conf.startTimeTransaction) {
         continue
       }
 
-      const amountTX = web3Utils.hexToNumber(event.returnValues.amount)
+      const amountTX = result(returnValues, 'amount.toNumber', 0)
 
       this.amplitude.logEvent({
         user_id: toAddr ? toAddr : fromAddr,
@@ -653,7 +672,7 @@ export class blockchain {
 
     try {
       amount = await retryTimeout(() => this.mainNetTokenContract.methods.totalSupply().call()).then((totals: any) => {
-        if (!web3Utils.isBigNumber(totals)) {
+        if (!isBigNumber(totals)) {
           throw new Error('Contract method returned invalid value')
         }
 
@@ -729,9 +748,8 @@ export class blockchain {
     let firstBlockDate
     for (let index in allEvents) {
       let event = allEvents[index]
-      let fromAddr = event.returnValues.from
-      let toAddr = event.returnValues.to
-      let blockNumber = event.blockNumber
+      const { returnValues, blockNumber } = event
+      const { from: fromAddr, to: toAddr } = returnValues
 
       if (firstBlockDate === undefined || blockNumber - firstBlockDate.blockNumber > 1000) {
         //estimate block time to save slow network calls
@@ -748,7 +766,7 @@ export class blockchain {
         continue
       }
 
-      const amountTX = web3Utils.hexToNumber(event.returnValues.value)
+      const amountTX = result(returnValues, 'value.toNumber', 0)
       totalGDVolume += amountTX
 
       this.amplitude.logEvent({
@@ -840,7 +858,7 @@ export class blockchain {
   async getAddressBalance(address: string): Promise<number> {
     const gdbalance = await retryTimeout(() => this.tokenContract.methods.balanceOf(address).call())
 
-    return gdbalance ? web3Utils.hexToNumber(gdbalance) : 0
+    return result(gdbalance, 'toNumber', 0)
   }
 }
 

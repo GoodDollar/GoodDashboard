@@ -2,7 +2,7 @@ import React from 'react'
 import { ResponsiveLine } from '@nivo/line'
 import { COLORS } from '../../../constants'
 
-export default ({ legendX = '', legendY = '', height = 300, ...props }) => (
+export default ({ legendX = '', legendY = '', legendLabelWidth = 100, height = 300, ...props }) => (
   <div style={{ height }}>
     <ResponsiveLine
       margin={{ top: 50, right: 50, bottom: 50, left: 60 }}
@@ -42,7 +42,7 @@ export default ({ legendX = '', legendY = '', height = 300, ...props }) => (
           justify: false,
           itemsSpacing: 0,
           itemDirection: 'left-to-right',
-          itemWidth: 100,
+          itemWidth: legendLabelWidth,
           translateX: -6,
           translateY: -29,
           itemHeight: 20,

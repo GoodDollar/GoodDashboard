@@ -7,7 +7,7 @@ const getTotal = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = await AboutClaimTransactionProvider.getAll(...reqLimit(req));
 
-    const result = data.map((rec: any) => pick(rec, 'total_amount_txs', 'count_txs', 'ubi_quota', 'date'))
+    const result = data.map((rec: any) => pick(rec, 'total_amount_txs', 'count_txs', 'ubi_quota', 'daily_pool', 'date'))
 
     return res.status(200).json({
       responseCode: 200,
