@@ -278,15 +278,17 @@ export class blockchain {
       })
     )
 
-    const dailyUBIHistory: any[] = await Promise.all(allEvents.map(async (event: any) => {
-      const day = result(event, 'returnValues.day.toNumber', 0)
+    const dailyUBIHistory: any[] = await Promise.all(
+      allEvents.map(async (event: any) => {
+        const day = result(event, 'returnValues.day.toNumber', 0)
 
-      if (!day) {
-        return
-      }
+        if (!day) {
+          return
+        }
 
-      return retryTimeout(() => ubiContract.methods.dailyUBIHistory(day).call(), 500)
-    }))
+        return retryTimeout(() => ubiContract.methods.dailyUBIHistory(day).call(), 500)
+      })
+    )
 
     let firstBlockDate
     const preparedToSave: any = {}
@@ -325,7 +327,10 @@ export class blockchain {
     }
 
     log.debug('updateUBIQuota - events data parsed:', {
-      preparedToSave: Object.keys(preparedToSave).length,
+      date,
+      ubi_quota,
+      daily_pool,
+      datesUpdatedSoFar: Object.keys(preparedToSave).length,
     })
 
     await AboutClaimTransactionProvider.updateOrSet(preparedToSave)
