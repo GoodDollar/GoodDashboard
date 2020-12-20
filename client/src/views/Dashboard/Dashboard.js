@@ -2,11 +2,13 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
+// import DataUsageIcon from "@material-ui/icons/DataUsage"
 import ReceiptIcon from '@material-ui/icons/Receipt'
 import EqualizerIcon from '@material-ui/icons/Equalizer'
 import Warning from 'components/Typography/Warning'
 import Info from 'components/Typography/Info'
 import Success from 'components/Typography/Success'
+// import Primary from 'components/Typography/Primary'
 import GridItem from 'components/Grid/GridItem'
 import GridContainer from 'components/Grid/GridContainer'
 import Table from 'components/Table/Table'
@@ -21,6 +23,8 @@ import Line from 'components/Charts/Line'
 import Balance from 'components/Balance'
 import styles from 'assets/jss/material-dashboard-react/views/dashboardStyle'
 import {
+  // useGetGDInEscrow,
+  // useGetGDTotal,
   useGetTotalImpactStatistics,
   useGetTransactionCountPerDay,
   useGetTransactionDailyAverage,
@@ -39,6 +43,7 @@ import {
 import priceFormat from '../../utils/priceFormat'
 import isMobileOnly from '../../utils/isMobile'
 import TooltipUserInfo from '../UserProfile/TooltipUserInfo'
+import { useSeriesSpecificValueFormatter } from '../../hooks/nivo'
 import config from '../../config'
 
 const HISTORY_LIMIT = 360 //how many days back - currently used only for totalsupply
@@ -92,34 +97,6 @@ const mobileLineChartProps = !isMobileOnly
         },
       },
     }
-
-const G$DistributionTitle = 'G$ Claims Distribution Per Country'
-
-const G$Formatter = value => `G$ ${priceFormat(value)}`
-
-const useAggregateClaimPerDay = (claimPerDay, effectFn) => useEffect(() => {
-  if (!claimPerDay.length) {
-    return
-  }
-
-  effectFn(claimPerDay.reduce((totals, { date, ubi_quota = 0, count_txs = 0, daily_pool = 0, total_amount_txs = 0 }) => {
-    const { ubiQuota, uniqClaimers, activeClaimers, gdClaimed, dailyPool } = totals
-
-    uniqClaimers.push({ x: date, y: count_txs })
-    ubiQuota.push({ x: date, y: ubi_quota / 100 })
-    dailyPool.push({ x: date, y: daily_pool / 100 })
-    gdClaimed.push({ x: date, y: total_amount_txs / 100 })
-    activeClaimers.push({ x: date, y: ubi_quota ? daily_pool / ubi_quota : 0 })
-
-    return totals
-  }, {
-    ubiQuota: [],
-    gdClaimed: [],
-    dailyPool: [],
-    uniqClaimers: [],
-    activeClaimers: [],
-  }))
-}, [claimPerDay, effectFn])
 
 export default function Dashboard() {
   // wallet
@@ -196,50 +173,56 @@ export default function Dashboard() {
     }
   }, [transactionCountPerDay])
 
-  const updateClaimPerDayData = useCallback(({ ubiQuota, uniqClaimers, activeClaimers, gdClaimed, dailyPool }) => {
-    setDailyUBIQuotaData([
-      {
-        id: "Daily UBI Quota",
-        data: ubiQuota
-      }
-    ])
+  useEffect(() => {
+    if (claimPerDay.length > 0) {
+      setDailyUBIQuotaData([
+        {
+          id: 'Daily UBI Quota',
+          data: claimPerDay.map(v => ({
+            x: v.date,
+            y: v.ubi_quota / 100,
+          })),
+        },
+      ])
 
-    setDailyUniqClaimersData([
-      {
-        id: "Total active claimers",
-        data: activeClaimers
-      },
-      {
-        id: "Total unique claimers",
-        data: uniqClaimers
-      }
-    ])
+      setDailyUniqClaimersData([
+        {
+          id: 'Total unique claimers',
+          data: claimPerDay.map(v => ({
+            x: v.date,
+            y: v.count_txs,
+          })),
+        },
+      ])
 
-    setClaimPerDayData([
-      {
-        id: "G$ Daily Pool",
-        data: dailyPool
-      },
-      {
-        id: "Total G$ Claimed",
-        data: gdClaimed
-      }
-    ])
-  }, [setDailyUBIQuotaData, setDailyUniqClaimersData, setClaimPerDayData])
+      setClaimPerDayData([
+        {
+          id: 'Total G$ Claimed',
+          data: claimPerDay.map(v => ({
+            x: v.date,
+            y: v.total_amount_txs / 100,
+          })),
+        },
+      ])
+    }
+  }, [claimPerDay])
 
-  useAggregateClaimPerDay(claimPerDay, updateClaimPerDayData)
-
+  // gd
+  // const [GDTotal] = useGetGDTotal()
+  // const [GDInEscrow] = useGetGDInEscrow()
   const [
-    { totalUniqueClaimers, totalUBIDistributed } = {},
+    { totalUniqueClaimers, totalUBIDistributed, totalGDVolume } = {},
     totalImpactStatisticsLoading,
   ] = useGetTotalImpactStatistics()
 
   const classes = useStyles()
 
-  const handleSortTransaction = useCallback((field, direction) => {
+  const handleSortTransaction = (field, direction) => {
     setTransactionSort(field)
     setTransactionSortDirection(direction)
-  }, [setTransactionSort, setTransactionSortDirection])
+  }
+
+  const G$Formatter = value => `G$ ${priceFormat(value)}`
 
   return (
     <div>
@@ -299,13 +282,12 @@ export default function Dashboard() {
         <GridItem xs={12} lg={12} xl={6}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>{G$DistributionTitle}</h4>
+              <h4 className={classes.cardTitleWhite}>G$ Claims Distribution Per Country</h4>
             </CardHeader>
             <CardBody className={classes.googleMapCardBody}>
               <iframe
                 width="100%"
                 src={config.embedDataStudioUrl}
-                title={G$DistributionTitle}
                 frameBorder="0"
                 style={{
                   border: 0,
@@ -348,7 +330,6 @@ export default function Dashboard() {
                   }}
                   xFormat="time:%Y-%m-%d"
                   yFormat={G$Formatter}
-                  legendLabelWidth={115}
                   {...mobileLineChartProps}
                 />
               )}
@@ -385,7 +366,6 @@ export default function Dashboard() {
                     legendOffset: -12,
                   }}
                   xFormat="time:%Y-%m-%d"
-                  legendLabelWidth={135}
                   {...mobileLineChartProps}
                 />
               )}
@@ -544,6 +524,27 @@ export default function Dashboard() {
         </GridItem>
       </GridContainer>
       <GridContainer>
+        {/*<GridItem xs={12} md={6} lg={3}>
+          <Card>
+            <CardHeader color="primary" stats icon>
+              <CardIcon color="primary">
+                <DataUsageIcon/>
+              </CardIcon>
+              <p className={classes.cardCategory}>General</p>
+              <Primary>
+                GD in circulation: <Balance amount={GDTotal} fromCents/>
+              </Primary>
+              <Primary>
+                GD held in escrow: <Balance amount={GDInEscrow} fromCents/>
+              </Primary>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                GD in circulation, GD held in escrow
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>*/}
         <GridItem xs={12} md={6} lg={3}>
           <Card>
             <CardHeader color="warning" stats icon>
