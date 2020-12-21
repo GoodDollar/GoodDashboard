@@ -266,9 +266,6 @@ export class blockchain {
 
   async updateUBIQuota(toBlock: number) {
     const { ubiContract } = this
-    // Check if the hole history of 'UBICalculated' event is uploaded
-    // if not - then set from block to 0 value (beginning)
-    const isInitialUBICalcFetched = await PropertyProvider.get<boolean>('isInitialUBICalcFetched', false)
     const lastBlock = isInitialUBICalcFetched ? this.lastBlock : 0
 
     const allEvents: any[] = await retryTimeout(() =>

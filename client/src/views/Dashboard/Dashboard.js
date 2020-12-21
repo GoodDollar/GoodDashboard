@@ -187,7 +187,7 @@ export default function Dashboard() {
 
       setDailyUniqClaimersData([
         {
-          id: 'Total unique claimers',
+          id: 'Daily unique claimers',
           data: claimPerDay.map(v => ({
             x: v.date,
             y: v.count_txs,
@@ -197,7 +197,7 @@ export default function Dashboard() {
 
       setClaimPerDayData([
         {
-          id: 'Total G$ Claimed',
+          id: 'Daily G$ Claimed',
           data: claimPerDay.map(v => ({
             x: v.date,
             y: v.total_amount_txs / 100,
