@@ -11,7 +11,7 @@
     "@nivo/line": "^0.59.3",
     "@nivo/pie": "^0.59.1",
     "await-mutex": "^1.0.2",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "chartist": "0.10.1",
     "classnames": "2.2.6",
     "history": "4.9.0",
