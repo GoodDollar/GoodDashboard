@@ -265,8 +265,7 @@ export class blockchain {
   }
 
   async updateUBIQuota(toBlock: number) {
-    const { ubiContract } = this
-    const lastBlock = isInitialUBICalcFetched ? this.lastBlock : 0
+    const { ubiContract, lastBlock } = this
 
     const allEvents: any[] = await retryTimeout(() =>
       ubiContract.getPastEvents('UBICalculated', {
@@ -291,8 +290,7 @@ export class blockchain {
     const preparedToSave: any = {}
 
     log.debug('updateUBIQuota started:', {
-      events: allEvents.length,
-      isInitialUBICalcFetched,
+      events: allEvents.length
     })
 
     for (let index in allEvents) {
@@ -321,20 +319,19 @@ export class blockchain {
         ubi_quota,
         daily_pool,
       }
+
+      log.debug('updateUBIQuota - events data parsed:', {
+        date,
+        ubi_quota,
+        daily_pool
+      })
     }
 
     log.debug('updateUBIQuota - events data parsed:', {
-      date,
-      ubi_quota,
-      daily_pool,
       datesUpdatedSoFar: Object.keys(preparedToSave).length,
     })
 
     await AboutClaimTransactionProvider.updateOrSet(preparedToSave)
-
-    if (!isInitialUBICalcFetched) {
-      await PropertyProvider.set('isInitialUBICalcFetched', true)
-    }
 
     log.debug('updateUBIQuota finished')
   }

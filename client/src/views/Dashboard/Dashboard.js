@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet'
@@ -43,7 +43,6 @@ import {
 import priceFormat from '../../utils/priceFormat'
 import isMobileOnly from '../../utils/isMobile'
 import TooltipUserInfo from '../UserProfile/TooltipUserInfo'
-import { useSeriesSpecificValueFormatter } from '../../hooks/nivo'
 import config from '../../config'
 
 const HISTORY_LIMIT = 360 //how many days back - currently used only for totalsupply
@@ -211,7 +210,7 @@ export default function Dashboard() {
   // const [GDTotal] = useGetGDTotal()
   // const [GDInEscrow] = useGetGDInEscrow()
   const [
-    { totalUniqueClaimers, totalUBIDistributed, totalGDVolume } = {},
+    { totalUniqueClaimers, totalUBIDistributed, } = {},
     totalImpactStatisticsLoading,
   ] = useGetTotalImpactStatistics()
 
@@ -287,6 +286,7 @@ export default function Dashboard() {
             <CardBody className={classes.googleMapCardBody}>
               <iframe
                 width="100%"
+                title="G$ Claims Distribution Per Country"
                 src={config.embedDataStudioUrl}
                 frameBorder="0"
                 style={{

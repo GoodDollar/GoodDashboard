@@ -25,7 +25,6 @@ const PropertiesTypes = {
   totalUniqueClaimers: Number,
   totalUBIDistributed: Number,
   totalGDVolume: Number,
-  isInitialUBICalcFetched: Boolean,
   lastSurveyDate: String,
   ipfsMultiHash: String,
   ipfsID: String,
